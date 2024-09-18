@@ -38,6 +38,30 @@ export class NewsRepository {
     });
   }
 
+  async getNewsPreviews(page: number, limit: number) {
+    return this.newsRepo
+      .createQueryBuilder('get-previews')
+      .select([
+        'id',
+        'order',
+        'title',
+        'SUBSTR(summary, 0, 100) AS summary',
+        'state',
+        'isPublished',
+        'timeline',
+      ])
+      .orderBy('order')
+      .limit(limit)
+      .skip(page)
+      .getRawMany();
+  }
+
+  async getNewsPreviewsByKeyword(
+    keyword: string,
+    page: number,
+    limit: number,
+  ) {}
+
   async getNewsListByOptions(options: FindOptionsWhere<News> = {}) {
     return this.newsRepo.find({
       where: options,
