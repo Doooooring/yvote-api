@@ -2,11 +2,14 @@ import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Keyword } from './keyword.entity';
 import { News } from './news.entity';
 
-@Entity()
+@Entity({
+  name: 'NewsKeyword',
+  synchronize: false,
+})
 @Index(['news_id', 'keyword_id'])
 export class NewsKeyword {
   @PrimaryColumn()
-  id: string;
+  id: number;
 
   @Column()
   news_id: string;

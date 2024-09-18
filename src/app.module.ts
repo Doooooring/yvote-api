@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { TypeormConfig } from './config/typeorm.config';
 import { KeywordModule } from './keyword/keyword.module';
 import { NewsModule } from './news/news.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -15,11 +16,12 @@ import { NewsModule } from './news/news.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
       useFactory: TypeormConfig,
+      inject: [ConfigService],
     }),
     NewsModule,
     KeywordModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

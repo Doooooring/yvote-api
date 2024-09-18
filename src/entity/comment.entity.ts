@@ -1,17 +1,14 @@
-import {
-  Column,
-  Entity,
-  Index,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { News } from './news.entity';
 
-@Entity()
+@Entity({
+  name: 'Comment',
+  synchronize: false,
+})
 @Index(['news_id', 'comment_type'])
 export class Comment {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: number;
 
   @Column()
   order: number;
@@ -27,6 +24,9 @@ export class Comment {
 
   @Column()
   comment: string;
+
+  @Column()
+  date?: Date;
 
   @ManyToOne(() => News, (news) => news.comments)
   news: News;

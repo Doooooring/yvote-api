@@ -2,10 +2,18 @@ import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Comment } from './comment.entity';
 import { NewsKeyword } from './newsKeyword.emtity';
 
-@Entity()
+export interface Timeline {
+  title: string;
+  date: string;
+}
+
+@Entity({
+  name: 'News',
+  synchronize: false,
+})
 export class News {
   @PrimaryColumn()
-  id: string;
+  id: number;
 
   @Column()
   order: number;

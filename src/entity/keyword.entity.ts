@@ -1,9 +1,12 @@
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
-@Entity()
+@Entity({
+  name: 'Keyword',
+  synchronize: false,
+})
 export class Keyword {
   @PrimaryColumn()
-  id: string;
+  id: number;
 
   @Column()
   @Index()

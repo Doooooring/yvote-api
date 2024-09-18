@@ -2,12 +2,18 @@ import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { News } from './news.entity';
 import { User } from './user.entity';
 
-@Entity()
+@Entity({
+  name: 'Vote',
+  synchronize: false,
+})
 export class Vote {
   @PrimaryColumn()
+  id: number;
+
+  @Column()
   news_id: string;
 
-  @PrimaryColumn()
+  @Column()
   user_id: string;
 
   @Column()

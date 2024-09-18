@@ -1,9 +1,12 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity()
+@Entity({
+  name: 'User',
+  synchronize: false,
+})
 export class User {
   @PrimaryColumn()
-  id: string;
+  id: number;
 
   @Column()
   email: string;
