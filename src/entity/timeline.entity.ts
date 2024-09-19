@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
+import { News } from './news.entity';
 
 @Entity()
 export class Timeline {
@@ -10,4 +18,10 @@ export class Timeline {
 
   @Column()
   title: string;
+
+  @ManyToOne(() => News, (news) => news.comments)
+  @JoinColumn({
+    name: 'news_id',
+  })
+  news: News;
 }

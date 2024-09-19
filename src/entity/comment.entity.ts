@@ -1,9 +1,15 @@
-import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { News } from './news.entity';
 
 @Entity({
   name: 'Comment',
-  synchronize: false,
 })
 @Index(['news_id', 'comment_type'])
 export class Comment {
@@ -29,5 +35,8 @@ export class Comment {
   date?: Date;
 
   @ManyToOne(() => News, (news) => news.comments)
+  @JoinColumn({
+    name: 'news_id',
+  })
   news: News;
 }

@@ -1,10 +1,9 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { News } from './news.entity';
 import { User } from './user.entity';
 
 @Entity({
   name: 'Vote',
-  synchronize: false,
 })
 export class Vote {
   @PrimaryColumn()
@@ -20,8 +19,14 @@ export class Vote {
   response: string;
 
   @ManyToOne(() => News, (news) => news.id)
+  @JoinColumn({
+    name: 'news_id',
+  })
   news: News;
 
   @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({
+    name: 'user_id',
+  })
   user: User;
 }

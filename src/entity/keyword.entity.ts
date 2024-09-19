@@ -1,8 +1,8 @@
-import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToMany, PrimaryColumn } from 'typeorm';
+import { News } from './news.entity';
 
 @Entity({
   name: 'Keyword',
-  synchronize: false,
 })
 export class Keyword {
   @PrimaryColumn()
@@ -20,4 +20,7 @@ export class Keyword {
 
   @Column()
   recent: boolean;
+
+  @ManyToMany(() => News, (news) => news.keywords)
+  news: News[];
 }
