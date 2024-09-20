@@ -1,15 +1,23 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { Comment } from './comment.entity';
-import { NewsKeyword } from './newsKeyword.emtity';
+import { Timeline } from './timeline.entity';
+import { Keyword } from './keyword.entity';
 
-export interface Timeline {
+export interface TimelineFactor {
   title: string;
   date: string;
 }
 
 @Entity({
   name: 'News',
-  synchronize: false,
 })
 export class News {
   @PrimaryColumn()
@@ -36,12 +44,23 @@ export class News {
   @Column()
   opinions_right: string;
 
-  @Column('json')
-  timeline: any;
-
   @OneToMany(() => Comment, (comment) => comment.news)
   comments: Comment[];
 
-  @OneToMany(() => NewsKeyword, (newsKeyword) => newsKeyword.news)
-  newsKeywords: NewsKeyword[];
+  @OneToMany(() => Timeline, (timeline) => timeline.news)
+  timeline: Timeline[];
+
+  @ManyToMany(() => Keyword, (keyword) => keyword.news, {})
+  @JoinTable({
+    name: 'NewsKeyword',
+    joinColumn: {
+      name: 'news_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'keyword_id',
+      referencedColumnName: 'id',
+    },
+  })
+  keywords: Keyword[];
 }
