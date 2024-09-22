@@ -10,12 +10,6 @@ export class Vote {
   id: number;
 
   @Column()
-  news_id: string;
-
-  @Column()
-  user_id: string;
-
-  @Column()
   response: string;
 
   @ManyToOne(() => News, (news) => news.id)

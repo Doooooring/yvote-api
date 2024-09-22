@@ -12,25 +12,32 @@ export class CommentRepository {
   ) {}
 
   async getCommentByNewsIdAndCommentType(
-    id: string,
+    id: number,
     type: commentType,
     offset: number,
     limit: number,
   ) {
     return this.commentRepo.find({
       where: {
-        news_id: id,
+        news: {
+          id: id,
+        },
         comment: type,
+      },
+      order: {
+        order: 'DESC',
       },
       skip: offset,
       take: limit,
     });
   }
 
-  async getCommentAllByNewsIdAndCommentType(id: string) {
+  async getCommentAllByNewsIdAndCommentType(id: number) {
     return this.commentRepo.find({
       where: {
-        news_id: id,
+        news: {
+          id: id,
+        },
       },
     });
   }

@@ -1,15 +1,14 @@
 import {
   Column,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryColumn,
 } from 'typeorm';
 import { Comment } from './comment.entity';
-import { Timeline } from './timeline.entity';
 import { Keyword } from './keyword.entity';
+import { Timeline } from './timeline.entity';
 
 export interface TimelineFactor {
   title: string;
@@ -39,10 +38,10 @@ export class News {
   isPublished: boolean;
 
   @Column()
-  opinions_left: string;
+  opinion_left: string;
 
   @Column()
-  opinions_right: string;
+  opinion_right: string;
 
   @OneToMany(() => Comment, (comment) => comment.news)
   comments: Comment[];

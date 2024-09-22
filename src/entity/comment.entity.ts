@@ -20,9 +20,6 @@ export class Comment {
   order: number;
 
   @Column()
-  news_id: string;
-
-  @Column()
   comment_type: string;
 
   @Column()

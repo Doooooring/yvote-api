@@ -23,8 +23,5 @@ export class NewsService {
 
   async getNewsToEditById(id: number) {}
 
-  async getNewsPreviews(page: number, limit: number, keyword: string) {
-    
-
-  }
+  async getNewsPreviews(page: number, limit: number, keyword: string) {}
 }
