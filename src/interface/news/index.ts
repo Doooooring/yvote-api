@@ -1,3 +1,5 @@
+import { News } from 'src/entity/news.entity';
+
 export enum NewsCommentType {
   전략가 = '전략가',
   지도자 = '지도자',
@@ -16,4 +18,15 @@ export enum NewsCommentType {
   헌법재판소 = '헌법재판소',
   와이보트 = '와이보트',
   기타 = '기타',
+}
+
+export interface NewsPreviews
+  extends Pick<
+    News,
+    'id' | 'order' | 'title' | 'summary' | 'state' | 'isPublished' | 'timeline'
+  > {
+  keywords: Array<{
+    id: number;
+    keyword: string;
+  }>;
 }

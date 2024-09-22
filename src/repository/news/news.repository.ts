@@ -4,6 +4,7 @@ import { Comment } from 'src/entity/comment.entity';
 import { Keyword } from 'src/entity/keyword.entity';
 import { News } from 'src/entity/news.entity';
 import { Vote } from 'src/entity/vote.entity';
+import { NewsPreviews } from 'src/interface/news';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 
 @Injectable()
@@ -39,9 +40,9 @@ export class NewsRepository {
     });
   }
 
-  async getNewsPreviews(page: number, limit: number) {
+  getNewsPreviews(page: number, limit: number) {
     return this.newsRepo
-      .createQueryBuilder('get-previews')
+      .createQueryBuilder('news')
       .select([
         'id',
         'order',
@@ -51,17 +52,29 @@ export class NewsRepository {
         'isPublished',
         'timeline',
       ])
+      .leftJoinAndSelect('news.keyword', 'keyword')
+      .addSelect('keyword.keyword', 'keywords')
       .orderBy('order')
       .limit(limit)
-      .skip(page)
-      .getRawMany();
+      .skip(page);
   }
 
-  async getNewsPreviewsByKeyword(
-    keyword: string,
+  async getNewsPreviewsWithKeyword(
     page: number,
     limit: number,
-  ) {}
+    keyword: string,
+  ) {
+    return this.getNewsPreviews(page, limit)
+      .leftJoin('news.keywords', 'keyword')
+      .where('keyword.keyword = :keyword', { keyword })
+      .getRawMany() as Promise<NewsPreviews[]>;
+  }
+
+  async getNewsPreviewsAdmin(page: number, limit: number) {
+    return this.getNewsPreviews(page, limit)
+      .where('isPublished = True')
+      .getMany() as Promise<NewsPreviews[]>;
+  }
 
   async getNewsListByOptions(options: FindOptionsWhere<News> = {}) {
     return this.newsRepo.find({
