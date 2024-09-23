@@ -1,14 +1,18 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 import { Comment } from './comment.entity';
 import { Keyword } from './keyword.entity';
 import { Timeline } from './timeline.entity';
+import { Vote } from './vote.entity';
+import { NewsImage } from './newsImage.entity';
 
 export interface TimelineFactor {
   title: string;
@@ -43,11 +47,18 @@ export class News {
   @Column()
   opinion_right: string;
 
+  @OneToOne(() => NewsImage)
+  @JoinColumn({ name: 'news_image' })
+  news_image?: NewsImage;
+
   @OneToMany(() => Comment, (comment) => comment.news)
   comments: Comment[];
 
   @OneToMany(() => Timeline, (timeline) => timeline.news)
   timeline: Timeline[];
+
+  @OneToMany(() => Vote, (vote) => vote.news)
+  votes: Vote[];
 
   @ManyToMany(() => Keyword, (keyword) => keyword.news, {})
   @JoinTable({

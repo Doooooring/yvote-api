@@ -40,6 +40,48 @@ export class NewsRepository {
     });
   }
 
+  async getNewsRecent() {}
+
+  async getNewsInView() {
+    return this.newsRepo
+      .createQueryBuilder('news')
+      .select([
+        'id',
+        'order',
+        'title',
+        'summary',
+        'state',
+        'opinion_left',
+        'opinion_right',
+        'isPublished',
+        'timeline',
+      ])
+      .leftJoinAndSelect('news.keyword', 'keyword')
+      .addSelect('keyword.keyword', 'keywords')
+      .leftJoinAndSelect('news.comments', 'comment')
+      .addSelect('DISTINCT(comment.comment_type)', 'comments');
+  }
+
+  async getNewsInEdit() {
+    return this.newsRepo
+      .createQueryBuilder('news')
+      .select([
+        'id',
+        'order',
+        'title',
+        'summary',
+        'state',
+        'opinion_left',
+        'opinion_right',
+        'isPublished',
+        'timeline',
+      ])
+      .leftJoinAndSelect('news.keyword', 'keyword')
+      .addSelect('keyword.keyword', 'keywords')
+      .leftJoinAndSelect('news.comments', 'comments')
+      .getRawOne() as Promise<News>;
+  }
+
   getNewsPreviews(page: number, limit: number) {
     return this.newsRepo
       .createQueryBuilder('news')
@@ -72,7 +114,7 @@ export class NewsRepository {
 
   async getNewsPreviewsAdmin(page: number, limit: number) {
     return this.getNewsPreviews(page, limit)
-      .where('isPublished = True')
+      .andWhere('isPublished = True')
       .getMany() as Promise<NewsPreviews[]>;
   }
 
