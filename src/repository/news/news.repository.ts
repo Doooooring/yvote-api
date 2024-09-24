@@ -35,50 +35,54 @@ export class NewsRepository {
       order: {
         order: 'ASC',
       },
-      select: ['order'],
+      select: ['id'],
       take: 1,
     });
   }
 
   async getNewsRecent() {}
 
-  async getNewsInView() {
+  async getNewsInView(id: number) {
     return this.newsRepo
       .createQueryBuilder('news')
       .select([
         'id',
-        'order',
         'title',
         'summary',
         'state',
         'opinion_left',
         'opinion_right',
         'isPublished',
-        'timeline',
       ])
+      .leftJoinAndSelect('news_image', 'img')
       .leftJoinAndSelect('news.keyword', 'keyword')
       .addSelect('keyword.keyword', 'keywords')
       .leftJoinAndSelect('news.comments', 'comment')
-      .addSelect('DISTINCT(comment.comment_type)', 'comments');
+      .addSelect('DISTINCT(comment.comment_type)', 'comments')
+      .leftJoinAndSelect('news.timeline', 'timeline')
+      .where('news.id = :id', { id: id })
+      .orderBy('timeline.date', 'ASC')
+      .getRawOne();
   }
 
-  async getNewsInEdit() {
+  async getNewsInEdit(id: number) {
     return this.newsRepo
       .createQueryBuilder('news')
       .select([
         'id',
-        'order',
         'title',
         'summary',
         'state',
         'opinion_left',
         'opinion_right',
-        'isPublished',
-        'timeline',
       ])
+      .leftJoinAndSelect('news_image', 'img')
       .leftJoinAndSelect('news.keyword', 'keyword')
       .addSelect('keyword.keyword', 'keywords')
       .leftJoinAndSelect('news.comments', 'comments')
+      .leftJoinAndSelect('news.timeline', 'timeline')
+      .where('news.id = :id', { id: id })
+      .orderBy('timeline.date', 'ASC')
       .getRawOne() as Promise<News>;
   }
 
@@ -87,16 +91,16 @@ export class NewsRepository {
       .createQueryBuilder('news')
       .select([
         'id',
-        'order',
         'title',
         'SUBSTR(summary, 0, 100) AS summary',
         'state',
         'isPublished',
-        'timeline',
       ])
+      .leftJoinAndSelect('news_image', 'img')
       .leftJoinAndSelect('news.keyword', 'keyword')
       .addSelect('keyword.keyword', 'keywords')
-      .orderBy('order')
+      .orderBy('state', 'DESC')
+      .addOrderBy('id', 'DESC')
       .limit(limit)
       .skip(page);
   }
