@@ -3,7 +3,7 @@ import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
 @Entity({
   name: 'NewsImage',
 })
-export class NewsImage {
+export class ImageUrl {
   @PrimaryColumn()
   id: number;
 

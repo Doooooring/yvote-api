@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Keyword } from 'src/entity/keyword.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 
 @Injectable()
 export class KeywordRepository {
@@ -14,6 +14,13 @@ export class KeywordRepository {
     return this.getKeywordsByNewsId(id, ['id', 'keyword']) as Promise<
       Array<Pick<Keyword, 'id' | 'keyword'>>
     >;
+  }
+
+  async getKeywordById(id: number) {
+    return this.keywordRepo
+      .createQueryBuilder('keyword')
+      .where('keyword.id = :id', { id: id })
+      .leftJoinAndSelect('keyword.image');
   }
 
   // async getKeywordsByNewsId(id: number, fields: string[]) {

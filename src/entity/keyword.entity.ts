@@ -1,5 +1,14 @@
-import { Column, Entity, Index, ManyToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToMany,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { News } from './news.entity';
+import { ImageUrl } from './newsImage.entity';
 
 @Entity({
   name: 'Keyword',
@@ -20,6 +29,10 @@ export class Keyword {
 
   @Column()
   recent: boolean;
+
+  @OneToOne(() => ImageUrl)
+  @JoinColumn({ name: 'keyword_image' })
+  keyword_image?: ImageUrl;
 
   @ManyToMany(() => News, (news) => news.keywords)
   news: News[];
