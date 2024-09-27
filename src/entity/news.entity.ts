@@ -12,7 +12,7 @@ import { Comment } from './comment.entity';
 import { Keyword } from './keyword.entity';
 import { Timeline } from './timeline.entity';
 import { Vote } from './vote.entity';
-import { NewsImage } from './newsImage.entity';
+import { ImageUrl } from './newsImage.entity';
 
 export interface TimelineFactor {
   title: string;
@@ -47,9 +47,9 @@ export class News {
   @Column()
   opinion_right: string;
 
-  @OneToOne(() => NewsImage)
+  @OneToOne(() => ImageUrl)
   @JoinColumn({ name: 'news_image' })
-  news_image?: NewsImage;
+  news_image?: ImageUrl;
 
   @OneToMany(() => Comment, (comment) => comment.news)
   comments: Comment[];
