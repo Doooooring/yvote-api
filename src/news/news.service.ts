@@ -19,7 +19,10 @@ export class NewsService {
     return data.map((d) => d.id);
   }
 
-  async getNewsToViewById(id: number) {}
+  async getNewsToViewById(id: number) {
+    const data = await this.newsRepo.getNewsInView(id);
+    return data;
+  }
 
   async getNewsToEditById(id: number) {}
 
