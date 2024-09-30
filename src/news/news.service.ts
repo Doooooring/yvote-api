@@ -19,9 +19,32 @@ export class NewsService {
     return data.map((d) => d.id);
   }
 
-  async getNewsToViewById(id: number) {}
+  async getNewsPreviews(
+    page: number,
+    limit: number,
+    keyword: null | string,
+    isAdmin?: boolean,
+  ) {
+    if (isAdmin) {
+      if (keyword) {
+        return this.newsRepo.getNewsPreviewsWithKeyword(page, limit, keyword);
+      } else {
+        return this.newsRepo.getNewsPreviewsAdmin(page, limit);
+      }
+    }
 
-  async getNewsToEditById(id: number) {}
+    if (keyword) {
+      return this.newsRepo.getNewsPreviewsWithKeyword(page, limit, keyword);
+    } else {
+      return this.newsRepo.getNewsPreviews(page, limit);
+    }
+  }
 
-  async getNewsPreviews(page: number, limit: number, keyword: string) {}
+  async getNewsToViewById(id: number) {
+    return this.newsRepo.getNewsInView(id);
+  }
+
+  async getNewsToEditById(id: number) {
+    return this.newsRepo.getNewsInEdit(id);
+  }
 }
