@@ -9,3 +9,17 @@ export const Authroziation = createParamDecorator(
     return token;
   },
 );
+
+export function RespSuccess(target: any, key: string, descriptor: any) {
+  return {
+    success: true,
+    data: target,
+  };
+}
+
+export function RespFail(target: any, key: string, descriptor: any) {
+  return {
+    success: false,
+    data: target,
+  };
+}

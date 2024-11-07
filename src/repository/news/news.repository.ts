@@ -55,9 +55,9 @@ export class NewsRepository {
         'isPublished',
       ])
       .leftJoinAndSelect('news_image', 'img')
-      .leftJoinAndSelect('news.keyword', 'keyword')
+      .leftJoin('news.keyword', 'keyword')
       .addSelect('keyword.keyword', 'keywords')
-      .leftJoinAndSelect('news.comments', 'comment')
+      .leftJoin('news.comments', 'comment')
       .addSelect('DISTINCT(comment.comment_type)', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .where('news.id = :id', { id: id })
@@ -86,7 +86,7 @@ export class NewsRepository {
       .getRawOne() as Promise<News>;
   }
 
-  getNewsPreviews(page: number, limit: number) {
+  getNewsPreviewsProto(page: number, limit: number) {
     return this.newsRepo
       .createQueryBuilder('news')
       .select([
@@ -105,21 +105,23 @@ export class NewsRepository {
       .skip(page);
   }
 
-  async getNewsPreviewsWithKeyword(
-    page: number,
-    limit: number,
-    keyword: string,
-  ) {
-    return this.getNewsPreviews(page, limit)
-      .leftJoin('news.keywords', 'keyword')
-      .where('keyword.keyword = :keyword', { keyword })
-      .getRawMany() as Promise<NewsPreviews[]>;
+  async getNewsPreviews(page: number, limit: number, keyword?: string) {
+    const q = this.getNewsPreviewsProto(page, limit);
+    if (keyword) {
+      q.where('keyword.keyword = :keyword', { keyword });
+    }
+    return q.getRawMany() as Promise<NewsPreviews[]>;
   }
 
-  async getNewsPreviewsAdmin(page: number, limit: number) {
-    return this.getNewsPreviews(page, limit)
-      .andWhere('isPublished = True')
-      .getMany() as Promise<NewsPreviews[]>;
+  async getNewsPreviewsAdmin(page: number, limit: number, keyword?: string) {
+    const q = this.getNewsPreviewsProto(page, limit).andWhere(
+      'isPublished = True',
+    );
+    if (keyword) {
+      q.where('keyword.keyword = :keyword', { keyword });
+    }
+
+    return q.getRawMany() as Promise<NewsPreviews[]>;
   }
 
   async getNewsListByOptions(options: FindOptionsWhere<News> = {}) {

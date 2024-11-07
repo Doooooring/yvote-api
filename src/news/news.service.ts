@@ -24,7 +24,26 @@ export class NewsService {
     return data;
   }
 
-  async getNewsToEditById(id: number) {}
+  async getNewsToEditById(id: number) {
+    const data = await this.newsRepo.getNewsById(id);
+    return data;
+  }
 
-  async getNewsPreviews(page: number, limit: number, keyword: string) {}
+  async getNewsPreviews(
+    page: number,
+    limit: number,
+    {
+      keyword,
+      isAdmin,
+    }: {
+      keyword?: string;
+      isAdmin?: boolean;
+    },
+  ) {
+    if (isAdmin) {
+      return await this.newsRepo.getNewsPreviewsAdmin(page, limit, keyword);
+    } else {
+      return await this.newsRepo.getNewsPreviews(page, limit, keyword);
+    }
+  }
 }

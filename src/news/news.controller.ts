@@ -36,13 +36,18 @@ export class NewsController {
   }
 
   @Get('preview')
-  getNewsPreviews(
-    @Param('page') page: number,
-    @Param('limit') limit: number,
-    @Param('keyword') keyword: string,
+  async getNewsPreviews(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('keyword') keyword: string,
+    @Query('isAdmin') isAdmin: boolean = false,
     @Res() res: Response,
   ) {
-    res.send('');
+    const response = await this.newsService.getNewsPreviews(page, limit, {
+      keyword,
+      isAdmin,
+    });
+    res.send(response);
   }
 
   @Get('keyword')
