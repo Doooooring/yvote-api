@@ -10,11 +10,29 @@ export const Authroziation = createParamDecorator(
   },
 );
 
-export function RespSuccess(target: any, key: string, descriptor: any) {
-  return {
-    success: true,
-    data: target,
+export function RespInterceptor(
+  target: any,
+  key: string,
+  descriptor: PropertyDescriptor,
+) {
+  const originalMethod = descriptor.value;
+
+  descriptor.value = async function (...args: any[]) {
+    try {
+      const result = await originalMethod.apply(this, args);
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: error,
+      };
+    }
   };
+
+  return descriptor;
 }
 
 export function RespFail(target: any, key: string, descriptor: any) {

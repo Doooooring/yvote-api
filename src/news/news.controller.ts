@@ -1,15 +1,18 @@
 import {
+  Body,
   Controller,
   Get,
   Headers,
   Inject,
   Param,
+  Post,
   Query,
   Req,
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { NewsService } from './news.service';
+import { RespInterceptor } from 'src/tools/decorator';
 
 @Controller('news')
 export class NewsController {
@@ -23,19 +26,35 @@ export class NewsController {
   //   res.send('');
   // }
 
+  @Post()
+  async postNewsToEdit(@Body() body) {}
+
   @Get('/test')
+  @RespInterceptor
   async newsControllerTest(@Req() req: Request, @Res() res: Response) {
     const news = await this.newsService.getNewsIds();
-    console.log(news);
-    res.send({ data: news });
+    return news;
   }
 
   @Get(':id')
-  getNewsToViewById(@Param('id') id: number, @Res() res: Response) {
-    res.send('');
+  @RespInterceptor
+  async getNewsToViewById(@Param('id') id: number, @Res() res: Response) {
+    const news = await this.newsService.getNewsToViewById(id);
+    return news;
   }
 
+  @Get('/edit/:id')
+  @RespInterceptor
+  async getNewsToEditById(@Param('id') id: number, @Res() res: Response) {
+    const news = await this.newsService.getNewsToEditById(id);
+    return news;
+  }
+
+  @Post('/edit/:id')
+  async updateNewsToEditById(@Param('id') id: number) {}
+
   @Get('preview')
+  @RespInterceptor
   async getNewsPreviews(
     @Query('page') page: number,
     @Query('limit') limit: number,
@@ -47,12 +66,7 @@ export class NewsController {
       keyword,
       isAdmin,
     });
-    res.send(response);
-  }
-
-  @Get('keyword')
-  getNewsByKeyword(@Param('keyword') keyword: string, @Res() res: Response) {
-    res.send();
+    return response;
   }
 
   @Get(':id/vote')

@@ -124,18 +124,6 @@ export class NewsRepository {
     return q.getRawMany() as Promise<NewsPreviews[]>;
   }
 
-  async getNewsPreviewsWithKeywordAdmin(
-    page: number,
-    limit: number,
-    keyword: string,
-  ) {
-    return this.getNewsPreviews(page, limit)
-      .leftJoin('news.keywords', 'keyword')
-      .where('keyword.keyword = :keyword', { keyword })
-      .andWhere('isPublished = True')
-      .getMany() as Promise<NewsPreviews[]>;
-  }
-
   async getNewsListByOptions(options: FindOptionsWhere<News> = {}) {
     return this.newsRepo.find({
       where: options,

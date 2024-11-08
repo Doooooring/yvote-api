@@ -30,3 +30,5 @@ export interface NewsPreviews
     keyword: string;
   }>;
 }
+
+export interface NewsEdit extends Omit<News, 'votes'> {}
