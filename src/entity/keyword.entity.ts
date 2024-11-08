@@ -7,8 +7,8 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
+import { ImageUrl } from './Image.entity';
 import { News } from './news.entity';
-import { ImageUrl } from './newsImage.entity';
 
 @Entity({
   name: 'Keyword',

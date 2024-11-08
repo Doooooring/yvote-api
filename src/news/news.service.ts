@@ -19,32 +19,31 @@ export class NewsService {
     return data.map((d) => d.id);
   }
 
-  async getNewsPreviews(
-    page: number,
-    limit: number,
-    keyword: null | string,
-    isAdmin?: boolean,
-  ) {
-    if (isAdmin) {
-      if (keyword) {
-        return this.newsRepo.getNewsPreviewsWithKeyword(page, limit, keyword);
-      } else {
-        return this.newsRepo.getNewsPreviewsAdmin(page, limit);
-      }
-    }
-
-    if (keyword) {
-      return this.newsRepo.getNewsPreviewsWithKeyword(page, limit, keyword);
-    } else {
-      return this.newsRepo.getNewsPreviews(page, limit);
-    }
-  }
-
   async getNewsToViewById(id: number) {
-    return this.newsRepo.getNewsInView(id);
+    const data = await this.newsRepo.getNewsInView(id);
+    return data;
   }
 
   async getNewsToEditById(id: number) {
-    return this.newsRepo.getNewsInEdit(id);
+    const data = await this.newsRepo.getNewsById(id);
+    return data;
+  }
+
+  async getNewsPreviews(
+    page: number,
+    limit: number,
+    {
+      keyword,
+      isAdmin,
+    }: {
+      keyword?: string;
+      isAdmin?: boolean;
+    },
+  ) {
+    if (isAdmin) {
+      return await this.newsRepo.getNewsPreviewsAdmin(page, limit, keyword);
+    } else {
+      return await this.newsRepo.getNewsPreviews(page, limit, keyword);
+    }
   }
 }

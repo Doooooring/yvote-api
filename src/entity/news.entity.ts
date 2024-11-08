@@ -8,11 +8,11 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
+import { ImageUrl } from './Image.entity';
 import { Comment } from './comment.entity';
 import { Keyword } from './keyword.entity';
 import { Timeline } from './timeline.entity';
 import { Vote } from './vote.entity';
-import { ImageUrl } from './newsImage.entity';
 
 export interface TimelineFactor {
   title: string;

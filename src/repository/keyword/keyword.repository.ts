@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Keyword } from 'src/entity/keyword.entity';
 import { Repository } from 'typeorm';
+
 interface KeywordWithImg extends Keyword {
   img: string;
 }
+
 @Injectable()
 export class KeywordRepository {
   constructor(
