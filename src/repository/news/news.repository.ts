@@ -4,7 +4,7 @@ import { Comment } from 'src/entity/comment.entity';
 import { Keyword } from 'src/entity/keyword.entity';
 import { News } from 'src/entity/news.entity';
 import { Vote } from 'src/entity/vote.entity';
-import { NewsPreviews } from 'src/interface/news';
+import { NewsEdit, NewsPreviews } from 'src/interface/news';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 
 @Injectable()
@@ -143,5 +143,13 @@ export class NewsRepository {
 
   async getNewsById(id: number) {
     return this.getNewsByOptions({ id });
+  }
+
+  async postNews(news: NewsEdit) {
+    return this.newsRepo.save(news);
+  }
+
+  async updateNews(id: number, news: Partial<NewsEdit>) {
+    return this.newsRepo.update({ id: id }, news);
   }
 }

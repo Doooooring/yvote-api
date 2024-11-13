@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { NewsEdit } from 'src/interface/news';
 import { CommentRepository } from 'src/repository/comment/comment.repository';
 import { KeywordRepository } from 'src/repository/keyword/keyword.repository';
 import { NewsRepository } from 'src/repository/news/news.repository';
@@ -45,5 +46,18 @@ export class NewsService {
     } else {
       return await this.newsRepo.getNewsPreviews(page, limit, keyword);
     }
+  }
+
+  async postNews(news: NewsEdit) {
+    return await this.newsRepo.postNews(news);
+  }
+
+  async updateNewsCascade(id: number, news: NewsEdit) {
+    if (!news.id) news.id = id;
+    return this.newsRepo.postNews(news);
+  }
+
+  async updateNews(id: number, news: Partial<NewsEdit>) {
+    return await this.newsRepo.updateNews(id, news);
   }
 }

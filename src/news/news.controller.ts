@@ -5,14 +5,16 @@ import {
   Headers,
   Inject,
   Param,
+  Patch,
   Post,
   Query,
   Req,
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { NewsService } from './news.service';
+import { NewsEdit } from 'src/interface/news';
 import { RespInterceptor } from 'src/tools/decorator';
+import { NewsService } from './news.service';
 
 @Controller('news')
 export class NewsController {
@@ -25,9 +27,6 @@ export class NewsController {
   // getAllNews(@Req() req: Request, @Res() res: Response) {
   //   res.send('');
   // }
-
-  @Post()
-  async postNewsToEdit(@Body() body) {}
 
   @Get('/test')
   @RespInterceptor
@@ -43,6 +42,13 @@ export class NewsController {
     return news;
   }
 
+  @Post('/edit')
+  @RespInterceptor
+  async postNewsToEdit(@Body() body: NewsEdit) {
+    const response = await this.newsService.postNews(body);
+    return { state: true };
+  }
+
   @Get('/edit/:id')
   @RespInterceptor
   async getNewsToEditById(@Param('id') id: number, @Res() res: Response) {
@@ -50,8 +56,12 @@ export class NewsController {
     return news;
   }
 
-  @Post('/edit/:id')
-  async updateNewsToEditById(@Param('id') id: number) {}
+  @Patch('/edit/:id')
+  @RespInterceptor
+  async updateNewsToEditById(@Param('id') id: number, @Body() body: NewsEdit) {
+    const news = await this.newsService.updateNewsCascade(id, body);
+    return news;
+  }
 
   @Get('preview')
   @RespInterceptor
