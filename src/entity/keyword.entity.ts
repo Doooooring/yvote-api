@@ -31,8 +31,8 @@ export class Keyword {
   recent: boolean;
 
   @OneToOne(() => ImageUrl)
-  @JoinColumn({ name: 'keyword_image' })
-  keyword_image?: ImageUrl;
+  @JoinColumn({ name: 'keywordImage' })
+  keywordImage?: ImageUrl;
 
   @ManyToMany(() => News, (news) => news.keywords)
   news: News[];

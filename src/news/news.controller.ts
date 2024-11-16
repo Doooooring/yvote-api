@@ -70,7 +70,6 @@ export class NewsController {
     @Query('limit') limit: number,
     @Query('keyword') keyword: string,
     @Query('isAdmin') isAdmin: boolean = false,
-    @Res() res: Response,
   ) {
     const response = await this.newsService.getNewsPreviews(page, limit, {
       keyword,

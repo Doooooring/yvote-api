@@ -14,13 +14,13 @@ export class Vote {
 
   @ManyToOne(() => News, (news) => news.id)
   @JoinColumn({
-    name: 'news_id',
+    name: 'newsId',
   })
   news: News;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
-    name: 'user_id',
+    name: 'userId',
   })
   user: User;
 }

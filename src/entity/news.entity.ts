@@ -42,14 +42,14 @@ export class News {
   isPublished: boolean;
 
   @Column()
-  opinion_left: string;
+  opinionLeft: string;
 
   @Column()
-  opinion_right: string;
+  opinionRight: string;
 
   @OneToOne(() => ImageUrl)
-  @JoinColumn({ name: 'news_image' })
-  news_image?: ImageUrl;
+  @JoinColumn({ name: 'newsImage' })
+  newsImage?: ImageUrl;
 
   @OneToMany(() => Comment, (comment) => comment.news)
   comments: Comment[];
@@ -64,11 +64,11 @@ export class News {
   @JoinTable({
     name: 'NewsKeyword',
     joinColumn: {
-      name: 'news_id',
+      name: 'newsId',
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'keyword_id',
+      name: 'keywordId',
       referencedColumnName: 'id',
     },
   })

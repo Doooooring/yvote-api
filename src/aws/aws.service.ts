@@ -11,7 +11,7 @@ export class AwsService {
       region: this.configService.get('AWS_REGION'),
       credentials: {
         accessKeyId: this.configService.get('AWS_PUBLIC_KEY'),
-        secretAccessKey: this.configService.get('AWS_PRIVATE_KEY'), // Secret Key
+        secretAccessKey: this.configService.get('AWS_PRIVATE_KEY'),
       },
     });
   }
@@ -22,7 +22,7 @@ export class AwsService {
     ext: string,
   ) {
     const command = new PutObjectCommand({
-      Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // S3 버킷 이름
+      Bucket: this.configService.get('AWS_S3_BUCKET_NAME'),
       Key: fileName,
       Body: file.buffer,
       ACL: 'public-read',

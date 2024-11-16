@@ -50,18 +50,18 @@ export class NewsRepository {
         'title',
         'summary',
         'state',
-        'opinion_left',
-        'opinion_right',
+        'opinionLeft',
+        'opinionRight',
         'isPublished',
       ])
-      .leftJoinAndSelect('news_image', 'img')
+      .leftJoinAndSelect('newsImage', 'img')
       .leftJoin('news.keyword', 'keyword')
       .addSelect('keyword.keyword', 'keywords')
       .leftJoin('news.comments', 'comment')
-      .addSelect('DISTINCT(comment.comment_type)', 'comments')
+      .addSelect('DISTINCT(comment.commentType)', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
-      .where('news.id = :id', { id: id })
       .orderBy('timeline.date', 'ASC')
+      .where('news.id = :id', { id: id })
       .getRawOne();
   }
 
@@ -73,12 +73,11 @@ export class NewsRepository {
         'title',
         'summary',
         'state',
-        'opinion_left',
-        'opinion_right',
+        'opinionLeft',
+        'opinionRight',
       ])
-      .leftJoinAndSelect('news_image', 'img')
+      .leftJoinAndSelect('newsImage', 'img')
       .leftJoinAndSelect('news.keyword', 'keyword')
-      .addSelect('keyword.keyword', 'keywords')
       .leftJoinAndSelect('news.comments', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .where('news.id = :id', { id: id })
@@ -93,13 +92,19 @@ export class NewsRepository {
         'id',
         'title',
         'SUBSTR(summary, 0, 100) AS summary',
+        'newsImage',
         'state',
         'isPublished',
       ])
-      .leftJoinAndSelect('news_image', 'img')
+      .leftJoinAndSelect('newsImage', 'img')
       .leftJoinAndSelect('news.keyword', 'keyword')
+      .leftJoinAndSelect('news.timeline', 'timeline')
       .addSelect('keyword.keyword', 'keywords')
       .orderBy('state', 'DESC')
+      .addOrderBy(
+        '(SELECT MAX(t.date) FROM timeline t WHERE t.newsId = news.id)',
+        'DESC',
+      )
       .addOrderBy('id', 'DESC')
       .limit(limit)
       .skip(page);
