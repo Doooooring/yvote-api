@@ -11,7 +11,7 @@ import { News } from './news.entity';
 @Entity({
   name: 'Comment',
 })
-@Index(['news_id', 'comment_type'])
+@Index(['newsId', 'commentType'])
 export class Comment {
   @PrimaryColumn('uuid')
   id: number;
@@ -20,7 +20,7 @@ export class Comment {
   order: number;
 
   @Column()
-  comment_type: string;
+  commentType: string;
 
   @Column()
   title: string;
@@ -33,7 +33,7 @@ export class Comment {
 
   @ManyToOne(() => News, (news) => news.comments)
   @JoinColumn({
-    name: 'news_id',
+    name: 'newsId',
   })
   news: News;
 }

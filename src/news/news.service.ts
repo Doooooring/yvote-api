@@ -56,6 +56,7 @@ export class NewsService {
     if (!news.id) news.id = id;
     return this.newsRepo.postNews(news);
   }
+
   /**
    * @CAUTION
    * typeorm 'update' method bypasses relational updates

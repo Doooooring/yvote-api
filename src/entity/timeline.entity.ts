@@ -14,7 +14,7 @@ export class Timeline {
 
   @ManyToOne(() => News, (news) => news.comments)
   @JoinColumn({
-    name: 'news_id',
+    name: 'newsId',
   })
   news: News;
 }

@@ -23,7 +23,14 @@ export enum NewsCommentType {
 export interface NewsPreviews
   extends Pick<
     News,
-    'id' | 'order' | 'title' | 'summary' | 'state' | 'isPublished' | 'timeline'
+    | 'id'
+    | 'order'
+    | 'title'
+    | 'summary'
+    | 'state'
+    | 'isPublished'
+    | 'newsImage'
+    | 'timeline'
   > {
   keywords: Array<{
     id: number;
