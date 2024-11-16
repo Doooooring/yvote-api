@@ -19,3 +19,10 @@ export function getRespFail(data: any) {
     data,
   };
 }
+
+export function genDateId() {
+  const id = new Date().getTime();
+  return 'yvote-' + id;
+}
+
+export function convertImgToWebp() {}
