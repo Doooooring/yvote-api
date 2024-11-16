@@ -39,25 +39,25 @@ export class KeywordRepository {
   ) {
     return this.keywordRepo
       .createQueryBuilder('keyword')
-      .select(['id', 'keyword', 'category', 'keyword_image'])
+      .select(['id', 'keyword', 'category', 'keywordImage'])
       .where('keyword.category = :category', { category: category })
       .limit(limit)
       .offset(offset)
       .orderBy('keyword', 'ASC')
       .getRawMany() as Promise<
-      Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keyword_image'>>
+      Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keywordImage'>>
     >;
   }
 
   async getKeywordBySearch(search: string, offset: number, limit: number) {
     return this.keywordRepo
       .createQueryBuilder('keyword')
-      .select(['id', 'keyword', 'category', 'keyword_image'])
+      .select(['id', 'keyword', 'category', 'keywordImage'])
       .where('keyword.keyword REGEXP :regex', { regex: `%${search}%` })
       .limit(limit)
       .offset(offset)
       .getRawMany() as Promise<
-      Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keyword_image'>>
+      Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keywordImage'>>
     >;
   }
 
@@ -66,7 +66,7 @@ export class KeywordRepository {
       .createQueryBuilder('keyword')
       .select(['id', 'keyword', 'category'])
       .where('keyword.id = :id', { id: id })
-      .leftJoinAndSelect('keyword_image', 'img')
+      .leftJoinAndSelect('keywordImage', 'img')
       .getRawOne() as Promise<KeywordWithImg>;
   }
 
