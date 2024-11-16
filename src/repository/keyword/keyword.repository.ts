@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Keyword } from 'src/entity/keyword.entity';
+import { keywordCategory } from 'src/interface/keyword';
 import { Repository } from 'typeorm';
 
 interface KeywordWithImg extends Keyword {
@@ -32,25 +33,38 @@ export class KeywordRepository {
   }
 
   async getKeywordsByCategory(
-    category: Keyword['category'],
+    category: keywordCategory,
     offset: number,
     limit: number,
   ) {
     return this.keywordRepo
       .createQueryBuilder('keyword')
-      .select(['id', 'keyword', 'category'])
+      .select(['id', 'keyword', 'category', 'keyword_image'])
       .where('keyword.category = :category', { category: category })
       .limit(limit)
       .offset(offset)
       .orderBy('keyword', 'ASC')
       .getRawMany() as Promise<
-      Array<Pick<Keyword, 'id' | 'keyword' | 'category'>>
+      Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keyword_image'>>
+    >;
+  }
+
+  async getKeywordBySearch(search: string, offset: number, limit: number) {
+    return this.keywordRepo
+      .createQueryBuilder('keyword')
+      .select(['id', 'keyword', 'category', 'keyword_image'])
+      .where('keyword.keyword REGEXP :regex', { regex: `%${search}%` })
+      .limit(limit)
+      .offset(offset)
+      .getRawMany() as Promise<
+      Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keyword_image'>>
     >;
   }
 
   async getKeywordById(id: number) {
     return this.keywordRepo
       .createQueryBuilder('keyword')
+      .select(['id', 'keyword', 'category'])
       .where('keyword.id = :id', { id: id })
       .leftJoinAndSelect('keyword_image', 'img')
       .getRawOne() as Promise<KeywordWithImg>;
