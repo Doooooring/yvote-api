@@ -15,6 +15,8 @@ export class KeywordController {
     search: string = '',
     @Query('category')
     category: keywordCategory,
+    @Query('isRecent')
+    isRecent: boolean = false,
     @Query('offset')
     offset: number,
     @Query('limit')
@@ -23,6 +25,7 @@ export class KeywordController {
     return await this.keywordService.getKeywordsByOptions(offset, limit, {
       search,
       category,
+      isRecent,
     });
   }
 }

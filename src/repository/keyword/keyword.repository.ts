@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Keyword } from 'src/entity/keyword.entity';
 import { keywordCategory } from 'src/interface/keyword';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
 interface KeywordWithImg extends Keyword {
   img: string;
@@ -32,33 +32,32 @@ export class KeywordRepository {
     });
   }
 
-  async getKeywordsByCategory(
-    category: keywordCategory,
-    offset: number,
-    limit: number,
-  ) {
+  getKeywordsShortProto(limit: number, offset: number) {
     return this.keywordRepo
       .createQueryBuilder('keyword')
       .select(['id', 'keyword', 'category', 'keywordImage'])
-      .where('keyword.category = :category', { category: category })
       .limit(limit)
       .offset(offset)
-      .orderBy('keyword', 'ASC')
-      .getRawMany() as Promise<
-      Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keywordImage'>>
-    >;
+      .orderBy('keyword', 'ASC');
   }
 
-  async getKeywordBySearch(search: string, offset: number, limit: number) {
-    return this.keywordRepo
-      .createQueryBuilder('keyword')
-      .select(['id', 'keyword', 'category', 'keywordImage'])
-      .where('keyword.keyword REGEXP :regex', { regex: `%${search}%` })
-      .limit(limit)
-      .offset(offset)
-      .getRawMany() as Promise<
-      Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keywordImage'>>
-    >;
+  getKeywordsShortByCategory(
+    qb: SelectQueryBuilder<Keyword>,
+    category: keywordCategory,
+  ) {
+    return qb.andWhere('keyword.category = :category', { category: category });
+  }
+
+  getKeywordsShortBySearch(qb: SelectQueryBuilder<Keyword>, search: string) {
+    return qb.andWhere('keyword.keyword REGEXP :regex', {
+      regex: `%${search}%`,
+    });
+  }
+
+  getRecentKeywordsShort(qb: SelectQueryBuilder<Keyword>) {
+    return qb.andWhere('keyword.recent :is', {
+      is: true,
+    });
   }
 
   async getKeywordById(id: number) {
