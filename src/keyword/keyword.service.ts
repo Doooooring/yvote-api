@@ -42,4 +42,12 @@ export class KeywordService {
       Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keywordImage'>>
     >;
   }
+
+  async getKeywordById(id: number) {
+    return await this.keywordRepository.getKeywordById(id);
+  }
+
+  async getKeywordByKey(key: string) {
+    return await this.keywordRepository.getKeywordByKey(key);
+  }
 }

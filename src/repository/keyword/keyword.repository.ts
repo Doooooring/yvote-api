@@ -3,8 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Keyword } from 'src/entity/keyword.entity';
 import { keywordCategory } from 'src/interface/keyword';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-
-interface KeywordWithImg extends Keyword {
+export interface KeywordWithImg extends Omit<Keyword, 'news'> {
   img: string;
 }
 
@@ -60,12 +59,28 @@ export class KeywordRepository {
     });
   }
 
-  async getKeywordById(id: number) {
+  getKeywordProto() {
     return this.keywordRepo
       .createQueryBuilder('keyword')
-      .select(['id', 'keyword', 'category'])
+      .select([
+        'id',
+        'keyword',
+        'explain',
+        'category',
+        'recent',
+        'keywordImage',
+      ]);
+  }
+
+  async getKeywordById(id: number) {
+    return this.getKeywordProto()
       .where('keyword.id = :id', { id: id })
-      .leftJoinAndSelect('keywordImage', 'img')
+      .getRawOne() as Promise<KeywordWithImg>;
+  }
+
+  async getKeywordByKey(key: string) {
+    return this.getKeywordProto()
+      .where('keyword.keyword = :keyword', { keyword: key })
       .getRawOne() as Promise<KeywordWithImg>;
   }
 

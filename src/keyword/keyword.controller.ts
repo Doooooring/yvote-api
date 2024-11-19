@@ -28,4 +28,15 @@ export class KeywordController {
       isRecent,
     });
   }
+
+  @Get('/')
+  async getKeywordById(@Query('id') id: number, @Query('key') key: string) {
+    if (id) {
+      return await this.keywordService.getKeywordById(id);
+    }
+
+    if (key) {
+      return await this.keywordService.getKeywordByKey(key);
+    }
+  }
 }
