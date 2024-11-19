@@ -1,15 +1,24 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common';
-import { keywordCategory } from 'src/interface/keyword';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { KeywordEdit, keywordCategory } from 'src/interface/keyword';
 import { KeywordService } from './keyword.service';
 
 @Controller('keyword')
 export class KeywordController {
   constructor(
     @Inject(KeywordService)
-    private readonly keywordService,
+    private readonly keywordService: KeywordService,
   ) {}
 
-  @Get('keywords')
+  @Get('/keywords')
   async getKeywordTitles(
     @Query('search')
     search: string = '',
@@ -30,7 +39,7 @@ export class KeywordController {
   }
 
   @Get('/')
-  async getKeywordById(@Query('id') id: number, @Query('key') key: string) {
+  async getKeywordByOption(@Query('id') id: number, @Query('key') key: string) {
     if (id) {
       return await this.keywordService.getKeywordById(id);
     }
@@ -38,5 +47,15 @@ export class KeywordController {
     if (key) {
       return await this.keywordService.getKeywordByKey(key);
     }
+  }
+
+  @Post('/edit')
+  async postKeyword(@Body() body: KeywordEdit) {
+    return await this.keywordService.postKeyword(body);
+  }
+
+  @Patch('/edit/:id')
+  async patchKeywordById(@Body() body: KeywordEdit, @Param() id: number) {
+    return await this.keywordService.patchKeyword(id, body);
   }
 }

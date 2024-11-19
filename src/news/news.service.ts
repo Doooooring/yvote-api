@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { NewsEdit } from 'src/interface/news';
+import { NewsCommentType, NewsEdit } from 'src/interface/news';
 import { CommentRepository } from 'src/repository/comment/comment.repository';
 import { KeywordRepository } from 'src/repository/keyword/keyword.repository';
 import { NewsRepository } from 'src/repository/news/news.repository';
@@ -46,6 +46,20 @@ export class NewsService {
     } else {
       return await this.newsRepo.getNewsPreviews(page, limit, keyword);
     }
+  }
+
+  async getNewsComment(
+    newsId: number,
+    type: NewsCommentType,
+    offset: number,
+    limit: number,
+  ) {
+    return await this.commentRepo.getCommentByNewsIdAndCommentType(
+      newsId,
+      type,
+      offset,
+      limit,
+    );
   }
 
   async postNews(news: NewsEdit) {

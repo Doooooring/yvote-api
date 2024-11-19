@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
-import { commentType } from 'src/interface/comment';
+import { NewsCommentType } from 'src/interface/news';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class CommentRepository {
 
   async getCommentByNewsIdAndCommentType(
     id: number,
-    type: commentType,
+    type: NewsCommentType,
     offset: number,
     limit: number,
   ) {

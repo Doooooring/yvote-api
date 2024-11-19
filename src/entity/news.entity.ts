@@ -1,14 +1,11 @@
 import {
   Column,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
-  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { ImageUrl } from './Image.entity';
 import { Comment } from './comment.entity';
 import { Keyword } from './keyword.entity';
 import { Timeline } from './timeline.entity';
@@ -47,9 +44,8 @@ export class News {
   @Column()
   opinionRight: string;
 
-  @OneToOne(() => ImageUrl)
-  @JoinColumn({ name: 'newsImage' })
-  newsImage?: ImageUrl;
+  @Column()
+  newsImage?: string;
 
   @OneToMany(() => Comment, (comment) => comment.news)
   comments: Comment[];

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Keyword } from 'src/entity/keyword.entity';
 import { INF } from 'src/interface/common';
-import { keywordCategory } from 'src/interface/keyword';
+import { KeywordEdit, keywordCategory } from 'src/interface/keyword';
 import { KeywordRepository } from 'src/repository/keyword/keyword.repository';
 import { NewsRepository } from 'src/repository/news/news.repository';
 
@@ -49,5 +49,13 @@ export class KeywordService {
 
   async getKeywordByKey(key: string) {
     return await this.keywordRepository.getKeywordByKey(key);
+  }
+
+  async postKeyword(obj: KeywordEdit) {
+    return await this.keywordRepository.postKeyword(obj);
+  }
+
+  async patchKeyword(id: number, obj: KeywordEdit) {
+    return await this.keywordRepository.updateKeyword(id, obj);
   }
 }

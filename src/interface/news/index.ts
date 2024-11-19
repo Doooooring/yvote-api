@@ -38,4 +38,9 @@ export interface NewsPreviews
   }>;
 }
 
-export interface NewsEdit extends Omit<News, 'votes'> {}
+export interface NewsEdit extends Omit<News, 'votes' | 'keywords'> {
+  keywords: Array<{
+    id: number;
+    keyword: string;
+  }>;
+}

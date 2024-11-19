@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Keyword } from 'src/entity/keyword.entity';
-import { keywordCategory } from 'src/interface/keyword';
+import { KeywordEdit, keywordCategory } from 'src/interface/keyword';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 export interface KeywordWithImg extends Omit<Keyword, 'news'> {
   img: string;
@@ -84,12 +84,12 @@ export class KeywordRepository {
       .getRawOne() as Promise<KeywordWithImg>;
   }
 
-  async postKeyword(obj: Keyword) {
-    return this.keywordRepo.create(obj);
+  async postKeyword(obj: KeywordEdit) {
+    return this.keywordRepo.save(obj);
   }
 
-  async updateKeyword(obj: Keyword) {
-    return this.keywordRepo.update({ id: obj.id }, obj);
+  async updateKeyword(id: number, obj: KeywordEdit) {
+    return this.keywordRepo.update({ id: id }, obj);
   }
 
   async deleteKeyword(id: number) {

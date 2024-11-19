@@ -12,7 +12,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { NewsEdit } from 'src/interface/news';
+import { NewsCommentType, NewsEdit } from 'src/interface/news';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
 
@@ -33,6 +33,21 @@ export class NewsController {
   async newsControllerTest(@Req() req: Request, @Res() res: Response) {
     const news = await this.newsService.getNewsIds();
     return news;
+  }
+
+  @Get('preview')
+  @RespInterceptor
+  async getNewsPreviews(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('keyword') keyword: string,
+    @Query('isAdmin') isAdmin: boolean = false,
+  ) {
+    const response = await this.newsService.getNewsPreviews(page, limit, {
+      keyword,
+      isAdmin,
+    });
+    return response;
   }
 
   @Get(':id')
@@ -63,21 +78,6 @@ export class NewsController {
     return news;
   }
 
-  @Get('preview')
-  @RespInterceptor
-  async getNewsPreviews(
-    @Query('page') page: number,
-    @Query('limit') limit: number,
-    @Query('keyword') keyword: string,
-    @Query('isAdmin') isAdmin: boolean = false,
-  ) {
-    const response = await this.newsService.getNewsPreviews(page, limit, {
-      keyword,
-      isAdmin,
-    });
-    return response;
-  }
-
   @Get(':id/vote')
   getVoteInfoByNewsId(
     @Headers('authorization')
@@ -87,10 +87,12 @@ export class NewsController {
   ) {}
 
   @Get('/:id/comment')
-  getNewsComment(
+  async getNewsComment(
     @Param('id') id: number,
-    @Query('type') type: string,
-    @Query('page') page: number,
+    @Query('type') type: NewsCommentType,
+    @Query('offset') offset: number,
     @Query('limit') limit: number,
-  ) {}
+  ) {
+    return await this.newsService.getNewsComment(id, type, offset, limit);
+  }
 }

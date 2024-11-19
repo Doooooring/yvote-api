@@ -1,3 +1,5 @@
+import { Keyword } from 'src/entity/keyword.entity';
+
 export enum keywordCategory {
   human = '인물',
   politics = '정치',
@@ -6,4 +8,11 @@ export enum keywordCategory {
   social = '사회',
   organizatioin = '단체',
   etc = '기타',
+}
+
+export interface KeywordEdit extends Omit<Keyword, 'news'> {
+  news: Array<{
+    id: number;
+    title: string;
+  }>;
 }
