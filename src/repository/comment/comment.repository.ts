@@ -11,13 +11,30 @@ export class CommentRepository {
     private readonly commentRepo: Repository<Comment>,
   ) {}
 
+  async getCommentsRecentUpdated(offset: number, limit: number) {
+    return await this.commentRepo
+      .createQueryBuilder('comment')
+      .select([
+        'comment.id',
+        'comment.commentType',
+        'comment.title',
+        'comment.comment',
+        'news.id AS news_id',
+      ]) // Include only news.id
+      .leftJoin('comment.news', 'news') // Use leftJoin if you don't need to select full news
+      .orderBy('comment.updatedAt')
+      .offset(offset)
+      .limit(limit)
+      .getRawMany();
+  }
+
   async getCommentByNewsIdAndCommentType(
     id: number,
     type: NewsCommentType,
     offset: number,
     limit: number,
   ) {
-    return this.commentRepo.find({
+    return await this.commentRepo.find({
       where: {
         news: {
           id: id,
@@ -33,7 +50,7 @@ export class CommentRepository {
   }
 
   async getCommentAllByNewsIdAndCommentType(id: number) {
-    return this.commentRepo.find({
+    return await this.commentRepo.find({
       where: {
         news: {
           id: id,

@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { News } from './news.entity';
 
@@ -30,6 +31,9 @@ export class Comment {
 
   @Column()
   date?: Date;
+
+  @UpdateDateColumn()
+  updatedAt?: Date;
 
   @ManyToOne(() => News, (news) => news.comments)
   @JoinColumn({

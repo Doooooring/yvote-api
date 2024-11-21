@@ -19,6 +19,8 @@ export class ImgController {
 
     const name = filename ?? genDateId();
 
-    const resp = await this.awsService.imageUploadToS3(name, img, 'webp');
+    const imgAddress = await this.awsService.imageUploadToS3(name, img, 'webp');
+
+    return imgAddress;
   }
 }

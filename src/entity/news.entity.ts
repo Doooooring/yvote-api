@@ -47,13 +47,13 @@ export class News {
   @Column()
   newsImage?: string;
 
-  @OneToMany(() => Comment, (comment) => comment.news)
+  @OneToMany(() => Comment, (comment) => comment.news, { cascade: true })
   comments: Comment[];
 
-  @OneToMany(() => Timeline, (timeline) => timeline.news)
+  @OneToMany(() => Timeline, (timeline) => timeline.news, { cascade: true })
   timeline: Timeline[];
 
-  @OneToMany(() => Vote, (vote) => vote.news)
+  @OneToMany(() => Vote, (vote) => vote.news, { cascade: true })
   votes: Vote[];
 
   @ManyToMany(() => Keyword, (keyword) => keyword.news, {})

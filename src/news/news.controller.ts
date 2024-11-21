@@ -35,7 +35,7 @@ export class NewsController {
     return news;
   }
 
-  @Get('preview')
+  @Get('/previews')
   @RespInterceptor
   async getNewsPreviews(
     @Query('page') page: number,
@@ -50,11 +50,13 @@ export class NewsController {
     return response;
   }
 
-  @Get(':id')
+  @Get('/comment-updated')
   @RespInterceptor
-  async getNewsToViewById(@Param('id') id: number, @Res() res: Response) {
-    const news = await this.newsService.getNewsToViewById(id);
-    return news;
+  async getRecentComments(
+    @Query('offset') offset: number,
+    @Query('limit') limit: number,
+  ) {
+    return await this.newsService.getRecentComments(offset, limit);
   }
 
   @Post('/edit')
@@ -62,6 +64,13 @@ export class NewsController {
   async postNewsToEdit(@Body() body: NewsEdit) {
     const response = await this.newsService.postNews(body);
     return { state: true };
+  }
+
+  @Get('/:id')
+  @RespInterceptor
+  async getNewsToViewById(@Param('id') id: number, @Res() res: Response) {
+    const news = await this.newsService.getNewsToViewById(id);
+    return news;
   }
 
   @Get('/edit/:id')
@@ -78,7 +87,7 @@ export class NewsController {
     return news;
   }
 
-  @Get(':id/vote')
+  @Get('/:id/vote')
   getVoteInfoByNewsId(
     @Headers('authorization')
     authorization: string,

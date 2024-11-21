@@ -62,6 +62,10 @@ export class NewsService {
     );
   }
 
+  async getRecentCommnets(offset: number, limit: number) {
+    return await this.commentRepo.getCommentsRecentUpdated(offset, limit);
+  }
+
   async postNews(news: NewsEdit) {
     return await this.newsRepo.postNews(news);
   }
