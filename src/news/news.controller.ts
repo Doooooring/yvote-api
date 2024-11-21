@@ -8,10 +8,9 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   Res,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { NewsCommentType, NewsEdit } from 'src/interface/news';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
@@ -30,7 +29,7 @@ export class NewsController {
 
   @Get('/test')
   @RespInterceptor
-  async newsControllerTest(@Req() req: Request, @Res() res: Response) {
+  async newsControllerTest() {
     const news = await this.newsService.getNewsIds();
     return news;
   }
