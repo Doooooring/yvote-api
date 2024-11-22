@@ -96,22 +96,6 @@ export class KeywordRepository {
     return this.keywordRepo.delete({ id: id });
   }
 
-  // async getKeywordsByNewsId(id: number, fields: string[]) {
-  //   return this.keywordRepo
-  //     .createQueryBuilder('keyword')
-  //     .select(fields)
-  //     .where((qb) => {
-  //       const subQuery = qb
-  //         .subQuery()
-  //         .select('newsKeyword.keywords')
-  //         .from(NewsKeyword, 'newsKeyword')
-  //         .where('newsKeyword.news_id = :id', { id: id });
-
-  //       return 'keyword.keyword IN' + subQuery;
-  //     })
-  //     .getRawMany();
-  // }
-
   async getKeywordsByNewsId(id: number, fields: string[]) {
     return this.keywordRepo
       .createQueryBuilder('keyword')
