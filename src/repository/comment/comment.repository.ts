@@ -4,6 +4,11 @@ import { Comment } from 'src/entity/comment.entity';
 import { NewsCommentType } from 'src/interface/news';
 import { Repository } from 'typeorm';
 
+export interface RecentComment
+  extends Pick<Comment, 'id' | 'commentType' | 'title' | 'comment'> {
+  newsId: string;
+}
+
 @Injectable()
 export class CommentRepository {
   constructor(
@@ -12,20 +17,20 @@ export class CommentRepository {
   ) {}
 
   async getCommentsRecentUpdated(offset: number, limit: number) {
-    return await this.commentRepo
+    return (await this.commentRepo
       .createQueryBuilder('comment')
       .select([
         'comment.id',
         'comment.commentType',
         'comment.title',
         'comment.comment',
-        'news.id AS news_id',
-      ]) // Include only news.id
-      .leftJoin('comment.news', 'news') // Use leftJoin if you don't need to select full news
+        'news.id AS newsId',
+      ])
+      .leftJoin('comment.news', 'news')
       .orderBy('comment.updatedAt')
       .offset(offset)
       .limit(limit)
-      .getRawMany();
+      .getRawMany()) as RecentComment[];
   }
 
   async getCommentByNewsIdAndCommentType(

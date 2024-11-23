@@ -87,6 +87,7 @@ export class NewsController {
   }
 
   @Get('/:id/vote')
+  @RespInterceptor
   getVoteInfoByNewsId(
     @Headers('authorization')
     authorization: string,
@@ -95,6 +96,7 @@ export class NewsController {
   ) {}
 
   @Get('/:id/comment')
+  @RespInterceptor
   async getNewsComment(
     @Param('id') id: number,
     @Query('type') type: NewsCommentType,
