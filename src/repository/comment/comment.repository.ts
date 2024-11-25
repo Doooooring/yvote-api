@@ -5,8 +5,8 @@ import { NewsCommentType } from 'src/interface/news';
 import { Repository } from 'typeorm';
 
 export interface RecentComment
-  extends Pick<Comment, 'id' | 'commentType' | 'title' | 'comment'> {
-  newsId: string;
+  extends Pick<Comment, 'id' | 'commentType' | 'title' | 'comment' | 'date'> {
+  newsId: number;
 }
 
 @Injectable()
