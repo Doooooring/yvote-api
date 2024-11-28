@@ -34,15 +34,22 @@ export class NewsController {
     return news;
   }
 
+  @Get('ids')
+  @RespInterceptor
+  async getNewsIds() {
+    const news = await this.newsService.getNewsIds();
+    return news;
+  }
+
   @Get('/previews')
   @RespInterceptor
   async getNewsPreviews(
-    @Query('page') page: number,
+    @Query('offset') offset: number,
     @Query('limit') limit: number,
     @Query('keyword') keyword: string,
     @Query('isAdmin') isAdmin: boolean = false,
   ) {
-    const response = await this.newsService.getNewsPreviews(page, limit, {
+    const response = await this.newsService.getNewsPreviews(offset, limit, {
       keyword,
       isAdmin,
     });
@@ -55,7 +62,8 @@ export class NewsController {
     @Query('offset') offset: number,
     @Query('limit') limit: number,
   ) {
-    return await this.newsService.getRecentComments(offset, limit);
+    const response = await this.newsService.getRecentComments(offset, limit);
+    return response;
   }
 
   @Post('/edit')

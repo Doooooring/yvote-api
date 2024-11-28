@@ -4,7 +4,7 @@ import { Comment } from 'src/entity/comment.entity';
 import { Keyword } from 'src/entity/keyword.entity';
 import { News } from 'src/entity/news.entity';
 import { Vote } from 'src/entity/vote.entity';
-import { NewsEdit, NewsPreviews } from 'src/interface/news';
+import { NewsEdit, NewsinView, NewsPreviews } from 'src/interface/news';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 
 @Injectable()
@@ -55,14 +55,14 @@ export class NewsRepository {
         'isPublished',
       ])
       .leftJoinAndSelect('newsImage', 'img')
-      .leftJoin('news.keyword', 'keyword')
-      .addSelect('keyword.keyword', 'keywords')
+      .leftJoin('news.keywords', 'keywords')
+      .addSelect(['keywords.keyword', 'keywords.id'])
       .leftJoin('news.comments', 'comment')
       .addSelect('DISTINCT(comment.commentType)', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .orderBy('timeline.date', 'ASC')
       .where('news.id = :id', { id: id })
-      .getRawOne();
+      .getRawOne() as Promise<NewsinView>;
   }
 
   async getNewsInEdit(id: number) {

@@ -17,7 +17,7 @@ export class NewsService {
 
   async getNewsIds() {
     const data = await this.newsRepo.getNewsIds();
-    return data.map((d) => d.id);
+    return data;
   }
 
   async getNewsToViewById(id: number) {

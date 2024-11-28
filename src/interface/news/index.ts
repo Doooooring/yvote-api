@@ -1,3 +1,4 @@
+import { Keyword } from 'src/entity/keyword.entity';
 import { News } from 'src/entity/news.entity';
 
 export enum NewsCommentType {
@@ -43,4 +44,9 @@ export interface NewsEdit extends Omit<News, 'votes' | 'keywords'> {
     id: number;
     keyword: string;
   }>;
+}
+
+export interface NewsinView extends Omit<News, 'comments' | 'keywords'> {
+  comments: Array<NewsCommentType>;
+  keywords: Array<Pick<Keyword, 'id' | 'keyword'>>;
 }
