@@ -5,7 +5,7 @@ import { Keyword } from 'src/entity/keyword.entity';
 import { News } from 'src/entity/news.entity';
 import { Vote } from 'src/entity/vote.entity';
 import { NewsEdit, NewsinView, NewsPreviews } from 'src/interface/news';
-import { FindOptionsWhere, In, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Like, Repository } from 'typeorm';
 
 @Injectable()
 export class NewsRepository {
@@ -24,6 +24,15 @@ export class NewsRepository {
     return this.newsRepo.find({
       select: ['id'],
     });
+  }
+
+  async getNewsTitles(search: string) {
+    return this.newsRepo.find({
+      select: ['id', 'title'],
+      where: {
+        title: Like(`%${search}%`),
+      },
+    }) as Promise<Pick<News, 'id' | 'title'>[]>;
   }
 
   async getNewsCount() {
@@ -156,5 +165,9 @@ export class NewsRepository {
 
   async updateNews(id: number, news: Partial<NewsEdit>) {
     return this.newsRepo.update({ id: id }, news);
+  }
+
+  async deleteNewsById(id: number) {
+    return this.newsRepo.delete({ id });
   }
 }

@@ -20,6 +20,10 @@ export class NewsService {
     return data;
   }
 
+  async getNewsTitles(search: string) {
+    const data = await this.newsRepo.getNewsTitles(search);
+  }
+
   async getNewsToViewById(id: number) {
     const data = await this.newsRepo.getNewsInView(id);
     return data;
@@ -82,5 +86,9 @@ export class NewsService {
    */
   async updateNews(id: number, news: Partial<NewsEdit>) {
     return await this.newsRepo.updateNews(id, news);
+  }
+
+  async deleteNewsById(id: number) {
+    return await this.newsRepo.deleteNewsById(id);
   }
 }

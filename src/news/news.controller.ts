@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
   Inject,
@@ -34,10 +35,17 @@ export class NewsController {
     return news;
   }
 
-  @Get('ids')
+  @Get('/ids')
   @RespInterceptor
   async getNewsIds() {
     const news = await this.newsService.getNewsIds();
+    return news;
+  }
+
+  @Get('/titles')
+  @RespInterceptor
+  async getNewsTitles(@Query('search') search: string = '') {
+    const news = await this.newsService.getNewsTitles(search);
     return news;
   }
 
@@ -92,6 +100,12 @@ export class NewsController {
   async updateNewsToEditById(@Param('id') id: number, @Body() body: NewsEdit) {
     const news = await this.newsService.updateNewsCascade(id, body);
     return news;
+  }
+
+  @Delete('/edit/:id')
+  @RespInterceptor
+  async deleteNewsById(@Param('id') id: number) {
+    const response = await this.newsService.deleteNewsById(id)
   }
 
   @Get('/:id/vote')
