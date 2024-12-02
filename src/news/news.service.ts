@@ -72,6 +72,7 @@ export class NewsService {
 
   async updateNewsCascade(id: number, news: NewsEdit) {
     if (!news.id) news.id = id;
+
     return this.newsRepo.postNews(news);
   }
 

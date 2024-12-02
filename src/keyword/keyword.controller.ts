@@ -11,6 +11,7 @@ import {
 import { KeywordEdit, keywordCategory } from 'src/interface/keyword';
 import { RespInterceptor } from 'src/tools/decorator';
 import { KeywordService } from './keyword.service';
+import { INF } from 'src/interface/common';
 
 @Controller('keyword')
 export class KeywordController {
@@ -38,6 +39,15 @@ export class KeywordController {
       category,
       isRecent,
     });
+  }
+
+  @Get('/key-list')
+  @RespInterceptor
+  async getKeywordKeyList(
+    @Query('offset') offset: number = 0,
+    @Query('limit') limit: number = INF,
+  ) {
+    return await this.keywordService.getKeywordsKeyList(offset, limit);
   }
 
   @Get('/')

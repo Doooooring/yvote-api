@@ -14,6 +14,15 @@ export class KeywordRepository {
     private readonly keywordRepo: Repository<Keyword>,
   ) {}
 
+  async getKeywordsKey(offset: number, limit: number) {
+    return this.keywordRepo
+      .createQueryBuilder('keyword')
+      .select(['id', 'keyword'])
+      .limit(limit)
+      .offset(offset)
+      .getRawMany() as Promise<Array<Pick<Keyword, 'id' | 'keyword'>>>;
+  }
+
   async getKeywordsKeyByNewsId(id: number) {
     return this.getKeywordsByNewsId(id, ['id', 'keyword']) as Promise<
       Array<Pick<Keyword, 'id' | 'keyword'>>
