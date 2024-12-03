@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -70,7 +71,13 @@ export class KeywordController {
 
   @Patch('/edit/:id')
   @RespInterceptor
-  async patchKeywordById(@Body() body: KeywordEdit, @Param() id: number) {
+  async patchKeywordById(@Body() body: KeywordEdit, @Param('id') id: number) {
     return await this.keywordService.patchKeyword(id, body);
+  }
+
+  @Delete('/edit/:id')
+  @RespInterceptor
+  async deleteKeywordById(@Param('id') id: number) {
+    return await this.keywordService.deleteKeywordById(id);
   }
 }

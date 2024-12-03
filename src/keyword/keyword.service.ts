@@ -62,4 +62,8 @@ export class KeywordService {
   async patchKeyword(id: number, obj: KeywordEdit) {
     return await this.keywordRepository.updateKeyword(id, obj);
   }
+
+  async deleteKeywordById(id: number) {
+    return await this.keywordRepository.deleteKeyword(id);
+  }
 }

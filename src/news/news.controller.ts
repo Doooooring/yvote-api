@@ -105,7 +105,8 @@ export class NewsController {
   @Delete('/edit/:id')
   @RespInterceptor
   async deleteNewsById(@Param('id') id: number) {
-    const response = await this.newsService.deleteNewsById(id)
+    const response = await this.newsService.deleteNewsById(id);
+    return true;
   }
 
   @Get('/:id/vote')
