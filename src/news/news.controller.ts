@@ -10,11 +10,13 @@ import {
   Post,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { NewsCommentType, NewsEdit } from 'src/interface/news';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
+import { AdminGuard } from 'src/auth/admin/admin.guard';
 
 @Controller('news')
 export class NewsController {
@@ -74,6 +76,7 @@ export class NewsController {
     return response;
   }
 
+  @UseGuards(AdminGuard)
   @Post('/edit')
   @RespInterceptor
   async postNewsToEdit(@Body() body: NewsEdit) {
@@ -95,6 +98,7 @@ export class NewsController {
     return news;
   }
 
+  @UseGuards(AdminGuard)
   @Patch('/edit/:id')
   @RespInterceptor
   async updateNewsToEditById(@Param('id') id: number, @Body() body: NewsEdit) {
@@ -102,6 +106,7 @@ export class NewsController {
     return news;
   }
 
+  @UseGuards(AdminGuard)
   @Delete('/edit/:id')
   @RespInterceptor
   async deleteNewsById(@Param('id') id: number) {
