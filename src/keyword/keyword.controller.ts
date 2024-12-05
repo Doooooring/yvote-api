@@ -49,20 +49,9 @@ export class KeywordController {
   async getKeywordKeyList(
     @Query('offset') offset: number = 0,
     @Query('limit') limit: number = INF,
+    @Query('search') search: string = '',
   ) {
-    return await this.keywordService.getKeywordsKeyList(offset, limit);
-  }
-
-  @Get('/')
-  @RespInterceptor
-  async getKeywordByOption(@Query('id') id: number, @Query('key') key: string) {
-    if (id) {
-      return await this.keywordService.getKeywordById(id);
-    }
-
-    if (key) {
-      return await this.keywordService.getKeywordByKey(key);
-    }
+    return await this.keywordService.getKeywordsKeyList(offset, limit, search);
   }
 
   @UseGuards(AdminGuard)
@@ -84,5 +73,17 @@ export class KeywordController {
   @RespInterceptor
   async deleteKeywordById(@Param('id') id: number) {
     return await this.keywordService.deleteKeywordById(id);
+  }
+
+  @Get('/')
+  @RespInterceptor
+  async getKeywordByOption(@Query('id') id: number, @Query('key') key: string) {
+    if (id) {
+      return await this.keywordService.getKeywordById(id);
+    }
+
+    if (key) {
+      return await this.keywordService.getKeywordByKey(key);
+    }
   }
 }

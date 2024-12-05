@@ -43,8 +43,8 @@ export class KeywordService {
     >;
   }
 
-  async getKeywordsKeyList(offset: number, limit: number) {
-    return await this.keywordRepository.getKeywordsKey(offset, limit);
+  async getKeywordsKeyList(offset: number, limit: number, search: string) {
+    return await this.keywordRepository.getKeywordsKey(offset, limit, search);
   }
 
   async getKeywordById(id: number) {

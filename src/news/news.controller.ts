@@ -81,7 +81,7 @@ export class NewsController {
   @RespInterceptor
   async postNewsToEdit(@Body() body: NewsEdit) {
     const response = await this.newsService.postNews(body);
-    return { state: true };
+    return true;
   }
 
   @Get('/:id')
@@ -103,7 +103,7 @@ export class NewsController {
   @RespInterceptor
   async updateNewsToEditById(@Param('id') id: number, @Body() body: NewsEdit) {
     const news = await this.newsService.updateNewsCascade(id, body);
-    return news;
+    return true;
   }
 
   @UseGuards(AdminGuard)

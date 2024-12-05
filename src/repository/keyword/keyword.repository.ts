@@ -14,10 +14,13 @@ export class KeywordRepository {
     private readonly keywordRepo: Repository<Keyword>,
   ) {}
 
-  async getKeywordsKey(offset: number, limit: number) {
+  async getKeywordsKey(offset: number, limit: number, search: string) {
     return this.keywordRepo
       .createQueryBuilder('keyword')
       .select(['id', 'keyword'])
+      .where('keyword.keyword REGEXP :regex', {
+        regex: `%${search}%`,
+      })
       .limit(limit)
       .offset(offset)
       .getRawMany() as Promise<Array<Pick<Keyword, 'id' | 'keyword'>>>;
