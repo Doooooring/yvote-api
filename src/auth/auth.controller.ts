@@ -1,8 +1,7 @@
 import { Controller, Get, Inject, Post, UseGuards } from '@nestjs/common';
-import { KakakoAuthService } from './kakao/kakao.service';
-import { GoogleAuthService } from './google/google.service';
-import { Authroziation } from 'src/tools/decorator';
 import { AdminGuard } from './admin/admin.guard';
+import { GoogleAuthService } from './google/google.service';
+import { KakakoAuthService } from './kakao/kakao.service';
 
 @Controller('auth')
 export class AuthController {
@@ -27,6 +26,9 @@ export class AuthController {
   async checkTokenValidation() {
     return true;
   }
+
+  @Post('/admin/refresh')
+  async checkTokenRefresh() {}
 
   @Post('/admin/login')
   async adminLogin() {}
