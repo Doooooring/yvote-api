@@ -97,14 +97,7 @@ export class NewsRepository {
   getNewsPreviewsProto(page: number, limit: number) {
     return this.newsRepo
       .createQueryBuilder('news')
-      .select([
-        'id',
-        'title',
-        'SUBSTR(summary, 0, 100) AS summary',
-        'newsImage',
-        'state',
-        'isPublished',
-      ])
+      .select(['id', 'title', 'summary', 'newsImage', 'state', 'isPublished'])
       .leftJoinAndSelect('newsImage', 'img')
       .leftJoinAndSelect('news.keyword', 'keyword')
       .leftJoinAndSelect('news.timeline', 'timeline')
