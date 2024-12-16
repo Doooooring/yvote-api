@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { KakakoAuthService } from './kakao/kakao.service';
-import { GoogleAuthService } from './google/google.service';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { AdminGuard } from './admin/admin.guard';
+import { AuthController } from './auth.controller';
+import { GoogleAuthService } from './google/google.service';
+import { KakakoAuthService } from './kakao/kakao.service';
 
 @Module({
   imports: [
@@ -20,6 +20,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   controllers: [AuthController],
-  providers: [KakakoAuthService, GoogleAuthService],
+  providers: [KakakoAuthService, GoogleAuthService, AdminGuard],
+  exports: [AdminGuard],
 })
 export class AuthModule {}

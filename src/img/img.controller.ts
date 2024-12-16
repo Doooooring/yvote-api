@@ -1,7 +1,6 @@
-import { Controller, Inject, Post, Query, Req } from '@nestjs/common';
+import { Controller, Inject, Post, Req } from '@nestjs/common';
 import sharp from 'sharp';
 import { AwsService } from 'src/aws/aws.service';
-import { genDateId } from 'src/tools/common';
 
 @Controller('img')
 export class ImgController {
@@ -11,17 +10,18 @@ export class ImgController {
   ) {}
 
   @Post('/')
-  async postImg(@Req() req, @Query('filename') filename: string) {
+  async postImg(@Req() req) {
     const img = req.file?.buffer as Buffer;
+    const filename = req.file?.originalname as string; // Getting the original filename
+
     if (img === undefined) {
       throw Error();
     }
 
     const imgWEBP = await sharp(img).webp({}).toBuffer();
-    const name = filename ?? genDateId();
 
     const imgAddress = await this.awsService.imageUploadToS3(
-      name,
+      filename,
       imgWEBP,
       'webp',
     );

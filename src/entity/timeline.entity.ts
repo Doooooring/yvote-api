@@ -4,7 +4,7 @@ import { News } from './news.entity';
 @Entity()
 export class Timeline {
   @PrimaryColumn()
-  id: string;
+  id: number;
 
   @Column()
   date: Date;

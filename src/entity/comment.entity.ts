@@ -12,7 +12,7 @@ import { News } from './news.entity';
 @Entity({
   name: 'Comment',
 })
-@Index(['newsId', 'commentType'])
+@Index(['news', 'commentType'])
 export class Comment {
   @PrimaryColumn('uuid')
   id: number;

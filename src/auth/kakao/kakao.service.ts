@@ -5,6 +5,6 @@ import { AuthServiceInterface } from '../auth.service.interface';
 export class KakakoAuthService extends AuthServiceInterface {
   async login(token: string) {
     console.log(token);
-    return;
+    return '';
   }
 }

@@ -66,9 +66,10 @@ export class KeywordRepository {
   }
 
   getRecentKeywordsShort(qb: SelectQueryBuilder<Keyword>) {
-    return qb.andWhere('keyword.recent :is', {
-      is: true,
-    });
+    return qb
+      .innerJoin('keyword.news', 'news')
+      .where('news.state = :state', { state: true })
+      .distinct(true);
   }
 
   getKeywordProto() {
