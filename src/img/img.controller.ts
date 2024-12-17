@@ -2,7 +2,7 @@ import { Controller, Inject, Post, Req } from '@nestjs/common';
 import sharp from 'sharp';
 import { AwsService } from 'src/aws/aws.service';
 
-@Controller('img')
+@Controller('/img')
 export class ImgController {
   constructor(
     @Inject(AwsService)
@@ -15,7 +15,7 @@ export class ImgController {
     const filename = req.file?.originalname as string; // Getting the original filename
 
     if (img === undefined) {
-      throw Error();
+      throw Error('IMG undefined');
     }
 
     const imgWEBP = await sharp(img).webp({}).toBuffer();

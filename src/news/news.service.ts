@@ -22,6 +22,7 @@ export class NewsService {
 
   async getNewsTitles(search: string) {
     const data = await this.newsRepo.getNewsTitles(search);
+    return data;
   }
 
   async getNewsToViewById(id: number) {

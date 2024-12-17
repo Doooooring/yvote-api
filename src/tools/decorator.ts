@@ -20,14 +20,15 @@ export function RespInterceptor(
   descriptor.value = async function (...args: any[]) {
     try {
       const result = await originalMethod.apply(this, args);
+      console.log(result);
       return {
         success: true,
-        data: result,
+        result: result,
       };
     } catch (error) {
       return {
         success: false,
-        data: error,
+        result: error,
       };
     }
   };
@@ -38,6 +39,6 @@ export function RespInterceptor(
 export function RespFail(target: any, key: string, descriptor: any) {
   return {
     success: false,
-    data: target,
+    result: target,
   };
 }
