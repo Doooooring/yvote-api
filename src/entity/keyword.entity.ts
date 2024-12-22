@@ -2,35 +2,32 @@ import {
   Column,
   Entity,
   Index,
-  JoinColumn,
   ManyToMany,
-  OneToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ImageUrl } from './Image.entity';
 import { News } from './news.entity';
 
 @Entity({
   name: 'Keyword',
 })
 export class Keyword {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ default: '' })
   @Index()
   keyword: string;
 
-  @Column()
+  @Column({ default: '' })
   explain: string;
 
   @Column()
   category: string;
 
-  @Column()
+  @Column({ default: false })
   recent: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   keywordImage?: string;
 
   @ManyToMany(() => News, (news) => news.keywords)

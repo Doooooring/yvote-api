@@ -1,5 +1,12 @@
-import { Controller, Inject, Post, Req } from '@nestjs/common';
-import sharp from 'sharp';
+import {
+  Controller,
+  Inject,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as sharp from 'sharp';
 import { AwsService } from 'src/aws/aws.service';
 
 @Controller('/img')
@@ -10,14 +17,16 @@ export class ImgController {
   ) {}
 
   @Post('/')
-  async postImg(@Req() req) {
-    const img = req.file?.buffer as Buffer;
-    const filename = req.file?.originalname as string; // Getting the original filename
+  @UseInterceptors(FileInterceptor('img'))
+  async postImg(@UploadedFile() file: Express.Multer.File) {
+    const img = file?.buffer as Buffer;
+    const filename = file?.originalname as string;
 
     if (img === undefined) {
       throw Error('IMG undefined');
     }
-
+    console.log('file name : ', filename);
+    console.log(img);
     const imgWEBP = await sharp(img).webp({}).toBuffer();
 
     const imgAddress = await this.awsService.imageUploadToS3(

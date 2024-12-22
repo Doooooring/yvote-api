@@ -1,15 +1,25 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { News } from './news.entity';
 
 @Entity()
 export class Timeline {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  date: Date;
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    nullable: true,
+  })
+  date?: Date;
 
-  @Column()
+  @Column({ default: '' })
   title: string;
 
   @ManyToOne(() => News, (news) => news.comments)

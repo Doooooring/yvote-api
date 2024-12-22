@@ -15,6 +15,8 @@ export class NewsService {
     private readonly commentRepo: CommentRepository,
   ) {}
 
+  static fillNewsVacant() {}
+
   async getNewsIds() {
     const data = await this.newsRepo.getNewsIds();
     return data;
@@ -31,7 +33,8 @@ export class NewsService {
   }
 
   async getNewsToEditById(id: number) {
-    const data = await this.newsRepo.getNewsById(id);
+    const data = await this.newsRepo.getNewsInEdit(id);
+    console.log('data : ', data);
     return data;
   }
 

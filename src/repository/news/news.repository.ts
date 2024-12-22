@@ -1,25 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
-import { Keyword } from 'src/entity/keyword.entity';
 import { News } from 'src/entity/news.entity';
-import { Vote } from 'src/entity/vote.entity';
-import { NewsEdit, NewsinView, NewsPreviews } from 'src/interface/news';
-import { FindOptionsWhere, In, Like, Repository } from 'typeorm';
+import { NewsEdit, NewsPreviews } from 'src/interface/news';
+import { mergeUniqueArrays } from 'src/tools/common';
+import {
+  DataSource,
+  EntityManager,
+  FindOptionsWhere,
+  In,
+  Like,
+  Repository,
+} from 'typeorm';
+import { KeywordRepository } from '../keyword/keyword.repository';
 
 @Injectable()
 export class NewsRepository {
   constructor(
+    private dataSource: DataSource,
     @InjectRepository(News)
     private readonly newsRepo: Repository<News>,
-    @InjectRepository(Keyword)
-    private readonly keywordRepo: Repository<Keyword>,
-    @InjectRepository(Vote)
-    private readonly voteRepo: Repository<Vote>,
     @InjectRepository(Comment)
     private readonly commentRepo: Repository<Comment>,
+    private readonly keywordRepository: KeywordRepository,
   ) {}
 
+  async startTransaction() {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    return queryRunner;
+  }
   async getNewsIds() {
     return this.newsRepo.find({
       select: ['id'],
@@ -52,46 +63,54 @@ export class NewsRepository {
   async getNewsRecent() {}
 
   async getNewsInView(id: number) {
-    return this.newsRepo
+    const news = await this.newsRepo
       .createQueryBuilder('news')
       .select([
-        'id',
-        'title',
-        'summary',
-        'state',
-        'opinionLeft',
-        'opinionRight',
-        'isPublished',
+        'news.id',
+        'news.title',
+        'news.summary',
+        'news.state',
+        'news.opinionLeft',
+        'news.opinionRight',
+        'news.isPublished',
+        'news.newsImage',
       ])
-      .leftJoinAndSelect('newsImage', 'img')
       .leftJoin('news.keywords', 'keywords')
       .addSelect(['keywords.keyword', 'keywords.id'])
-      .leftJoin('news.comments', 'comment')
-      .addSelect('DISTINCT(comment.commentType)', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .orderBy('timeline.date', 'ASC')
       .where('news.id = :id', { id: id })
-      .getRawOne() as Promise<NewsinView>;
+      .getOne();
+
+    const distnctComments = await this.commentRepo
+      .createQueryBuilder('c')
+      .select('DISTINCT c.commentType', 'commentType')
+      .where('c.newsId = :id', { id })
+      .getRawMany();
+
+    news.comments = distnctComments.map(({ commentType }) => commentType);
+
+    return news;
   }
 
   async getNewsInEdit(id: number) {
     return this.newsRepo
       .createQueryBuilder('news')
       .select([
-        'id',
-        'title',
-        'summary',
-        'state',
-        'opinionLeft',
-        'opinionRight',
+        'news.id',
+        'news.title',
+        'news.summary',
+        'news.state',
+        'news.opinionLeft',
+        'news.opinionRight',
+        'news.newsImage',
       ])
-      .leftJoinAndSelect('newsImage', 'img')
-      .leftJoinAndSelect('news.keyword', 'keyword')
+      .leftJoinAndSelect('news.keywords', 'keyword')
       .leftJoinAndSelect('news.comments', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .where('news.id = :id', { id: id })
       .orderBy('timeline.date', 'ASC')
-      .getRawOne() as Promise<News>;
+      .getOne() as Promise<News>;
   }
 
   getNewsPreviewsProto(page: number, limit: number) {
@@ -99,8 +118,8 @@ export class NewsRepository {
       .createQueryBuilder('news')
       .select(['id', 'title', 'summary', 'newsImage', 'state', 'isPublished'])
       .leftJoinAndSelect('newsImage', 'img')
-      .leftJoinAndSelect('news.keyword', 'keyword')
-      .leftJoinAndSelect('news.timeline', 'timeline')
+      .leftJoin('news.keywords', 'keywords')
+      .leftJoin('news.timeline', 'timeline')
       .addSelect('keyword.keyword', 'keywords')
       .orderBy('state', 'DESC')
       .addOrderBy(
@@ -115,7 +134,7 @@ export class NewsRepository {
   async getNewsPreviews(page: number, limit: number, keyword?: string) {
     const q = this.getNewsPreviewsProto(page, limit);
     if (keyword) {
-      q.where('keyword.keyword = :keyword', { keyword });
+      q.where('keywords.keyword = :keyword', { keyword });
     }
     return q.getRawMany() as Promise<NewsPreviews[]>;
   }
@@ -125,7 +144,7 @@ export class NewsRepository {
       'isPublished = True',
     );
     if (keyword) {
-      q.where('keyword.keyword = :keyword', { keyword });
+      q.where('keywords.keyword = :keyword', { keyword });
     }
 
     return q.getRawMany() as Promise<NewsPreviews[]>;
@@ -142,25 +161,78 @@ export class NewsRepository {
     return this.getNewsListByOptions(whereOption);
   }
 
-  async getNewsByOptions(options: FindOptionsWhere<News> = {}) {
-    return this.newsRepo.findOne({
-      where: options,
-    });
-  }
-
-  async getNewsById(id: number) {
-    return this.getNewsByOptions({ id });
-  }
-
   async postNews(news: NewsEdit) {
-    return this.newsRepo.save(news);
+    const queryRunner = await this.startTransaction();
+
+    try {
+      const newsRepository = queryRunner.manager.getRepository(News);
+      await newsRepository.save({
+        ...news,
+        order: 0,
+      });
+
+      if (news.state) {
+        const keywords = news.keywords;
+        await this.updateKeywordsState(
+          keywords.map(({ id }) => id),
+          queryRunner.manager,
+        );
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async updateNews(id: number, news: Partial<NewsEdit>) {
-    return this.newsRepo.update({ id: id }, news);
+    const queryRunner = await this.startTransaction();
+
+    try {
+      const prevNews = await this.newsRepo.findOne({ where: { id } });
+      const prevKeywords = prevNews.keywords.map(({ id }) => id);
+      const curKeywords = news.keywords.map(({ id }) => id) ?? [];
+
+      const newsRepository = queryRunner.manager.getRepository(News);
+      await newsRepository.save({
+        ...news,
+      });
+
+      const keywordsToUpdate = mergeUniqueArrays(prevKeywords, curKeywords);
+      await this.updateKeywordsState(keywordsToUpdate, queryRunner.manager);
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async deleteNewsById(id: number) {
-    return this.newsRepo.delete({ id });
+    const queryRunner = await this.startTransaction();
+
+    try {
+      const prevNews = await this.newsRepo.findOne({ where: { id } });
+      const prevKeywords = prevNews.keywords.map(({ id }) => id);
+      const newsRepository = queryRunner.manager.getRepository(News);
+      await newsRepository.delete({
+        id: id,
+      });
+      await this.updateKeywordsState(prevKeywords, queryRunner.manager);
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async updateKeywordsState(keywords: number[], manager: EntityManager) {
+    for (const id of keywords) {
+      await this.keywordRepository.updateKeywordState(id, manager);
+    }
   }
 }

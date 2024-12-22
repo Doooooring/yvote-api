@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Keyword } from 'src/entity/keyword.entity';
 import { KeywordEdit, keywordCategory } from 'src/interface/keyword';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  DataSource,
+  EntityManager,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 export interface KeywordWithImg extends Omit<Keyword, 'news'> {
   img: string;
 }
@@ -10,9 +15,17 @@ export interface KeywordWithImg extends Omit<Keyword, 'news'> {
 @Injectable()
 export class KeywordRepository {
   constructor(
+    private dataSource: DataSource,
     @InjectRepository(Keyword)
     private readonly keywordRepo: Repository<Keyword>,
   ) {}
+
+  async startTransaction() {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    return queryRunner;
+  }
 
   async getKeywordsKey(offset: number, limit: number, search: string) {
     return this.keywordRepo
@@ -98,15 +111,72 @@ export class KeywordRepository {
   }
 
   async postKeyword(obj: KeywordEdit) {
-    return this.keywordRepo.save(obj);
+    const queryRunner = await this.startTransaction();
+
+    try {
+      const keywordRepository = queryRunner.manager.getRepository(Keyword);
+      const keyword = await keywordRepository.save(obj);
+
+      const id = keyword.id;
+      await this.updateKeywordState(id, queryRunner.manager);
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async updateKeyword(id: number, obj: KeywordEdit) {
-    return this.keywordRepo.update({ id: id }, obj);
+    const queryRunner = await this.startTransaction();
+
+    try {
+      const keywordRepository = queryRunner.manager.getRepository(Keyword);
+      await keywordRepository.update(obj, { id: id });
+
+      await this.updateKeywordState(id, queryRunner.manager);
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async deleteKeyword(id: number) {
+    const queryRunner = await this.startTransaction();
+    try {
+      const keywordRepository = queryRunner.manager.getRepository(Keyword);
+      await keywordRepository.delete({ id });
+
+      await this.updateKeywordState(id, queryRunner.manager);
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+
     return this.keywordRepo.delete({ id: id });
+  }
+
+  async updateKeywordState(id: number, manager: EntityManager) {
+    const state = await this.getKeywordState(id);
+    await manager
+      .createQueryBuilder()
+      .update('Keyword')
+      .set({
+        state: state,
+      })
+      .where({ id: id })
+      .execute();
+  }
+
+  async getKeywordState(keywordId: number) {
+    const cnt = await this.keywordRepo
+      .createQueryBuilder('keyword')
+      .leftJoinAndSelect('keyword.news', 'news')
+      .where('keyword.id = :keywordId', { keywordId })
+      .andWhere('news.status = :status', { status: true })
+      .getCount();
+    return cnt > 0;
   }
 
   async getKeywordsByNewsId(id: number, fields: string[]) {

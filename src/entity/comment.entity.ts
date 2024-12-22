@@ -4,7 +4,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { News } from './news.entity';
@@ -14,7 +14,7 @@ import { News } from './news.entity';
 })
 @Index(['news', 'commentType'])
 export class Comment {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
@@ -23,13 +23,17 @@ export class Comment {
   @Column()
   commentType: string;
 
-  @Column()
+  @Column({ default: '' })
   title: string;
 
-  @Column()
+  @Column({ default: '' })
   comment: string;
 
-  @Column()
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    nullable: true,
+  })
   date?: Date;
 
   @UpdateDateColumn()

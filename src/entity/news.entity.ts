@@ -4,7 +4,7 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Comment } from './comment.entity';
 import { Keyword } from './keyword.entity';
@@ -20,31 +20,34 @@ export interface TimelineFactor {
   name: 'News',
 })
 export class News {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   order: number;
 
-  @Column()
+  @Column({ default: '' })
   title: string;
 
-  @Column()
+  @Column({ default: '' })
+  subTitle: string;
+
+  @Column({ default: '' })
   summary: string;
 
-  @Column()
+  @Column({ default: false })
   state: boolean;
 
-  @Column()
+  @Column({ default: false })
   isPublished: boolean;
 
-  @Column()
+  @Column({ default: '' })
   opinionLeft: string;
 
-  @Column()
+  @Column({ default: '' })
   opinionRight: string;
 
-  @Column()
+  @Column({ nullable: true })
   newsImage?: string;
 
   @OneToMany(() => Comment, (comment) => comment.news, { cascade: true })
@@ -56,7 +59,7 @@ export class News {
   @OneToMany(() => Vote, (vote) => vote.news, { cascade: true })
   votes: Vote[];
 
-  @ManyToMany(() => Keyword, (keyword) => keyword.news, {})
+  @ManyToMany(() => Keyword, (keyword) => keyword.news, { cascade: true })
   @JoinTable({
     name: 'NewsKeyword',
     joinColumn: {

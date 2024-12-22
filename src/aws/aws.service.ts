@@ -20,16 +20,22 @@ export class AwsService {
     const AWS_REGION = this.configService.get('AWS_REGION');
     const AWS_S3_BUCKET_NAME = this.configService.get('AWS_S3_BUCKET_NAME');
 
-    const command = new PutObjectCommand({
-      Bucket: AWS_S3_BUCKET_NAME,
-      Key: fileName,
-      Body: file,
-      ACL: 'public-read',
-      ContentType: `image/${ext}`,
-    });
+    console.log('aws_region : ', AWS_REGION);
+    console.log('aws_s3 bucket name: ', AWS_S3_BUCKET_NAME);
 
-    await this.s3Client.send(command);
+    try {
+      const command = new PutObjectCommand({
+        Bucket: AWS_S3_BUCKET_NAME,
+        Key: fileName,
+        Body: file,
+        ACL: 'public-read',
+        ContentType: `image/${ext}`,
+      });
 
-    return `https://s3.${AWS_REGION}.amazonaws.com/${AWS_S3_BUCKET_NAME}/${fileName}`;
+      await this.s3Client.send(command);
+
+      return `https://s3.${AWS_REGION}.amazonaws.com/${AWS_S3_BUCKET_NAME}/${fileName}`;
+    } catch (e) {}
+    return '';
   }
 }

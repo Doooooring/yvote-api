@@ -26,6 +26,7 @@ export function RespInterceptor(
         result: result,
       };
     } catch (error) {
+      console.log(error);
       return {
         success: false,
         result: error,

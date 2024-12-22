@@ -1,4 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { News } from './news.entity';
 import { User } from './user.entity';
 
@@ -6,10 +12,10 @@ import { User } from './user.entity';
   name: 'Vote',
 })
 export class Vote {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ default: '' })
   response: string;
 
   @ManyToOne(() => News, (news) => news.id)

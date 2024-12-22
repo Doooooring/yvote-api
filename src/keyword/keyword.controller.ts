@@ -10,11 +10,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { AdminGuard } from 'src/auth/admin/admin.guard';
+import { INF } from 'src/interface/common';
 import { KeywordEdit, keywordCategory } from 'src/interface/keyword';
 import { RespInterceptor } from 'src/tools/decorator';
 import { KeywordService } from './keyword.service';
-import { INF } from 'src/interface/common';
-import { AdminGuard } from 'src/auth/admin/admin.guard';
 
 @Controller('keyword')
 export class KeywordController {
@@ -57,15 +57,20 @@ export class KeywordController {
   @UseGuards(AdminGuard)
   @Post('/edit')
   @RespInterceptor
-  async postKeyword(@Body() body: KeywordEdit) {
-    return await this.keywordService.postKeyword(body);
+  async postKeyword(@Body() body: { keyword: KeywordEdit }) {
+    const { keyword } = body;
+    return await this.keywordService.postKeyword(keyword);
   }
 
   @UseGuards(AdminGuard)
   @Patch('/edit/:id')
   @RespInterceptor
-  async patchKeywordById(@Body() body: KeywordEdit, @Param('id') id: number) {
-    return await this.keywordService.patchKeyword(id, body);
+  async patchKeywordById(
+    @Body() body: { keyword: KeywordEdit },
+    @Param('id') id: number,
+  ) {
+    const { keyword } = body;
+    return await this.keywordService.patchKeyword(id, keyword);
   }
 
   @UseGuards(AdminGuard)

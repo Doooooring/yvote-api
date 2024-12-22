@@ -9,14 +9,12 @@ import {
   Patch,
   Post,
   Query,
-  Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { AdminGuard } from 'src/auth/admin/admin.guard';
 import { NewsCommentType, NewsEdit } from 'src/interface/news';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
-import { AdminGuard } from 'src/auth/admin/admin.guard';
 
 @Controller('news')
 export class NewsController {
@@ -79,21 +77,22 @@ export class NewsController {
   @UseGuards(AdminGuard)
   @Post('/edit')
   @RespInterceptor
-  async postNewsToEdit(@Body() body: NewsEdit) {
-    const response = await this.newsService.postNews(body);
+  async postNewsToEdit(@Body() body: { news: NewsEdit }) {
+    const { news } = body;
+    const response = await this.newsService.postNews(news);
     return true;
   }
 
   @Get('/:id')
   @RespInterceptor
-  async getNewsToViewById(@Param('id') id: number, @Res() res: Response) {
+  async getNewsToViewById(@Param('id') id: number) {
     const news = await this.newsService.getNewsToViewById(id);
     return news;
   }
 
   @Get('/edit/:id')
   @RespInterceptor
-  async getNewsToEditById(@Param('id') id: number, @Res() res: Response) {
+  async getNewsToEditById(@Param('id') id: number) {
     const news = await this.newsService.getNewsToEditById(id);
     return news;
   }
@@ -101,8 +100,12 @@ export class NewsController {
   @UseGuards(AdminGuard)
   @Patch('/edit/:id')
   @RespInterceptor
-  async updateNewsToEditById(@Param('id') id: number, @Body() body: NewsEdit) {
-    const news = await this.newsService.updateNewsCascade(id, body);
+  async updateNewsToEditById(
+    @Param('id') id: number,
+    @Body() body: { news: NewsEdit },
+  ) {
+    const { news } = body;
+    const response = await this.newsService.updateNewsCascade(id, news);
     return true;
   }
 

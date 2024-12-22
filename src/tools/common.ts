@@ -1,6 +1,10 @@
 export function clone<T>(obj: T) {
   return JSON.parse(JSON.stringify(obj)) as T;
 }
+export function mergeUniqueArrays<T>(array1: Array<T>, array2: Array<T>) {
+  const mergedArray = [...new Set([...array1, ...array2])];
+  return mergedArray;
+}
 
 export function bearerParse(token: string) {
   return token.trim().split(' ')[1];
