@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
 import { News } from 'src/entity/news.entity';
+import { DBERROR } from 'src/interface/err';
 import { NewsEdit, NewsPreviews } from 'src/interface/news';
 import { mergeUniqueArrays } from 'src/tools/common';
 import {
@@ -80,6 +81,7 @@ export class NewsRepository {
       .where('news.id = :id', { id: id })
       .getOne();
 
+    if (!news) throw Error(DBERROR.NOT_EXIST);
     const distnctComments = await this.getDistinctCommentTypeByNewsId(id);
 
     news.comments = distnctComments.map(({ commentType }) => commentType);

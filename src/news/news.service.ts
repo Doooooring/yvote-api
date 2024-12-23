@@ -62,6 +62,10 @@ export class NewsService {
     offset: number,
     limit: number,
   ) {
+    console.log('============= get news comment');
+    console.log('type : ', type);
+    console.log('offset : ', offset, ', limit : ', limit);
+
     return await this.commentRepo.getCommentByNewsIdAndCommentType(
       newsId,
       type,

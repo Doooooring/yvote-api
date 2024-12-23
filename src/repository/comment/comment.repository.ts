@@ -40,19 +40,22 @@ export class CommentRepository {
     offset: number,
     limit: number,
   ) {
-    return await this.commentRepo.find({
-      where: {
-        news: {
-          id: id,
-        },
-        comment: type,
-      },
-      order: {
-        order: 'DESC',
-      },
-      skip: offset,
-      take: limit,
-    });
+    return await this.commentRepo
+      .createQueryBuilder('comment')
+      .select([
+        'comment.id',
+        'comment.commentType',
+        'comment.title',
+        'comment.date',
+        'comment.comment',
+      ])
+      .leftJoin('comment.news', 'news')
+      .where('news.id = :id', { id: id })
+      .andWhere('comment.commentType = :type', { type: type })
+      .offset(offset)
+      .limit(limit)
+      .orderBy('comment.order')
+      .getMany();
   }
 
   async getCommentAllByNewsIdAndCommentType(id: number) {
