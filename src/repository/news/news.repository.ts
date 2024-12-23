@@ -60,8 +60,6 @@ export class NewsRepository {
     });
   }
 
-  async getNewsRecent() {}
-
   async getNewsInView(id: number) {
     const news = await this.newsRepo
       .createQueryBuilder('news')
@@ -82,11 +80,7 @@ export class NewsRepository {
       .where('news.id = :id', { id: id })
       .getOne();
 
-    const distnctComments = await this.commentRepo
-      .createQueryBuilder('c')
-      .select('DISTINCT c.commentType', 'commentType')
-      .where('c.newsId = :id', { id })
-      .getRawMany();
+    const distnctComments = await this.getDistinctCommentTypeByNewsId(id);
 
     news.comments = distnctComments.map(({ commentType }) => commentType);
 
@@ -116,17 +110,23 @@ export class NewsRepository {
   getNewsPreviewsProto(page: number, limit: number) {
     return this.newsRepo
       .createQueryBuilder('news')
-      .select(['id', 'title', 'summary', 'newsImage', 'state', 'isPublished'])
-      .leftJoinAndSelect('newsImage', 'img')
+      .select([
+        'news.id',
+        'news.title',
+        'news.summary',
+        'news.newsImage',
+        'news.state',
+        'news.isPublished',
+      ])
       .leftJoin('news.keywords', 'keywords')
       .leftJoin('news.timeline', 'timeline')
-      .addSelect('keyword.keyword', 'keywords')
+      .addSelect('keywords.keyword', 'keywords')
       .orderBy('state', 'DESC')
       .addOrderBy(
         '(SELECT MAX(t.date) FROM timeline t WHERE t.newsId = news.id)',
         'DESC',
       )
-      .addOrderBy('id', 'DESC')
+      .addOrderBy('news.id', 'DESC')
       .limit(limit)
       .skip(page);
   }
@@ -136,7 +136,7 @@ export class NewsRepository {
     if (keyword) {
       q.where('keywords.keyword = :keyword', { keyword });
     }
-    return q.getRawMany() as Promise<NewsPreviews[]>;
+    return q.getMany();
   }
 
   async getNewsPreviewsAdmin(page: number, limit: number, keyword?: string) {
@@ -234,5 +234,13 @@ export class NewsRepository {
     for (const id of keywords) {
       await this.keywordRepository.updateKeywordState(id, manager);
     }
+  }
+
+  async getDistinctCommentTypeByNewsId(id: number) {
+    return await this.commentRepo
+      .createQueryBuilder('c')
+      .select('DISTINCT c.commentType', 'commentType')
+      .where('c.newsId = :id', { id })
+      .getRawMany();
   }
 }

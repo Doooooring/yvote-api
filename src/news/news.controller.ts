@@ -15,7 +15,9 @@ import { AdminGuard } from 'src/auth/admin/admin.guard';
 import { NewsCommentType, NewsEdit } from 'src/interface/news';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
+import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 
+@LogRequests()
 @Controller('news')
 export class NewsController {
   constructor(

@@ -31,12 +31,10 @@ export class KeywordRepository {
     return this.keywordRepo
       .createQueryBuilder('keyword')
       .select(['id', 'keyword'])
-      .where('keyword.keyword REGEXP :regex', {
-        regex: `%${search}%`,
-      })
-      .limit(limit)
+      .where('keyword.keyword LIKE :like', { like: `%${search}%` })
       .offset(offset)
-      .getRawMany() as Promise<Array<Pick<Keyword, 'id' | 'keyword'>>>;
+      .limit(limit)
+      .getMany() as Promise<Array<Pick<Keyword, 'id' | 'keyword'>>>;
   }
 
   async getKeywordsKeyByNewsId(id: number) {
@@ -118,8 +116,13 @@ export class KeywordRepository {
       const keyword = await keywordRepository.save(obj);
 
       const id = keyword.id;
+      console.log('is before update keyword state');
       await this.updateKeywordState(id, queryRunner.manager);
+      console.log('is after');
+      await queryRunner.commitTransaction();
     } catch (e) {
+      console.log('<<<<<<<<<<<<<<<<<<<');
+      console.log(e);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -134,6 +137,7 @@ export class KeywordRepository {
       await keywordRepository.update(obj, { id: id });
 
       await this.updateKeywordState(id, queryRunner.manager);
+      await queryRunner.commitTransaction();
     } catch (e) {
       await queryRunner.rollbackTransaction();
     } finally {
@@ -148,6 +152,7 @@ export class KeywordRepository {
       await keywordRepository.delete({ id });
 
       await this.updateKeywordState(id, queryRunner.manager);
+      await queryRunner.commitTransaction();
     } catch (e) {
       await queryRunner.rollbackTransaction();
     } finally {
@@ -159,14 +164,15 @@ export class KeywordRepository {
 
   async updateKeywordState(id: number, manager: EntityManager) {
     const state = await this.getKeywordState(id);
-    await manager
+    const response = await manager
       .createQueryBuilder()
       .update('Keyword')
       .set({
-        state: state,
+        recent: state,
       })
       .where({ id: id })
       .execute();
+    return response;
   }
 
   async getKeywordState(keywordId: number) {
@@ -174,8 +180,9 @@ export class KeywordRepository {
       .createQueryBuilder('keyword')
       .leftJoinAndSelect('keyword.news', 'news')
       .where('keyword.id = :keywordId', { keywordId })
-      .andWhere('news.status = :status', { status: true })
+      .andWhere('news.state = :state', { state: true })
       .getCount();
+
     return cnt > 0;
   }
 

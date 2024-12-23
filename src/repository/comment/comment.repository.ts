@@ -17,20 +17,21 @@ export class CommentRepository {
   ) {}
 
   async getCommentsRecentUpdated(offset: number, limit: number) {
-    return (await this.commentRepo
+    return await this.commentRepo
       .createQueryBuilder('comment')
       .select([
         'comment.id',
         'comment.commentType',
         'comment.title',
+        'comment.date',
         'comment.comment',
-        'news.id AS newsId',
       ])
       .leftJoin('comment.news', 'news')
+      .addSelect('news.id')
       .orderBy('comment.updatedAt')
       .offset(offset)
       .limit(limit)
-      .getRawMany()) as RecentComment[];
+      .getMany();
   }
 
   async getCommentByNewsIdAndCommentType(

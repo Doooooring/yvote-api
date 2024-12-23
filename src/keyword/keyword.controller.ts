@@ -59,6 +59,8 @@ export class KeywordController {
   @RespInterceptor
   async postKeyword(@Body() body: { keyword: KeywordEdit }) {
     const { keyword } = body;
+    console.log('=======================');
+    console.log('keyword : ', keyword);
     return await this.keywordService.postKeyword(keyword);
   }
 

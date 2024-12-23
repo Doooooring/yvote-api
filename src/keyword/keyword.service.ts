@@ -44,6 +44,10 @@ export class KeywordService {
   }
 
   async getKeywordsKeyList(offset: number, limit: number, search: string) {
+    console.log('=======================');
+    console.log('offset : ', offset);
+    console.log('limit  : ', limit);
+
     return await this.keywordRepository.getKeywordsKey(offset, limit, search);
   }
 
