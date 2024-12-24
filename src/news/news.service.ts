@@ -34,7 +34,7 @@ export class NewsService {
 
   async getNewsToEditById(id: number) {
     const data = await this.newsRepo.getNewsInEdit(id);
-    console.log('data : ', data);
+
     return data;
   }
 
@@ -62,10 +62,6 @@ export class NewsService {
     offset: number,
     limit: number,
   ) {
-    console.log('============= get news comment');
-    console.log('type : ', type);
-    console.log('offset : ', offset, ', limit : ', limit);
-
     return await this.commentRepo.getCommentByNewsIdAndCommentType(
       newsId,
       type,
@@ -85,7 +81,7 @@ export class NewsService {
   async updateNewsCascade(id: number, news: NewsEdit) {
     if (!news.id) news.id = id;
 
-    return this.newsRepo.postNews(news);
+    return this.newsRepo.updateNews(id, news);
   }
 
   /**

@@ -5,6 +5,7 @@ import { AdminGuard } from './admin/admin.guard';
 import { AuthController } from './auth.controller';
 import { GoogleAuthService } from './google/google.service';
 import { KakakoAuthService } from './kakao/kakao.service';
+import { AdminAuthService } from './admin/admin.service';
 
 @Module({
   imports: [
@@ -20,7 +21,12 @@ import { KakakoAuthService } from './kakao/kakao.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [KakakoAuthService, GoogleAuthService, AdminGuard],
+  providers: [
+    KakakoAuthService,
+    GoogleAuthService,
+    AdminAuthService,
+    AdminGuard,
+  ],
   exports: [AdminGuard],
 })
 export class AuthModule {}

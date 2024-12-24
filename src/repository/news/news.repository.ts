@@ -14,6 +14,7 @@ import {
   Repository,
 } from 'typeorm';
 import { KeywordRepository } from '../keyword/keyword.repository';
+import { Keyword } from 'src/entity/keyword.entity';
 
 @Injectable()
 export class NewsRepository {
@@ -192,19 +193,21 @@ export class NewsRepository {
 
   async updateNews(id: number, news: Partial<NewsEdit>) {
     const queryRunner = await this.startTransaction();
+    const newsRepository = queryRunner.manager.getRepository(News);
 
     try {
-      const prevNews = await this.newsRepo.findOne({ where: { id } });
+      const prevNews = await this.getNewsInView(id);
+
       const prevKeywords = prevNews.keywords.map(({ id }) => id);
       const curKeywords = news.keywords.map(({ id }) => id) ?? [];
 
-      const newsRepository = queryRunner.manager.getRepository(News);
       await newsRepository.save({
         ...news,
       });
 
       const keywordsToUpdate = mergeUniqueArrays(prevKeywords, curKeywords);
       await this.updateKeywordsState(keywordsToUpdate, queryRunner.manager);
+      await queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);
       await queryRunner.rollbackTransaction();
@@ -217,13 +220,14 @@ export class NewsRepository {
     const queryRunner = await this.startTransaction();
 
     try {
-      const prevNews = await this.newsRepo.findOne({ where: { id } });
+      const prevNews = await this.getNewsInView(id);
       const prevKeywords = prevNews.keywords.map(({ id }) => id);
       const newsRepository = queryRunner.manager.getRepository(News);
       await newsRepository.delete({
         id: id,
       });
       await this.updateKeywordsState(prevKeywords, queryRunner.manager);
+      await queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);
       await queryRunner.rollbackTransaction();
@@ -233,6 +237,8 @@ export class NewsRepository {
   }
 
   async updateKeywordsState(keywords: number[], manager: EntityManager) {
+    console.log('is start update keyword state');
+
     for (const id of keywords) {
       await this.keywordRepository.updateKeywordState(id, manager);
     }

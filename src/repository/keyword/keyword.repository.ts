@@ -57,10 +57,15 @@ export class KeywordRepository {
   getKeywordsShortProto(limit: number, offset: number) {
     return this.keywordRepo
       .createQueryBuilder('keyword')
-      .select(['id', 'keyword', 'category', 'keywordImage'])
+      .select([
+        'keyword.id',
+        'keyword.keyword',
+        'keyword.category',
+        'keyword.keywordImage',
+      ])
       .limit(limit)
       .offset(offset)
-      .orderBy('keyword', 'ASC');
+      .orderBy('keyword.keyword', 'ASC');
   }
 
   getKeywordsShortByCategory(
@@ -87,25 +92,25 @@ export class KeywordRepository {
     return this.keywordRepo
       .createQueryBuilder('keyword')
       .select([
-        'id',
-        'keyword',
-        'explain',
-        'category',
-        'recent',
-        'keywordImage',
+        'keyword.id',
+        'keyword.keyword',
+        'keyword.explain',
+        'keyword.category',
+        'keyword.recent',
+        'keyword.keywordImage',
       ]);
   }
 
   async getKeywordById(id: number) {
     return this.getKeywordProto()
       .where('keyword.id = :id', { id: id })
-      .getRawOne() as Promise<KeywordWithImg>;
+      .getOne();
   }
 
   async getKeywordByKey(key: string) {
     return this.getKeywordProto()
       .where('keyword.keyword = :keyword', { keyword: key })
-      .getRawOne() as Promise<KeywordWithImg>;
+      .getOne();
   }
 
   async postKeyword(obj: KeywordEdit) {
@@ -116,9 +121,7 @@ export class KeywordRepository {
       const keyword = await keywordRepository.save(obj);
 
       const id = keyword.id;
-      console.log('is before update keyword state');
       await this.updateKeywordState(id, queryRunner.manager);
-      console.log('is after');
       await queryRunner.commitTransaction();
     } catch (e) {
       console.log('<<<<<<<<<<<<<<<<<<<');
@@ -163,7 +166,7 @@ export class KeywordRepository {
   }
 
   async updateKeywordState(id: number, manager: EntityManager) {
-    const state = await this.getKeywordState(id);
+    const state = await this.getKeywordState(id, manager);
     const response = await manager
       .createQueryBuilder()
       .update('Keyword')
@@ -175,13 +178,40 @@ export class KeywordRepository {
     return response;
   }
 
-  async getKeywordState(keywordId: number) {
-    const cnt = await this.keywordRepo
+  async getKeywordState(keywordId: number, manager?: EntityManager) {
+    console.log('============================');
+    console.log('keyword id : ', keywordId);
+    let keywordRepo;
+    if (manager) {
+      keywordRepo = manager.getRepository(Keyword);
+    } else {
+      keywordRepo = this.keywordRepo;
+    }
+    const r1 = await keywordRepo
+      .createQueryBuilder('keyword')
+      .leftJoinAndSelect('keyword.news', 'news')
+      .where('keyword.id = :keywordId', { keywordId })
+      .andWhere('news.state = :state', { state: true })
+      .getOne();
+
+    console.log(r1);
+
+    const r2 = await keywordRepo
+      .createQueryBuilder('keyword')
+      .leftJoinAndSelect('keyword.news', 'news')
+      .where('keyword.id = :keywordId', { keywordId })
+      .getOne();
+
+    console.log(r2);
+
+    const cnt = await keywordRepo
       .createQueryBuilder('keyword')
       .leftJoinAndSelect('keyword.news', 'news')
       .where('keyword.id = :keywordId', { keywordId })
       .andWhere('news.state = :state', { state: true })
       .getCount();
+
+    console.log('count : ', cnt);
 
     return cnt > 0;
   }
@@ -192,6 +222,6 @@ export class KeywordRepository {
       .select(fields)
       .leftJoinAndSelect('keyword.news', 'news')
       .where('news.id = :news_id', { news_id: id })
-      .getRawMany();
+      .getMany();
   }
 }

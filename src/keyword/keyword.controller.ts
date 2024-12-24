@@ -15,7 +15,9 @@ import { INF } from 'src/interface/common';
 import { KeywordEdit, keywordCategory } from 'src/interface/keyword';
 import { RespInterceptor } from 'src/tools/decorator';
 import { KeywordService } from './keyword.service';
-
+import { reqLogger } from 'src/tools/logger';
+import { LogRequests } from 'src/decorators/requestLoggin.decorator';
+@LogRequests()
 @Controller('keyword')
 export class KeywordController {
   constructor(
@@ -59,8 +61,7 @@ export class KeywordController {
   @RespInterceptor
   async postKeyword(@Body() body: { keyword: KeywordEdit }) {
     const { keyword } = body;
-    console.log('=======================');
-    console.log('keyword : ', keyword);
+
     return await this.keywordService.postKeyword(keyword);
   }
 

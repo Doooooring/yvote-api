@@ -1,5 +1,6 @@
 import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 import { bearerParse } from './common';
+import { errLoger } from './logger';
 
 export const Authroziation = createParamDecorator(
   (data: string, ctx: ExecutionContext) => {
@@ -20,12 +21,12 @@ export function RespInterceptor(
   descriptor.value = async function (...args: any[]) {
     try {
       const result = await originalMethod.apply(this, args);
-      console.log(result);
       return {
         success: true,
         result: result,
       };
     } catch (error) {
+      errLoger({ message: error.message, timestamp: new Date().toISOString() });
       console.log(error);
       return {
         success: false,

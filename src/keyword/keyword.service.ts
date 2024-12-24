@@ -38,16 +38,14 @@ export class KeywordService {
       this.keywordRepository.getRecentKeywordsShort(qbProto);
     }
 
-    return qbProto.getRawMany() as Promise<
-      Array<Pick<Keyword, 'id' | 'keyword' | 'category' | 'keywordImage'>>
+    const response = (await qbProto.getMany()) as Array<
+      Pick<Keyword, 'id' | 'keyword' | 'category' | 'keywordImage'>
     >;
+    console.log(response);
+    return response;
   }
 
   async getKeywordsKeyList(offset: number, limit: number, search: string) {
-    console.log('=======================');
-    console.log('offset : ', offset);
-    console.log('limit  : ', limit);
-
     return await this.keywordRepository.getKeywordsKey(offset, limit, search);
   }
 
