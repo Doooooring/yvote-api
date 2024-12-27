@@ -8,6 +8,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as sharp from 'sharp';
 import { AwsService } from 'src/aws/aws.service';
+import { RespInterceptor } from 'src/tools/decorator';
 
 @Controller('/img')
 export class ImgController {
@@ -18,6 +19,7 @@ export class ImgController {
 
   @Post('/')
   @UseInterceptors(FileInterceptor('img'))
+  @RespInterceptor
   async postImg(@UploadedFile() file: Express.Multer.File) {
     const img = file?.buffer as Buffer;
     const filename = file?.originalname as string;

@@ -25,6 +25,12 @@ export class KeywordController {
     private readonly keywordService: KeywordService,
   ) {}
 
+  @Get('/migration')
+  @RespInterceptor
+  async migrateKeyword() {
+    const response = await fetch('');
+  }
+
   @Get('/keywords')
   @RespInterceptor
   async getKeywordTitles(

@@ -12,6 +12,10 @@ export class AdminAuthService extends AuthServiceInterface {
     super();
   }
   async login(token: string) {
+    console.log('============== get login ===================');
+    console.log(token);
+    console.log(this.configService.get('YVOTE_ADMIN_CODE'));
+
     if (token == this.configService.get('YVOTE_ADMIN_CODE')) {
       const payload = { username: 'admin' };
       const jwt = await this.jwtService.signAsync(payload, {

@@ -7,18 +7,23 @@ export class AdminGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    return true;
     try {
       const request = context.switchToHttp().getRequest();
-      const token = this.extractTokenFromHeader(request);
+
+      const token = request.cookies?.['access_token'];
+
+      console.log('=======================');
+      console.log(token);
 
       if (!token) {
         throw new Error('TokenNotExist');
       }
+
       const payload = await this.jwtService.verifyAsync(token);
       return true;
     } catch (e) {
-      // TokenNotExist, JsonWebTokenError, TokenExpiredError
-      return true;
+      return false;
     }
   }
 
