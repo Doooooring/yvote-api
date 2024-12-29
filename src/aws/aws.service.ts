@@ -1,6 +1,7 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { response } from 'express';
 
 @Injectable()
 export class AwsService {
@@ -11,7 +12,7 @@ export class AwsService {
       region: this.configService.get('AWS_REGION'),
       credentials: {
         accessKeyId: this.configService.get('AWS_PUBLIC_KEY'),
-        secretAccessKey: this.configService.get('AWS_PRIVATE_KEY'),
+        secretAccessKey: this.configService.get('AWS_ACCESS_KEY'),
       },
     });
   }
@@ -32,10 +33,12 @@ export class AwsService {
         ContentType: `image/${ext}`,
       });
 
-      await this.s3Client.send(command);
-
+      const resposne = await this.s3Client.send(command);
+      console.log(response);
       return `https://s3.${AWS_REGION}.amazonaws.com/${AWS_S3_BUCKET_NAME}/${fileName}`;
-    } catch (e) {}
-    return '';
+    } catch (e) {
+      console.log(e);
+      return '';
+    }
   }
 }
