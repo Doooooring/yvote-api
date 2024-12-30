@@ -26,7 +26,13 @@ export function getRespFail(data: any) {
 
 export function genDateId() {
   const id = new Date().getTime();
-  return 'yvote-' + id;
+  return id;
+}
+
+export function getKRTime(t: string) {
+  const utc = new Date(t);
+  utc.setHours(utc.getHours() + 18);
+  return utc;
 }
 
 export function convertImgToWebp() {}

@@ -10,7 +10,8 @@ export enum keywordCategory {
   etc = '기타',
 }
 
-export interface KeywordEdit extends Omit<Keyword, 'news'> {
+export interface KeywordEdit extends Omit<Keyword, 'id' | 'news'> {
+  id?: number;
   news: Array<{
     id: number;
     title: string;

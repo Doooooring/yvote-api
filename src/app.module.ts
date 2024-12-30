@@ -8,6 +8,7 @@ import { TypeormConfig } from './config/typeorm.config';
 import { ImgModule } from './img/img.module';
 import { KeywordModule } from './keyword/keyword.module';
 import { NewsModule } from './news/news.module';
+import { MigrationModule } from './migration/migration.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { NewsModule } from './news/news.module';
     ImgModule,
     NewsModule,
     KeywordModule,
+    MigrationModule,
     AuthModule,
   ],
   controllers: [AppController],

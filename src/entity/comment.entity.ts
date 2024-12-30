@@ -26,7 +26,7 @@ export class Comment {
   @Column({ default: '' })
   title: string;
 
-  @Column({ default: '' })
+  @Column({ type: 'longtext', default: '' })
   comment: string;
 
   @Column({

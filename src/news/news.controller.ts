@@ -16,6 +16,8 @@ import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 import { NewsCommentType, NewsEdit } from 'src/interface/news';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
+import { getKRTime } from 'src/tools/common';
+import { KeywordService } from 'src/keyword/keyword.service';
 
 @LogRequests()
 @Controller('news')
@@ -23,6 +25,8 @@ export class NewsController {
   constructor(
     @Inject(NewsService)
     private readonly newsService: NewsService,
+    @Inject(KeywordService)
+    private readonly keywordService: KeywordService,
   ) {}
 
   // @Get()
@@ -86,42 +90,7 @@ export class NewsController {
   }
 
   @Get('/migrate')
-  async newsMigrate() {
-    try {
-      const response = await fetch('http://localhost:3001/admin/news/title');
-      const body = await response.json();
-      const newsTitles = body.result.news as Array<{
-        _id: string;
-        title: string;
-      }>;
-      for (const newsTitle of newsTitles) {
-        const { _id, title } = newsTitle;
-        const response = await fetch(`http://localhost:3001/admin/news/${_id}`);
-        const body = await response.json();
-        const {
-          _id: _,
-          opinions,
-          timeline,
-          comments,
-          votes,
-          rest,
-        } = body.result.news;
-
-        const opinionLeft = opinions.left;
-        const opinionRight = opinions.right;
-
-        console.log(body.result.news);
-
-        for (const k of Object.keys(comments)) {
-          console.log(comments[k]);
-        }
-
-        break;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
+  async newsMigrate() {}
 
   @Get('/:id')
   @RespInterceptor
@@ -134,6 +103,7 @@ export class NewsController {
   @RespInterceptor
   async getNewsToEditById(@Param('id') id: number) {
     const news = await this.newsService.getNewsToEditById(id);
+
     return news;
   }
 

@@ -32,7 +32,7 @@ export class News {
   @Column({ default: '' })
   subTitle: string;
 
-  @Column({ default: '' })
+  @Column({ type: 'longtext', default: '' })
   summary: string;
 
   @Column({ default: false })
