@@ -3,10 +3,11 @@ import { AwsService } from 'src/aws/aws.service';
 import { KeywordEdit } from 'src/interface/keyword';
 import { KeywordService } from 'src/keyword/keyword.service';
 import { NewsService } from 'src/news/news.service';
-import { getKRTime } from 'src/tools/common';
+import { convertImgToWebp, getKRTime } from 'src/tools/common';
 
 @Controller('migration')
 export class MigrationController {
+  private readonly url1: string = 'http://localhost:3001';
   private readonly url2: string = 'https://api.yvoting.com';
 
   constructor(
@@ -23,14 +24,17 @@ export class MigrationController {
     const response = await fetch(`${this.url2}/admin/keywords/keyword`);
     const body = await response.json();
     const keywords = body.result.keywords;
-    for (const k of keywords) {
+    for (const i in keywords) {
+      const k = keywords[i];
       const response = await fetch(`${this.url2}/admin/keywords/${k.keyword}`);
       const j = await response.json();
       const { _id, keyword, explain, category } = j.result.keyword;
       let imgSrc: string | null = null;
       try {
         const imgRsp = await fetch(`${this.url2}/images/keyword/${_id}`);
-        const img = Buffer.from(await (await imgRsp.blob()).arrayBuffer());
+        const img = await convertImgToWebp(
+          Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
+        );
         imgSrc = await this.awsService.imageUploadToS3(
           keyword + '_org',
           img,
@@ -48,7 +52,10 @@ export class MigrationController {
       } as KeywordEdit;
 
       const response2 = await this.keywordService.postKeyword(newKeyword);
-      console.log(response2);
+      if (Number(i) % 10 == 9) {
+        console.log(`=[${i}/${keywords.length}]==========================`);
+        console.log(response2);
+      }
     }
   }
 
@@ -78,7 +85,6 @@ export class MigrationController {
         _id: string;
         title: string;
       }>;
-      console.log(newsTitles);
       for (const i in newsTitles) {
         const newsTitle = newsTitles[i];
         const { _id, title } = newsTitle;
@@ -96,11 +102,12 @@ export class MigrationController {
 
         const opinionLeft = opinions.left;
         const opinionRight = opinions.right;
-
         let imgSrc: string | null = null;
         try {
-          const imgRsp = await fetch(`${this.url2}/images/keyword/${_id}`);
-          const img = Buffer.from(await (await imgRsp.blob()).arrayBuffer());
+          const imgRsp = await fetch(`${this.url2}/images/news/${_id}`);
+          const img = await convertImgToWebp(
+            Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
+          );
           imgSrc = await this.awsService.imageUploadToS3(
             'news' + i + '_org',
             img,
@@ -110,7 +117,7 @@ export class MigrationController {
           console.log(e);
         }
 
-        const newComments = Object.keys(comments).reduce((acc, k) => {
+        const newComments = Object.keys(comments ?? {}).reduce((acc, k) => {
           const cArr = comments[k];
 
           const newC = cArr.map((comment, idx) => {
@@ -126,7 +133,7 @@ export class MigrationController {
           return [...acc, ...newC];
         }, []);
 
-        const newTimeline = timeline.map((t) => {
+        const newTimeline = (timeline ?? []).map((t) => {
           const { _id, date, title } = t;
           return { date: getKRTime(date), title: title };
         });
@@ -135,7 +142,8 @@ export class MigrationController {
           await Promise.all(
             keywords.map(async (k) => {
               const keyword = await this.keywordService.getKeywordByKey(k);
-              return keyword?.id ?? null;
+              if (!keyword) return null;
+              return { id: keyword?.id };
             }),
           )
         ).filter((s) => s != null);
@@ -150,11 +158,13 @@ export class MigrationController {
           newsImage: imgSrc,
           ...rest,
         };
+        const response2 = await this.newsService.postNews(newsMy);
 
-        console.log('new+++++++++++++++++++++++');
-        console.log(newsMy);
-
-        break;
+        if (Number(i) % 10 == 9) {
+          console.log(
+            `=${i}/${newsTitles.length}==================================`,
+          );
+        }
       }
     } catch (e) {
       console.log(e);

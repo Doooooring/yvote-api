@@ -18,7 +18,7 @@ export class Keyword {
   @Index()
   keyword: string;
 
-  @Column({ type: 'longtext', default: '' })
+  @Column({ type: 'longtext' })
   explain: string;
 
   @Column()

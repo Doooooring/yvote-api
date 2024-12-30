@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
 import { News } from 'src/entity/news.entity';
 import { DBERROR } from 'src/interface/err';
-import { NewsEdit, NewsPreviews } from 'src/interface/news';
+import { NewsEdit } from 'src/interface/news';
 import { mergeUniqueArrays } from 'src/tools/common';
 import {
   DataSource,
@@ -14,7 +14,6 @@ import {
   Repository,
 } from 'typeorm';
 import { KeywordRepository } from '../keyword/keyword.repository';
-import { Keyword } from 'src/entity/keyword.entity';
 
 @Injectable()
 export class NewsRepository {
@@ -110,9 +109,48 @@ export class NewsRepository {
       .getOne() as Promise<News>;
   }
 
-  getNewsPreviewsProto(page: number, limit: number) {
+  getNewsPreviews(
+    page: number,
+    limit: number,
+    {
+      keyword,
+      isAdmin,
+    }: {
+      keyword?: string;
+      isAdmin?: boolean;
+    },
+  ) {
+    const subQuery = this.newsRepo
+      .createQueryBuilder('subNews')
+      .select('subNews.id id')
+      .where('1 = 1');
+
+    if (!isAdmin) subQuery.andWhere('isPublished = True');
+    if (keyword) {
+      subQuery
+        .leftJoin('subNews.keyword', 'keywords')
+        .andWhere('keywords.keyword = :keyword', { keyword });
+    }
+    subQuery
+      .orderBy('state', 'DESC')
+      .addOrderBy('subNews.id', 'DESC')
+      .limit(limit)
+      .offset(page);
+
+    // .leftJoinAndSelect('news.timeline', 'timeline')
+    // .addOrderBy(
+    //   '(SELECT MAX(t.date) FROM timeline t WHERE t.newsId = news.id)',
+    //   'DESC',
+    // )
+
     return this.newsRepo
       .createQueryBuilder('news')
+      .innerJoin(
+        `(${subQuery.getQuery()})`,
+        'paged_news',
+        'news.id = paged_news.id',
+      )
+      .setParameters(subQuery.getParameters())
       .select([
         'news.id',
         'news.title',
@@ -120,37 +158,10 @@ export class NewsRepository {
         'news.newsImage',
         'news.state',
         'news.isPublished',
+        'keywords.keyword',
       ])
       .leftJoin('news.keywords', 'keywords')
-      .leftJoin('news.timeline', 'timeline')
-      .addSelect('keywords.keyword', 'keywords')
-      .orderBy('state', 'DESC')
-      .addOrderBy(
-        '(SELECT MAX(t.date) FROM timeline t WHERE t.newsId = news.id)',
-        'DESC',
-      )
-      .addOrderBy('news.id', 'DESC')
-      .limit(limit)
-      .skip(page);
-  }
-
-  async getNewsPreviews(page: number, limit: number, keyword?: string) {
-    const q = this.getNewsPreviewsProto(page, limit);
-    if (keyword) {
-      q.where('keywords.keyword = :keyword', { keyword });
-    }
-    return q.getMany();
-  }
-
-  async getNewsPreviewsAdmin(page: number, limit: number, keyword?: string) {
-    const q = this.getNewsPreviewsProto(page, limit).andWhere(
-      'isPublished = True',
-    );
-    if (keyword) {
-      q.where('keywords.keyword = :keyword', { keyword });
-    }
-
-    return q.getRawMany() as Promise<NewsPreviews[]>;
+      .getMany();
   }
 
   async getNewsListByOptions(options: FindOptionsWhere<News> = {}) {

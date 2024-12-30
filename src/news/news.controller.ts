@@ -14,10 +14,9 @@ import {
 import { AdminGuard } from 'src/auth/admin/admin.guard';
 import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 import { NewsCommentType, NewsEdit } from 'src/interface/news';
+import { KeywordService } from 'src/keyword/keyword.service';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
-import { getKRTime } from 'src/tools/common';
-import { KeywordService } from 'src/keyword/keyword.service';
 
 @LogRequests()
 @Controller('news')
@@ -88,9 +87,6 @@ export class NewsController {
     const response = await this.newsService.postNews(news);
     return true;
   }
-
-  @Get('/migrate')
-  async newsMigrate() {}
 
   @Get('/:id')
   @RespInterceptor

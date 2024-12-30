@@ -1,7 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { response } from 'express';
 import { genDateId } from 'src/tools/common';
 
 @Injectable()
@@ -24,18 +23,18 @@ export class AwsService {
 
     console.log('aws_region : ', AWS_REGION);
     console.log('aws_s3 bucket name: ', AWS_S3_BUCKET_NAME);
-
+    const neFilename = fileName + genDateId();
     try {
       const command = new PutObjectCommand({
         Bucket: AWS_S3_BUCKET_NAME,
-        Key: fileName + genDateId(),
+        Key: neFilename,
         Body: file,
         ACL: 'public-read',
         ContentType: `image/${ext}`,
       });
 
       const response = await this.s3Client.send(command);
-      return `https://s3.${AWS_REGION}.amazonaws.com/${AWS_S3_BUCKET_NAME}/${fileName}`;
+      return `https://${AWS_S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${neFilename}`;
     } catch (e) {
       console.log(e);
       return '';

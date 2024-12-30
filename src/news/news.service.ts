@@ -41,19 +41,12 @@ export class NewsService {
   async getNewsPreviews(
     page: number,
     limit: number,
-    {
-      keyword,
-      isAdmin,
-    }: {
+    option: {
       keyword?: string;
       isAdmin?: boolean;
     },
   ) {
-    if (isAdmin) {
-      return await this.newsRepo.getNewsPreviewsAdmin(page, limit, keyword);
-    } else {
-      return await this.newsRepo.getNewsPreviews(page, limit, keyword);
-    }
+    return await this.newsRepo.getNewsPreviews(page, limit, option);
   }
 
   async getNewsComment(

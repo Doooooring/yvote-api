@@ -1,5 +1,5 @@
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
 
 export interface iReqLog {
   timestamp: string;
@@ -25,4 +25,9 @@ export function errLoger(logger: iErrLog) {
   const logFilePath = path.join(process.cwd(), 'error-logs.txt');
   const log = `[${logger.timestamp}] ERROR LOG\n=========================================================\n\n ${logger.message} \n=========================================================\n\n `;
   fs.appendFileSync(logFilePath, log + '\n');
+}
+
+export function Logger(s: string) {
+  const logFilePath = path.join(process.cwd(), 'logger.txt');
+  fs.appendFileSync(logFilePath, s + '\n');
 }

@@ -1,3 +1,5 @@
+import * as sharp from 'sharp';
+
 export function clone<T>(obj: T) {
   return JSON.parse(JSON.stringify(obj)) as T;
 }
@@ -35,4 +37,6 @@ export function getKRTime(t: string) {
   return utc;
 }
 
-export function convertImgToWebp() {}
+export async function convertImgToWebp(img: Buffer) {
+  return await sharp(img).webp({ quality: 80 }).toBuffer();
+}

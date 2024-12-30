@@ -28,7 +28,7 @@ export class CommentRepository {
       ])
       .leftJoin('comment.news', 'news')
       .addSelect('news.id')
-      .orderBy('comment.updatedAt')
+      .orderBy('comment.updatedAt', 'DESC')
       .offset(offset)
       .limit(limit)
       .getMany();

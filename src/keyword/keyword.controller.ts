@@ -11,12 +11,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from 'src/auth/admin/admin.guard';
+import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 import { INF } from 'src/interface/common';
 import { KeywordEdit, keywordCategory } from 'src/interface/keyword';
 import { RespInterceptor } from 'src/tools/decorator';
 import { KeywordService } from './keyword.service';
-import { reqLogger } from 'src/tools/logger';
-import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 @LogRequests()
 @Controller('keyword')
 export class KeywordController {
@@ -24,10 +23,6 @@ export class KeywordController {
     @Inject(KeywordService)
     private readonly keywordService: KeywordService,
   ) {}
-
-  @Get('/migrate')
-  @RespInterceptor
-  async migrateKeyword() {}
 
   @Get('/keywords')
   @RespInterceptor
