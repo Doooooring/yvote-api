@@ -61,6 +61,15 @@ export class MigrationController {
 
   @Get('/news')
   async newsMigrate() {
+    const getCommentTitle = (title: string) => {
+      const dates = title.match(/\((\d{1,2})\/(\d{1,2})\)/);
+      if (!dates) return title;
+      const month = dates[1];
+      const day = dates[2];
+      const formatted = ` (${month}/${day})`;
+      return title.split(formatted)[0];
+    };
+
     const getCommentDate = (title: string) => {
       const dates = title.match(/\((\d{1,2})\/(\d{1,2})\)/);
       let year, month, date;
@@ -123,7 +132,7 @@ export class MigrationController {
           const newC = cArr.map((comment, idx) => {
             const newComment = {
               order: idx,
-              title: comment.title,
+              title: getCommentTitle(comment.title),
               commentType: k,
               comment: comment.comment,
               date: getCommentDate(comment.title),

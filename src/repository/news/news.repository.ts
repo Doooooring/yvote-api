@@ -123,12 +123,18 @@ export class NewsRepository {
     const subQuery = this.newsRepo
       .createQueryBuilder('subNews')
       .select('subNews.id id')
+      .leftJoin('subNews.timeline', 'timeline')
+      .addOrderBy(
+        '(SELECT MAX(t.date) FROM timeline t WHERE t.newsId = subNew.id)',
+        'DESC',
+      )
+      .groupBy('subNews.id')
       .where('1 = 1');
 
     if (!isAdmin) subQuery.andWhere('isPublished = True');
     if (keyword) {
       subQuery
-        .leftJoin('subNews.keyword', 'keywords')
+        .leftJoin('subNews.keywords', 'keywords')
         .andWhere('keywords.keyword = :keyword', { keyword });
     }
     subQuery
@@ -136,12 +142,6 @@ export class NewsRepository {
       .addOrderBy('subNews.id', 'DESC')
       .limit(limit)
       .offset(page);
-
-    // .leftJoinAndSelect('news.timeline', 'timeline')
-    // .addOrderBy(
-    //   '(SELECT MAX(t.date) FROM timeline t WHERE t.newsId = news.id)',
-    //   'DESC',
-    // )
 
     return this.newsRepo
       .createQueryBuilder('news')
