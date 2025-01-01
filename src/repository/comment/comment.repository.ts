@@ -54,7 +54,7 @@ export class CommentRepository {
       .andWhere('comment.commentType = :type', { type: type })
       .offset(offset)
       .limit(limit)
-      .orderBy('comment.order')
+      .orderBy('comment.order', 'DESC')
       .getMany();
   }
 

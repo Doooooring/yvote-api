@@ -72,19 +72,22 @@ export class MigrationController {
 
     const getCommentDate = (title: string) => {
       const dates = title.match(/\((\d{1,2})\/(\d{1,2})\)/);
-      let year, month, date;
-      if (dates) {
-        year = '2024';
-        month = dates[1];
-        date = dates[2];
-      } else {
-        year = '2023';
-        month = '01';
-        date = '01';
-      }
 
-      const commentDate = getKRTime(year + '-' + month + '-' + date);
-      return commentDate;
+      if (dates) {
+        const month = dates[1] as string;
+        const date = dates[2] as string;
+        return { month, date };
+      } else {
+        return null;
+      }
+    };
+
+    const getCommDateForm = (date: {
+      year: string;
+      month: string;
+      date: string;
+    }) => {
+      return getKRTime(date.year + '-' + date.month + '-' + date.date);
     };
 
     try {
@@ -111,41 +114,48 @@ export class MigrationController {
 
         const opinionLeft = opinions.left;
         const opinionRight = opinions.right;
-        let imgSrc: string | null = null;
-        try {
-          const imgRsp = await fetch(`${this.url2}/images/news/${_id}`);
-          const img = await convertImgToWebp(
-            Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
-          );
-          imgSrc = await this.awsService.imageUploadToS3(
-            'news' + i + '_org',
-            img,
-            'webp',
-          );
-        } catch (e) {
-          console.log(e);
-        }
+        const imgSrc: string | null = null;
+        // try {
+        //   const imgRsp = await fetch(`${this.url2}/images/news/${_id}`);
+        //   const img = await convertImgToWebp(
+        //     Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
+        //   );
+        //   imgSrc = await this.awsService.imageUploadToS3(
+        //     'news' + i + '_org',
+        //     img,
+        //     'webp',
+        //   );
+        // } catch (e) {
+        //   console.log(e);
+        // }
+
+        let isOld = false;
+        let oldMaxMonth = -1;
+        const newTimeline = (timeline ?? []).map((t) => {
+          const { _id, date, title } = t;
+          const krTime = getKRTime(date);
+
+          if (krTime.getFullYear() == 2023) {
+            isOld = true;
+            oldMaxMonth = Math.max(krTime.getMonth() + 1);
+          }
+          return { date: getKRTime(date), title: title };
+        });
 
         const newComments = Object.keys(comments ?? {}).reduce((acc, k) => {
           const cArr = comments[k];
-
           const newC = cArr.map((comment, idx) => {
             const newComment = {
               order: idx,
-              title: getCommentTitle(comment.title),
+              title: comment.title,
               commentType: k,
               comment: comment.comment,
-              date: getCommentDate(comment.title),
+              date: null,
             };
             return newComment;
           });
           return [...acc, ...newC];
         }, []);
-
-        const newTimeline = (timeline ?? []).map((t) => {
-          const { _id, date, title } = t;
-          return { date: getKRTime(date), title: title };
-        });
 
         const newKeywords = (
           await Promise.all(
