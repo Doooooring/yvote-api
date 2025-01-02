@@ -54,7 +54,6 @@ export class MigrationController {
       const response2 = await this.keywordService.postKeyword(newKeyword);
       if (Number(i) % 10 == 9) {
         console.log(`=[${i}/${keywords.length}]==========================`);
-        console.log(response2);
       }
     }
   }
@@ -129,16 +128,16 @@ export class MigrationController {
         //   console.log(e);
         // }
 
-        let isOld = false;
-        let oldMaxMonth = -1;
+        // let isOld = false;
+        // let oldMaxMonth = -1;
         const newTimeline = (timeline ?? []).map((t) => {
           const { _id, date, title } = t;
-          const krTime = getKRTime(date);
+          //   const krTime = getKRTime(date);
 
-          if (krTime.getFullYear() == 2023) {
-            isOld = true;
-            oldMaxMonth = Math.max(krTime.getMonth() + 1);
-          }
+          //   if (krTime.getFullYear() == 2023) {
+          //     isOld = true;
+          //     oldMaxMonth = Math.max(krTime.getMonth() + 1);
+          //   }
           return { date: getKRTime(date), title: title };
         });
 

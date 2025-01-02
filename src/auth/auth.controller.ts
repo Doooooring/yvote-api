@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -11,11 +12,11 @@ import { AdminGuard } from './admin/admin.guard';
 import { GoogleAuthService } from './google/google.service';
 import { KakakoAuthService } from './kakao/kakao.service';
 import { AdminAuthService } from './admin/admin.service';
-import { Authroziation } from 'src/tools/decorator';
+import { Authroziation, RespInterceptor } from 'src/tools/decorator';
 import { bearerParse } from 'src/tools/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
-@Controller('auth')
+@Controller('/auth')
 export class AuthController {
   constructor(
     @Inject(KakakoAuthService)
@@ -37,7 +38,8 @@ export class AuthController {
 
   @UseGuards(AdminGuard)
   @Get('/admin/validate-session')
-  async checkTokenValidation() {
+  @RespInterceptor
+  async checkTokenValidation(@Req() req: Request) {
     return true;
   }
 
@@ -51,9 +53,12 @@ export class AuthController {
 
     res.cookie('access_token', jwt, {
       maxAge: 1000 * 60 * 60,
+      sameSite: 'lax',
+      secure: false,
+      path: '/',
     });
 
-    return res.json({
+    return res.send({
       success: true,
       result: {
         message: 'Login successful',

@@ -27,6 +27,6 @@ import { AdminAuthService } from './admin/admin.service';
     AdminAuthService,
     AdminGuard,
   ],
-  exports: [AdminGuard],
+  exports: [AdminGuard, JwtModule],
 })
 export class AuthModule {}

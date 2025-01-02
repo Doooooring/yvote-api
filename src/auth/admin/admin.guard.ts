@@ -7,10 +7,9 @@ export class AdminGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    return true;
     try {
       const request = context.switchToHttp().getRequest();
-
+      console.log(request.cookies);
       const token = request.cookies?.['access_token'];
 
       console.log('=======================');
@@ -23,6 +22,7 @@ export class AdminGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token);
       return true;
     } catch (e) {
+      throw Error(e);
       return false;
     }
   }
