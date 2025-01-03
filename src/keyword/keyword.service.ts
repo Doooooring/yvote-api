@@ -41,7 +41,6 @@ export class KeywordService {
     const response = (await qbProto.getMany()) as Array<
       Pick<Keyword, 'id' | 'keyword' | 'category' | 'keywordImage'>
     >;
-    console.log(response);
     return response;
   }
 

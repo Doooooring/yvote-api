@@ -18,13 +18,19 @@ export class Vote {
   @Column({ default: '' })
   response: string;
 
-  @ManyToOne(() => News, (news) => news.id)
+  @ManyToOne(() => News, (news) => news.votes, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   @JoinColumn({
     name: 'newsId',
   })
   news: News;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   @JoinColumn({
     name: 'userId',
   })

@@ -21,8 +21,6 @@ export class AwsService {
     const AWS_REGION = this.configService.get('AWS_REGION');
     const AWS_S3_BUCKET_NAME = this.configService.get('AWS_S3_BUCKET_NAME');
 
-    console.log('aws_region : ', AWS_REGION);
-    console.log('aws_s3 bucket name: ', AWS_S3_BUCKET_NAME);
     const neFilename = fileName + genDateId();
     try {
       const command = new PutObjectCommand({

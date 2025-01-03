@@ -39,7 +39,10 @@ export class Comment {
   @UpdateDateColumn()
   updatedAt?: Date;
 
-  @ManyToOne(() => News, (news) => news.comments)
+  @ManyToOne(() => News, (news) => news.comments, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   @JoinColumn({
     name: 'newsId',
   })

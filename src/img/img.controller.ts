@@ -27,8 +27,7 @@ export class ImgController {
     if (img === undefined) {
       throw Error('IMG undefined');
     }
-    console.log('file name : ', filename);
-    console.log(img);
+
     const imgWEBP = await sharp(img).webp({}).toBuffer();
 
     const imgAddress = await this.awsService.imageUploadToS3(

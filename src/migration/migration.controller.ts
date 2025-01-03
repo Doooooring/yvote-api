@@ -113,20 +113,20 @@ export class MigrationController {
 
         const opinionLeft = opinions.left;
         const opinionRight = opinions.right;
-        const imgSrc: string | null = null;
-        // try {
-        //   const imgRsp = await fetch(`${this.url2}/images/news/${_id}`);
-        //   const img = await convertImgToWebp(
-        //     Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
-        //   );
-        //   imgSrc = await this.awsService.imageUploadToS3(
-        //     'news' + i + '_org',
-        //     img,
-        //     'webp',
-        //   );
-        // } catch (e) {
-        //   console.log(e);
-        // }
+        let imgSrc: string | null = null;
+        try {
+          const imgRsp = await fetch(`${this.url2}/images/news/${_id}`);
+          const img = await convertImgToWebp(
+            Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
+          );
+          imgSrc = await this.awsService.imageUploadToS3(
+            'news' + i + '_org',
+            img,
+            'webp',
+          );
+        } catch (e) {
+          console.log(e);
+        }
 
         // let isOld = false;
         // let oldMaxMonth = -1;

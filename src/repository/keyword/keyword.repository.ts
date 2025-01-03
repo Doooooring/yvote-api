@@ -195,30 +195,12 @@ export class KeywordRepository {
   }
 
   async getKeywordState(keywordId: number, manager?: EntityManager) {
-    console.log('============================');
-    console.log('keyword id : ', keywordId);
     let keywordRepo;
     if (manager) {
       keywordRepo = manager.getRepository(Keyword);
     } else {
       keywordRepo = this.keywordRepo;
     }
-    const r1 = await keywordRepo
-      .createQueryBuilder('keyword')
-      .leftJoinAndSelect('keyword.news', 'news')
-      .where('keyword.id = :keywordId', { keywordId })
-      .andWhere('news.state = :state', { state: true })
-      .getOne();
-
-    console.log(r1);
-
-    const r2 = await keywordRepo
-      .createQueryBuilder('keyword')
-      .leftJoinAndSelect('keyword.news', 'news')
-      .where('keyword.id = :keywordId', { keywordId })
-      .getOne();
-
-    console.log(r2);
 
     const cnt = await keywordRepo
       .createQueryBuilder('keyword')
@@ -226,8 +208,6 @@ export class KeywordRepository {
       .where('keyword.id = :keywordId', { keywordId })
       .andWhere('news.state = :state', { state: true })
       .getCount();
-
-    console.log('count : ', cnt);
 
     return cnt > 0;
   }

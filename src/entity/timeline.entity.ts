@@ -22,7 +22,10 @@ export class Timeline {
   @Column({ default: '' })
   title: string;
 
-  @ManyToOne(() => News, (news) => news.comments)
+  @ManyToOne(() => News, (news) => news.timeline, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   @JoinColumn({
     name: 'newsId',
   })

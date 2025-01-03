@@ -9,11 +9,7 @@ export class AdminGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
       const request = context.switchToHttp().getRequest();
-      console.log(request.cookies);
       const token = request.cookies?.['access_token'];
-
-      console.log('=======================');
-      console.log(token);
 
       if (!token) {
         throw new Error('TokenNotExist');
@@ -23,7 +19,6 @@ export class AdminGuard implements CanActivate {
       return true;
     } catch (e) {
       throw Error(e);
-      return false;
     }
   }
 

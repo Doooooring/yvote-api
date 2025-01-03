@@ -228,7 +228,6 @@ export class NewsRepository {
   }
 
   async deleteNewsById(id: number) {
-    console.log('is start delete news by id');
     const queryRunner = await this.startTransaction();
 
     try {
