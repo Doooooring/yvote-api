@@ -113,6 +113,22 @@ export class KeywordRepository {
       .getOne();
   }
 
+  async getKeywordByIdWithNews(id: number) {
+    return this.getKeywordProto()
+      .where('keyword.id = :id', { id: id })
+      .leftJoin('keyword.news', 'news')
+      .addSelect('news.title')
+      .getOne();
+  }
+
+  async getKeywordByKeyWithNews(key: string) {
+    return this.getKeywordProto()
+      .leftJoin('keyword.news', 'news')
+      .addSelect('news.title')
+      .where('keyword.keyword = :keyword', { keyword: key })
+      .getOne();
+  }
+
   async postKeyword(obj: KeywordEdit) {
     const queryRunner = await this.startTransaction();
 

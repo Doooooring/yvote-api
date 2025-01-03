@@ -228,6 +228,7 @@ export class NewsRepository {
   }
 
   async deleteNewsById(id: number) {
+    console.log('is start delete news by id');
     const queryRunner = await this.startTransaction();
 
     try {
@@ -248,8 +249,6 @@ export class NewsRepository {
   }
 
   async updateKeywordsState(keywords: number[], manager: EntityManager) {
-    console.log('is start update keyword state');
-
     for (const id of keywords) {
       await this.keywordRepository.updateKeywordState(id, manager);
     }

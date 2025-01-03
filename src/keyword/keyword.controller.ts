@@ -84,13 +84,17 @@ export class KeywordController {
 
   @Get('/')
   @RespInterceptor
-  async getKeywordByOption(@Query('id') id: number, @Query('key') key: string) {
+  async getKeywordByOption(
+    @Query('id') id: number,
+    @Query('key') key: string,
+    @Query('isWithNews') isWithNews: boolean,
+  ) {
     if (id) {
-      return await this.keywordService.getKeywordById(id);
+      return await this.keywordService.getKeywordById(id, isWithNews);
     }
 
     if (key) {
-      return await this.keywordService.getKeywordByKey(key);
+      return await this.keywordService.getKeywordByKey(key, isWithNews);
     }
   }
 }

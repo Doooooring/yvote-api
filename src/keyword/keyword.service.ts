@@ -49,13 +49,23 @@ export class KeywordService {
     return await this.keywordRepository.getKeywordsKey(offset, limit, search);
   }
 
-  async getKeywordById(id: number) {
-    return await this.keywordRepository.getKeywordById(id);
+  async getKeywordById(id: number, isWithNews: boolean = false) {
+    if (isWithNews) {
+      return await this.keywordRepository.getKeywordByIdWithNews(id);
+    } else {
+      return await this.keywordRepository.getKeywordById(id);
+    }
   }
 
-  async getKeywordByKey(key: string) {
-    return await this.keywordRepository.getKeywordByKey(key);
+  async getKeywordByKey(key: string, isWithNews: boolean = false) {
+    if (isWithNews)
+      return await this.keywordRepository.getKeywordByKeyWithNews(key);
+    else {
+      return await this.keywordRepository.getKeywordByKey(key);
+    }
   }
+
+  async getKeywordByKeyWithNews(key: string) {}
 
   async postKeyword(obj: KeywordEdit) {
     return await this.keywordRepository.postKeyword(obj);
