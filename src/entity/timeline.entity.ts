@@ -24,7 +24,8 @@ export class Timeline {
 
   @ManyToOne(() => News, (news) => news.timeline, {
     onDelete: 'CASCADE',
-    nullable: false,
+    orphanedRowAction: 'delete',
+    nullable: true,
   })
   @JoinColumn({
     name: 'newsId',

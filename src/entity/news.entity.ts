@@ -32,6 +32,9 @@ export class News {
   @Column({ default: '' })
   subTitle: string;
 
+  @Column({ default: '' })
+  slug: string;
+
   @Column({ type: 'longtext' })
   summary: string;
 
@@ -50,10 +53,14 @@ export class News {
   @Column({ nullable: true })
   newsImage?: string;
 
-  @OneToMany(() => Comment, (comment) => comment.news, { cascade: true })
+  @OneToMany(() => Comment, (comment) => comment.news, {
+    cascade: ['insert', 'update', 'remove', 'soft-remove', 'recover'],
+  })
   comments: Comment[];
 
-  @OneToMany(() => Timeline, (timeline) => timeline.news, { cascade: true })
+  @OneToMany(() => Timeline, (timeline) => timeline.news, {
+    cascade: ['insert', 'update', 'remove', 'soft-remove', 'recover'],
+  })
   timeline: Timeline[];
 
   @OneToMany(() => Vote, (vote) => vote.news, { cascade: true })

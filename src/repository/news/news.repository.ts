@@ -212,9 +212,7 @@ export class NewsRepository {
       const prevKeywords = prevNews.keywords.map(({ id }) => id);
       const curKeywords = news.keywords.map(({ id }) => id) ?? [];
 
-      await newsRepository.save({
-        ...news,
-      });
+      await newsRepository.save(news);
 
       const keywordsToUpdate = mergeUniqueArrays(prevKeywords, curKeywords);
       await this.updateKeywordsState(keywordsToUpdate, queryRunner.manager);

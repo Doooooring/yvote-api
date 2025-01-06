@@ -41,7 +41,8 @@ export class Comment {
 
   @ManyToOne(() => News, (news) => news.comments, {
     onDelete: 'CASCADE',
-    nullable: false,
+    orphanedRowAction: 'delete',
+    nullable: true,
   })
   @JoinColumn({
     name: 'newsId',

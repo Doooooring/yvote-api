@@ -20,7 +20,6 @@ export class Vote {
 
   @ManyToOne(() => News, (news) => news.votes, {
     onDelete: 'CASCADE',
-    nullable: false,
   })
   @JoinColumn({
     name: 'newsId',
@@ -29,7 +28,6 @@ export class Vote {
 
   @ManyToOne(() => User, (user) => user.id, {
     onDelete: 'CASCADE',
-    nullable: false,
   })
   @JoinColumn({
     name: 'userId',

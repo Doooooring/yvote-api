@@ -27,6 +27,8 @@ export interface NewsPreviews
     | 'id'
     | 'order'
     | 'title'
+    | 'subTitle'
+    | 'slug'
     | 'summary'
     | 'state'
     | 'isPublished'
