@@ -168,6 +168,8 @@ export class MigrationController {
 
         const newsMy = {
           title,
+          subTitle: '',
+          slug: '',
           opinionLeft,
           opinionRight,
           comments: newComments,

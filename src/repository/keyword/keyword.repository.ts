@@ -117,14 +117,14 @@ export class KeywordRepository {
     return this.getKeywordProto()
       .where('keyword.id = :id', { id: id })
       .leftJoin('keyword.news', 'news')
-      .addSelect('news.title')
+      .addSelect(['news.id', 'news.title'])
       .getOne();
   }
 
   async getKeywordByKeyWithNews(key: string) {
     return this.getKeywordProto()
       .leftJoin('keyword.news', 'news')
-      .addSelect('news.title')
+      .addSelect(['news.id', 'news.title'])
       .where('keyword.keyword = :keyword', { keyword: key })
       .getOne();
   }

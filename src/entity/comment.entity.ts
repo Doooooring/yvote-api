@@ -31,7 +31,6 @@ export class Comment {
 
   @Column({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
     nullable: true,
   })
   date?: Date;

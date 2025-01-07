@@ -100,8 +100,10 @@ export class NewsRepository {
         'news.opinionLeft',
         'news.opinionRight',
         'news.newsImage',
+        'keyword.id',
+        'keyword.keyword',
       ])
-      .leftJoinAndSelect('news.keywords', 'keyword')
+      .leftJoin('news.keywords', 'keyword')
       .leftJoinAndSelect('news.comments', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .where('news.id = :id', { id: id })

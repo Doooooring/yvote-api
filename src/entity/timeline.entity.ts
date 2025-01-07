@@ -14,7 +14,6 @@ export class Timeline {
 
   @Column({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
     nullable: true,
   })
   date?: Date;
