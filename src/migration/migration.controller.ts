@@ -21,17 +21,17 @@ export class MigrationController {
 
   @Get('/keyword')
   async keywordMigrate() {
-    const response = await fetch(`${this.url2}/admin/keywords/keyword`);
+    const response = await fetch(`${this.url1}/admin/keywords/keyword`);
     const body = await response.json();
     const keywords = body.result.keywords;
     for (const i in keywords) {
       const k = keywords[i];
-      const response = await fetch(`${this.url2}/admin/keywords/${k.keyword}`);
+      const response = await fetch(`${this.url1}/admin/keywords/${k.keyword}`);
       const j = await response.json();
       const { _id, keyword, explain, category } = j.result.keyword;
       let imgSrc: string | null = null;
       try {
-        const imgRsp = await fetch(`${this.url2}/images/keyword/${_id}`);
+        const imgRsp = await fetch(`${this.url1}/images/keyword/${_id}`);
         const img = await convertImgToWebp(
           Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
         );
@@ -90,7 +90,7 @@ export class MigrationController {
     };
 
     try {
-      const response = await fetch(`${this.url2}/admin/news/title?search=`);
+      const response = await fetch(`${this.url1}/admin/news/title?search=`);
       const body = await response.json();
       const newsTitles = body.result.news as Array<{
         _id: string;
@@ -99,7 +99,7 @@ export class MigrationController {
       for (const i in newsTitles) {
         const newsTitle = newsTitles[i];
         const { _id, title } = newsTitle;
-        const response = await fetch(`${this.url2}/admin/news/${_id}`);
+        const response = await fetch(`${this.url1}/admin/news/${_id}`);
         const body = await response.json();
         const {
           _id: _,
@@ -115,7 +115,7 @@ export class MigrationController {
         const opinionRight = opinions.right;
         let imgSrc: string | null = null;
         try {
-          const imgRsp = await fetch(`${this.url2}/images/news/${_id}`);
+          const imgRsp = await fetch(`${this.url1}/images/news/${_id}`);
           const img = await convertImgToWebp(
             Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
           );
