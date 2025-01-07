@@ -150,10 +150,10 @@ export class KeywordRepository {
 
   async updateKeyword(id: number, obj: KeywordEdit) {
     const queryRunner = await this.startTransaction();
-
+    if (!(id in obj)) obj.id = id;
     try {
       const keywordRepository = queryRunner.manager.getRepository(Keyword);
-      await keywordRepository.update(obj, { id: id });
+      await keywordRepository.save(obj);
 
       await this.updateKeywordState(id, queryRunner.manager);
       await queryRunner.commitTransaction();
