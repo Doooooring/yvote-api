@@ -24,6 +24,7 @@ export class CommentRepository {
         'comment.commentType',
         'comment.title',
         'comment.date',
+        'comment.url',
         'comment.comment',
       ])
       .leftJoin('comment.news', 'news')
@@ -48,6 +49,7 @@ export class CommentRepository {
         'comment.commentType',
         'comment.title',
         'comment.date',
+        'comment.url',
         'comment.comment',
       ])
       .leftJoin('comment.news', 'news')
