@@ -9,6 +9,7 @@ import { convertImgToWebp, getKRTime } from 'src/tools/common';
 export class MigrationController {
   private readonly url1: string = 'http://localhost:3001';
   private readonly url2: string = 'https://api.yvoting.com';
+  private readonly url3: string = 'http://13.211.177.184:3001';
 
   constructor(
     @Inject(NewsService)
@@ -19,19 +20,23 @@ export class MigrationController {
     private readonly awsService: AwsService,
   ) {}
 
+  get url() {
+    return this.url1;
+  }
+
   @Get('/keyword')
   async keywordMigrate() {
-    const response = await fetch(`${this.url2}/admin/keywords/keyword`);
+    const response = await fetch(`${this.url}/admin/keywords/keyword`);
     const body = await response.json();
     const keywords = body.result.keywords;
     for (const i in keywords) {
       const k = keywords[i];
-      const response = await fetch(`${this.url2}/admin/keywords/${k.keyword}`);
+      const response = await fetch(`${this.url}/admin/keywords/${k.keyword}`);
       const j = await response.json();
       const { _id, keyword, explain, category } = j.result.keyword;
       let imgSrc: string | null = null;
       try {
-        const imgRsp = await fetch(`${this.url2}/images/keyword/${_id}`);
+        const imgRsp = await fetch(`${this.url}/images/keyword/${_id}`);
         const img = await convertImgToWebp(
           Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
         );
@@ -90,7 +95,7 @@ export class MigrationController {
     };
 
     try {
-      const response = await fetch(`${this.url2}/admin/news/title?search=`);
+      const response = await fetch(`${this.url}/admin/news/title?search=`);
       const body = await response.json();
       const newsTitles = body.result.news as Array<{
         _id: string;
@@ -99,7 +104,7 @@ export class MigrationController {
       for (const i in newsTitles) {
         const newsTitle = newsTitles[i];
         const { _id, title } = newsTitle;
-        const response = await fetch(`${this.url2}/admin/news/${_id}`);
+        const response = await fetch(`${this.url}/admin/news/${_id}`);
         const body = await response.json();
         const {
           _id: _,
@@ -115,7 +120,7 @@ export class MigrationController {
         const opinionRight = opinions.right;
         let imgSrc: string | null = null;
         try {
-          const imgRsp = await fetch(`${this.url2}/images/news/${_id}`);
+          const imgRsp = await fetch(`${this.url}/images/news/${_id}`);
           const img = await convertImgToWebp(
             Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
           );
