@@ -23,6 +23,9 @@ export class Comment {
   @Column()
   commentType: string;
 
+  @Column({ nullable: true })
+  url: string;
+
   @Column({ default: '' })
   title: string;
 
