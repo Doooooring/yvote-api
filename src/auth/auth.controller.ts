@@ -54,7 +54,7 @@ export class AuthController {
     res.cookie('access_token', jwt, {
       maxAge: 1000 * 60 * 60,
       sameSite: 'lax',
-      secure: false,
+      secure: true,
       path: '/',
     });
 
