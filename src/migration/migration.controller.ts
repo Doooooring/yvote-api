@@ -22,7 +22,7 @@ export class MigrationController {
   ) {}
 
   get url() {
-    return this.url1;
+    return this.url2;
   }
 
   @Get('/v2/keyword')
@@ -30,11 +30,11 @@ export class MigrationController {
     const keylist = await this.keywordService.getKeywordsKeyList(0, INF, '');
 
     for (const key of keylist) {
-      const { id, ...rest } = await this.keywordService.getKeywordByKey(
-        key.keyword,
-      );
+      const keyword = await this.keywordService.getKeywordByKey(key.keyword);
       const response = await fetch(`${this.url}/keyword/edit`, {
-        body: JSON.stringify({ keyword: rest }),
+        method: 'POST', // POST 메서드 설정
+
+        body: JSON.stringify({ keyword: keyword }),
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -45,11 +45,11 @@ export class MigrationController {
     const idlist = await this.newsService.getNewsIds();
 
     for (const id of idlist) {
-      const { id: _, ...rest } = await this.newsService.getNewsToEditById(
-        id.id,
-      );
-      const response = await fetch(`${this.url}/keyword/edit`, {
-        body: JSON.stringify({ news: rest }),
+      const news = await this.newsService.getNewsToEditById(id.id);
+      const response = await fetch(`${this.url}/news/edit`, {
+        method: 'POST', // POST 메서드 설정
+
+        body: JSON.stringify({ news: news }),
         headers: { 'Content-Type': 'application/json' },
       });
     }
