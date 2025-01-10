@@ -9,7 +9,7 @@ import { Vote } from 'src/entity/vote.entity';
 
 export const TypeormConfig = (configService: ConfigService) => {
   const type = 'mysql';
-  const host = '127.0.0.1';
+  const host = configService.get('DB_ENDPOINT');
   const port = 3306;
   const database = 'test1';
   const username = configService.get('DB_USER_NAME');
