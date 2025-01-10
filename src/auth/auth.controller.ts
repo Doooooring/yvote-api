@@ -52,8 +52,9 @@ export class AuthController {
     const jwt = await this.adminAuthService.login(token);
 
     res.cookie('access_token', jwt, {
-      maxAge: 1000 * 60 * 60,
-      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60, // 1시간
+      httpOnly: true,
+      sameSite: 'none',
       secure: true,
       path: '/',
     });
