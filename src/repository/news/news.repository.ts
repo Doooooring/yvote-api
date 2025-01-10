@@ -97,6 +97,7 @@ export class NewsRepository {
         'news.title',
         'news.summary',
         'news.state',
+        'news.isPublished',
         'news.opinionLeft',
         'news.opinionRight',
         'news.newsImage',
