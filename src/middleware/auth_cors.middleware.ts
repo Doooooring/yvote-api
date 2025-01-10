@@ -14,6 +14,7 @@ export class AuthCorsMiddleware implements NestMiddleware {
         'http://localhost:3001',
         'http://localhost:3002',
         'https://yvoting.com',
+        'https://y-vote-admin.vercel.app',
       ],
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
