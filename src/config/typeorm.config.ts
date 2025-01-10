@@ -11,7 +11,7 @@ export const TypeormConfig = (configService: ConfigService) => {
   const type = 'mysql';
   const host = configService.get('DB_ENDPOINT');
   const port = 3306;
-  const database = 'test1';
+  const database = configService.get('DB_IDENTITY');
   const username = configService.get('DB_USER_NAME');
   const password = configService.get('DB_PASSWORD');
 
