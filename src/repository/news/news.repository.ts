@@ -110,8 +110,8 @@ export class NewsRepository {
       .leftJoinAndSelect('news.comments', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .where('news.id = :id', { id: id })
-      .orderBy('timeline.date', 'ASC')
-      .orderBy('commnets.order', 'ASC')
+      .addOrderBy('timeline.date', 'ASC')
+      .addOrderBy('comments.order', 'ASC')
       .getOne() as Promise<News>;
   }
 
