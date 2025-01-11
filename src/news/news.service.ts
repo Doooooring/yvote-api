@@ -33,7 +33,11 @@ export class NewsService {
   }
 
   async getNewsToEditById(id: number) {
+    const message = 'Start fetch news to edit id : ' + id;
+    console.log(message);
     const data = await this.newsRepo.getNewsInEdit(id);
+    const st = JSON.stringify(data);
+    console.log('data size : ', st.length);
 
     return data;
   }
