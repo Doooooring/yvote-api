@@ -30,6 +30,8 @@ export class CommentRepository {
       .leftJoin('comment.news', 'news')
       .addSelect('news.id')
       .where('comment.date IS NOT NULL')
+      .andWhere('news.isPublished  = :published', { published: true })
+      .andWhere('news.state = :state', { state: false })
       .orderBy('comment.date', 'DESC')
       .offset(offset)
       .limit(limit)
