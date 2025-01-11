@@ -1,5 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { AwsService } from 'src/aws/aws.service';
+import { INF } from 'src/interface/common';
 import { KeywordEdit } from 'src/interface/keyword';
 import { KeywordService } from 'src/keyword/keyword.service';
 import { NewsService } from 'src/news/news.service';
@@ -21,7 +22,37 @@ export class MigrationController {
   ) {}
 
   get url() {
-    return this.url1;
+    return this.url2;
+  }
+
+  @Get('/v2/keyword')
+  async keywordMigV2() {
+    const keylist = await this.keywordService.getKeywordsKeyList(0, INF, '');
+
+    for (const key of keylist) {
+      const keyword = await this.keywordService.getKeywordByKey(key.keyword);
+      const response = await fetch(`${this.url}/keyword/edit`, {
+        method: 'POST', // POST 메서드 설정
+
+        body: JSON.stringify({ keyword: keyword }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+  @Get('/v2/news')
+  async newsMigV2() {
+    const idlist = await this.newsService.getNewsIds();
+
+    for (const id of idlist) {
+      const news = await this.newsService.getNewsToEditById(id.id);
+      const response = await fetch(`${this.url}/news/edit`, {
+        method: 'POST', // POST 메서드 설정
+
+        body: JSON.stringify({ news: news }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   }
 
   @Get('/keyword')

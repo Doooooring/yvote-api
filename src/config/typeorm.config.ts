@@ -9,9 +9,9 @@ import { Vote } from 'src/entity/vote.entity';
 
 export const TypeormConfig = (configService: ConfigService) => {
   const type = 'mysql';
-  const host = '127.0.0.1';
+  const host = configService.get('DB_ENDPOINT');
   const port = 3306;
-  const database = 'test1';
+  const database = configService.get('DB_IDENTITY');
   const username = configService.get('DB_USER_NAME');
   const password = configService.get('DB_PASSWORD');
 
@@ -24,7 +24,7 @@ export const TypeormConfig = (configService: ConfigService) => {
     password,
     entities: [News, Keyword, Comment, Timeline, User, Vote],
     autoLoadEntities: true,
-    synchronize: true,
+    synchronize: false,
   };
 
   return option;
