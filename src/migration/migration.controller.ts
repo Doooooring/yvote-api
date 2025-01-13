@@ -58,16 +58,20 @@ export class MigrationController {
   @Get('/keyword')
   async keywordMigrate() {
     const response = await fetch(`${this.url}/admin/keywords/keyword`);
+
     const body = await response.json();
     const keywords = body.result.keywords;
     for (const i in keywords) {
       const k = keywords[i];
+
       const response = await fetch(`${this.url}/admin/keywords/${k.keyword}`);
+
       const j = await response.json();
       const { _id, keyword, explain, category } = j.result.keyword;
       let imgSrc: string | null = null;
       try {
         const imgRsp = await fetch(`${this.url}/images/keyword/${_id}`);
+
         const img = await convertImgToWebp(
           Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
         );
@@ -135,6 +139,7 @@ export class MigrationController {
       for (const i in newsTitles) {
         const newsTitle = newsTitles[i];
         const { _id, title } = newsTitle;
+
         const response = await fetch(`${this.url}/admin/news/${_id}`);
         const body = await response.json();
         const {
@@ -152,6 +157,7 @@ export class MigrationController {
         let imgSrc: string | null = null;
         try {
           const imgRsp = await fetch(`${this.url}/images/news/${_id}`);
+
           const img = await convertImgToWebp(
             Buffer.from(await (await imgRsp.blob()).arrayBuffer()),
           );

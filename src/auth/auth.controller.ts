@@ -8,13 +8,12 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { RespInterceptor } from 'src/tools/decorator';
 import { AdminGuard } from './admin/admin.guard';
+import { AdminAuthService } from './admin/admin.service';
 import { GoogleAuthService } from './google/google.service';
 import { KakakoAuthService } from './kakao/kakao.service';
-import { AdminAuthService } from './admin/admin.service';
-import { Authroziation, RespInterceptor } from 'src/tools/decorator';
-import { bearerParse } from 'src/tools/common';
-import { Request, Response } from 'express';
 
 @Controller('/auth')
 export class AuthController {
@@ -52,7 +51,7 @@ export class AuthController {
     const jwt = await this.adminAuthService.login(token);
 
     res.cookie('access_token', jwt, {
-      maxAge: 1000 * 60 * 60, // 1시간
+      maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
       sameSite: 'none',
       secure: true,

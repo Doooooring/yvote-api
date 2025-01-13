@@ -68,6 +68,7 @@ export class NewsRepository {
       .select([
         'news.id',
         'news.title',
+        'news.subTitle',
         'news.summary',
         'news.state',
         'news.opinionLeft',
@@ -96,6 +97,7 @@ export class NewsRepository {
       .select([
         'news.id',
         'news.title',
+        'news.subTitle',
         'news.summary',
         'news.state',
         'news.isPublished',
@@ -109,7 +111,8 @@ export class NewsRepository {
       .leftJoinAndSelect('news.comments', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .where('news.id = :id', { id: id })
-      .orderBy('timeline.date', 'ASC')
+      .addOrderBy('timeline.date', 'ASC')
+      .addOrderBy('comments.order', 'ASC')
       .getOne() as Promise<News>;
   }
 
@@ -158,6 +161,7 @@ export class NewsRepository {
       .select([
         'news.id',
         'news.title',
+        'news.subTitle',
         'news.summary',
         'news.newsImage',
         'news.state',
