@@ -14,6 +14,7 @@ import {
   Repository,
 } from 'typeorm';
 import { KeywordRepository } from '../keyword/keyword.repository';
+import { Logger } from 'src/tools/logger';
 
 @Injectable()
 export class NewsRepository {
@@ -127,10 +128,6 @@ export class NewsRepository {
       .createQueryBuilder('subNews')
       .select('subNews.id id')
       .leftJoin('subNews.timeline', 'timeline')
-      .addOrderBy(
-        '(SELECT MAX(t.date) FROM timeline t WHERE t.newsId = subNew.id)',
-        'DESC',
-      )
       .groupBy('subNews.id')
       .where('1 = 1');
 
@@ -142,6 +139,10 @@ export class NewsRepository {
     }
     subQuery
       .orderBy('state', 'DESC')
+      .addOrderBy(
+        '(SELECT MAX(t.date) FROM timeline t WHERE t.newsId = subNews.id)',
+        'DESC',
+      )
       .addOrderBy('subNews.id', 'DESC')
       .limit(limit)
       .offset(page);
