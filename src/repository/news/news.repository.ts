@@ -14,7 +14,6 @@ import {
   Repository,
 } from 'typeorm';
 import { KeywordRepository } from '../keyword/keyword.repository';
-import { Logger } from 'src/tools/logger';
 
 @Injectable()
 export class NewsRepository {
@@ -116,7 +115,7 @@ export class NewsRepository {
       .getOne() as Promise<News>;
   }
 
-  getNewsPreviews(
+  async getNewsPreviews(
     page: number,
     limit: number,
     {
@@ -129,7 +128,7 @@ export class NewsRepository {
   ) {
     const subQuery = this.newsRepo
       .createQueryBuilder('subNews')
-      .select('subNews.id id')
+      .select(['subNews.id id', 'MAX(timeline.date) timelineDate'])
       .leftJoin('subNews.timeline', 'timeline')
       .groupBy('subNews.id')
       .where('1 = 1');
@@ -142,15 +141,12 @@ export class NewsRepository {
     }
     subQuery
       .orderBy('state', 'DESC')
-      .addOrderBy(
-        '(SELECT MAX(t.date) FROM timeline t WHERE t.newsId = subNews.id)',
-        'DESC',
-      )
+      .addOrderBy('timelineDate', 'DESC')
       .addOrderBy('subNews.id', 'DESC')
       .limit(limit)
       .offset(page);
 
-    return this.newsRepo
+    const response = await this.newsRepo
       .createQueryBuilder('news')
       .innerJoin(
         `(${subQuery.getQuery()})`,
@@ -159,17 +155,40 @@ export class NewsRepository {
       )
       .setParameters(subQuery.getParameters())
       .select([
-        'news.id',
-        'news.title',
-        'news.subTitle',
-        'news.summary',
-        'news.newsImage',
-        'news.state',
-        'news.isPublished',
-        'keywords.keyword',
+        'news.id id',
+        'news.title title',
+        'news.subTitle subTitle',
+        'news.summary summary',
+        'news.newsImage newsImage',
+        'news.state state',
+        'news.isPublished isPublished',
+        'paged_news.timelineDate timelineDate',
+        'keywords.id keywordId',
+        'keywords.keyword keyword',
       ])
       .leftJoin('news.keywords', 'keywords')
-      .getMany();
+      .getRawMany();
+
+    const ids = [];
+    const entityMap = {};
+    response.forEach((row) => {
+      const { id, keywordId, keyword, ...rest } = row;
+      if (id in entityMap) {
+        entityMap[id].keywords.push({ id: keywordId, keyword });
+      } else {
+        ids.push(id);
+        entityMap[id] = {
+          id: Number(id),
+          ...rest,
+          keywords: [{ id: Number(keywordId), keyword }],
+        };
+      }
+    });
+    const result = ids.map((id) => {
+      return entityMap[id];
+    });
+
+    return result;
   }
 
   async getNewsListByOptions(options: FindOptionsWhere<News> = {}) {
