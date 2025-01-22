@@ -140,9 +140,8 @@ export class KeywordRepository {
       await this.updateKeywordState(id, queryRunner.manager);
       await queryRunner.commitTransaction();
     } catch (e) {
-      console.log('<<<<<<<<<<<<<<<<<<<');
-      console.log(e);
       await queryRunner.rollbackTransaction();
+      throw e;
     } finally {
       await queryRunner.release();
     }
@@ -159,6 +158,7 @@ export class KeywordRepository {
       await queryRunner.commitTransaction();
     } catch (e) {
       await queryRunner.rollbackTransaction();
+      throw e;
     } finally {
       await queryRunner.release();
     }
@@ -174,6 +174,7 @@ export class KeywordRepository {
       await queryRunner.commitTransaction();
     } catch (e) {
       await queryRunner.rollbackTransaction();
+      throw e;
     } finally {
       await queryRunner.release();
     }

@@ -221,9 +221,10 @@ export class NewsRepository {
       }
 
       await queryRunner.commitTransaction();
+      return news.id;
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
+      throw Error(e);
     } finally {
       await queryRunner.release();
     }
@@ -245,8 +246,8 @@ export class NewsRepository {
       await this.updateKeywordsState(keywordsToUpdate, queryRunner.manager);
       await queryRunner.commitTransaction();
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
+      throw e;
     } finally {
       await queryRunner.release();
     }
@@ -265,8 +266,8 @@ export class NewsRepository {
       await this.updateKeywordsState(prevKeywords, queryRunner.manager);
       await queryRunner.commitTransaction();
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
+      throw e;
     } finally {
       await queryRunner.release();
     }
