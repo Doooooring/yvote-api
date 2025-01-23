@@ -7,10 +7,10 @@ import { AuthModule } from './auth/auth.module';
 import { TypeormConfig } from './config/typeorm.config';
 import { ImgModule } from './img/img.module';
 import { KeywordModule } from './keyword/keyword.module';
-import { NewsModule } from './news/news.module';
-import { MigrationModule } from './migration/migration.module';
 import { AuthCorsMiddleware } from './middleware/auth_cors.middleware';
 import { CommonCorsMiddleware } from './middleware/common_cors.middleware';
+import { MigrationModule } from './migration/migration.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -43,6 +43,8 @@ export class AppModule {
     { path: '/news/edit/:id', method: RequestMethod.PATCH },
     { path: '/news/edit/:id', method: RequestMethod.DELETE },
     { path: '/news/edit/:id', method: RequestMethod.OPTIONS },
+    { path: '/news/edit/:id/comments', method: RequestMethod.PATCH },
+    { path: '/news/edit/:id/comments', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit', method: RequestMethod.POST },
     { path: '/keyword/edit', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit/:id', method: RequestMethod.POST },

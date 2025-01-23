@@ -196,12 +196,9 @@ export class KeywordRepository {
   }
 
   async getKeywordState(keywordId: number, manager?: EntityManager) {
-    let keywordRepo;
-    if (manager) {
-      keywordRepo = manager.getRepository(Keyword);
-    } else {
-      keywordRepo = this.keywordRepo;
-    }
+    const keywordRepo = manager
+      ? manager.getRepository(Keyword)
+      : this.keywordRepo;
 
     const cnt = await keywordRepo
       .createQueryBuilder('keyword')

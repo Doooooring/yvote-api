@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
 import { NewsCommentType } from 'src/interface/news';
-import { Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 
 export interface RecentComment
   extends Pick<Comment, 'id' | 'commentType' | 'title' | 'comment' | 'date'> {
@@ -12,9 +12,17 @@ export interface RecentComment
 @Injectable()
 export class CommentRepository {
   constructor(
+    private dataSource: DataSource,
     @InjectRepository(Comment)
     private readonly commentRepo: Repository<Comment>,
   ) {}
+
+  async startTransaction() {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    return queryRunner;
+  }
 
   async getCommentsRecentUpdated(offset: number, limit: number) {
     return await this.commentRepo
@@ -70,6 +78,41 @@ export class CommentRepository {
           id: id,
         },
       },
+    });
+  }
+
+  async saveCommentsByNewsId(newsId: number, comments: Comment[]) {
+    const queryRunner = await this.startTransaction();
+    try {
+      const commentRepo = queryRunner.manager.getRepository(Comment);
+      for (const order in comments) {
+        const comment = comments[order];
+        comment.order = Number(order);
+        const result = await this.saveCommentByNewsId(newsId, comment);
+      }
+
+      await queryRunner.commitTransaction();
+      return true;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw Error(e);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async saveCommentByNewsId(
+    newsId: number,
+    comment: Comment,
+    manager?: EntityManager,
+  ) {
+    const commentRepo = manager
+      ? manager.getRepository(Comment)
+      : this.commentRepo;
+
+    const response = await commentRepo.save({
+      ...comment,
+      news: { id: newsId },
     });
   }
 }

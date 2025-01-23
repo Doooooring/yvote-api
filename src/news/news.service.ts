@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Comment } from 'src/entity/comment.entity';
 import { NewsCommentType, NewsEdit } from 'src/interface/news';
 import { CommentRepository } from 'src/repository/comment/comment.repository';
 import { KeywordRepository } from 'src/repository/keyword/keyword.repository';
@@ -34,10 +35,8 @@ export class NewsService {
 
   async getNewsToEditById(id: number) {
     const message = 'Start fetch news to edit id : ' + id;
-    console.log(message);
     const data = await this.newsRepo.getNewsInEdit(id);
     const st = JSON.stringify(data);
-    console.log('data size : ', st.length);
 
     return data;
   }
@@ -69,6 +68,10 @@ export class NewsService {
 
   async getRecentComments(offset: number, limit: number) {
     return await this.commentRepo.getCommentsRecentUpdated(offset, limit);
+  }
+
+  async saveCommentsByNewsId(newsId: number, comments: Comment[]) {
+    return await this.commentRepo.saveCommentsByNewsId(newsId, comments);
   }
 
   async postNews(news: NewsEdit) {

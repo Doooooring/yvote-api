@@ -91,7 +91,7 @@ export class NewsRepository {
   }
 
   async getNewsInEdit(id: number) {
-    return this.newsRepo
+    const news = await this.newsRepo
       .createQueryBuilder('news')
       .select([
         'news.id',
@@ -107,12 +107,15 @@ export class NewsRepository {
         'keyword.keyword',
       ])
       .leftJoin('news.keywords', 'keyword')
-      .leftJoinAndSelect('news.comments', 'comments')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .where('news.id = :id', { id: id })
       .addOrderBy('timeline.date', 'ASC')
-      .addOrderBy('comments.order', 'ASC')
-      .getOne() as Promise<News>;
+      .getOne();
+
+    const distnctComments = await this.getDistinctCommentTypeByNewsId(id);
+
+    news.comments = distnctComments.map(({ commentType }) => commentType);
+    return news;
   }
 
   async getNewsPreviews(
@@ -207,7 +210,7 @@ export class NewsRepository {
 
     try {
       const newsRepository = queryRunner.manager.getRepository(News);
-      await newsRepository.save({
+      const result = await newsRepository.save({
         ...news,
         order: 0,
       });
@@ -221,7 +224,7 @@ export class NewsRepository {
       }
 
       await queryRunner.commitTransaction();
-      return news.id;
+      return result.id;
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw Error(e);

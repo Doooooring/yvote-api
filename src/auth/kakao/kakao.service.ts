@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { AuthServiceInterface } from '../auth.service.interface';
 import axios from 'axios';
+import { AuthServiceInterface } from '../auth.service.interface';
 
 @Injectable()
 export class KakakoAuthService extends AuthServiceInterface {
-  constructor(
-    private readonly KAKAO_API_URL = 'https://kapi.kakao.com',
-    private readonly KAKAO_AUTH_URL = 'https://kauth.kakao.com',
-  ) {
+  private readonly KAKAO_API_URL = 'https://kapi.kakao.com';
+  private readonly KAKAO_AUTH_URL = 'https://kauth.kakao.com';
+  constructor() {
     super();
   }
 

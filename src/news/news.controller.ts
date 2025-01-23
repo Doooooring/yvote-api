@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { AdminGuard } from 'src/auth/admin/admin.guard';
 import { LogRequests } from 'src/decorators/requestLoggin.decorator';
+import { News } from 'src/entity/news.entity';
 import { NewsCommentType, NewsEdit } from 'src/interface/news';
 import { KeywordService } from 'src/keyword/keyword.service';
 import { RespInterceptor } from 'src/tools/decorator';
@@ -85,7 +86,7 @@ export class NewsController {
   async postNewsToEdit(@Body() body: { news: NewsEdit }) {
     const { news } = body;
     const response = await this.newsService.postNews(news);
-    return true;
+    return response;
   }
 
   @Get('/:id')
@@ -101,6 +102,18 @@ export class NewsController {
     const news = await this.newsService.getNewsToEditById(id);
 
     return news;
+  }
+
+  @UseGuards(AdminGuard)
+  @Patch('/edit/:id/comments')
+  @RespInterceptor
+  async updateCommentsByNewsId(
+    @Param('id') id: number,
+    @Body() body: { comments: News['comments'] },
+  ) {
+    const { comments } = body;
+    const response = await this.newsService.saveCommentsByNewsId(id, comments);
+    return true;
   }
 
   @UseGuards(AdminGuard)
