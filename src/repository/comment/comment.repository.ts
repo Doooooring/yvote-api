@@ -87,7 +87,7 @@ export class CommentRepository {
       const commentRepo = queryRunner.manager.getRepository(Comment);
       for (const order in comments) {
         const comment = comments[order];
-        comment.order = Number(order);
+        comment.order = comments.length - Number(order);
         const result = await this.saveCommentByNewsId(newsId, comment);
       }
 
