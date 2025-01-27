@@ -38,6 +38,12 @@ export class News {
   @Column({ type: 'longtext' })
   summary: string;
 
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+  })
+  date?: Date;
+
   @Column({ default: false })
   state: boolean;
 

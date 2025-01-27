@@ -6,6 +6,7 @@ import { News } from 'src/entity/news.entity';
 import { Timeline } from 'src/entity/timeline.entity';
 import { User } from 'src/entity/user.entity';
 import { Vote } from 'src/entity/vote.entity';
+import { DataSourceOptions } from 'typeorm';
 
 export const TypeormConfig = (configService: ConfigService) => {
   const type = 'mysql';
@@ -15,7 +16,7 @@ export const TypeormConfig = (configService: ConfigService) => {
   const username = configService.get('DB_USER_NAME');
   const password = configService.get('DB_PASSWORD');
 
-  const option: TypeOrmModuleOptions = {
+  const option: TypeOrmModuleOptions & DataSourceOptions = {
     type,
     host,
     port,
