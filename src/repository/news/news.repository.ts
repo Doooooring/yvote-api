@@ -69,6 +69,7 @@ export class NewsRepository {
         'news.title',
         'news.subTitle',
         'news.summary',
+        'news.date',
         'news.state',
         'news.opinionLeft',
         'news.opinionRight',
@@ -98,6 +99,7 @@ export class NewsRepository {
         'news.title',
         'news.subTitle',
         'news.summary',
+        'news.date',
         'news.state',
         'news.isPublished',
         'news.opinionLeft',
@@ -108,8 +110,8 @@ export class NewsRepository {
       ])
       .leftJoin('news.keywords', 'keyword')
       .leftJoinAndSelect('news.timeline', 'timeline')
+      .orderBy('timeline.date', 'ASC')
       .where('news.id = :id', { id: id })
-      .addOrderBy('timeline.date', 'ASC')
       .getOne();
 
     const distnctComments = await this.getDistinctCommentTypeByNewsId(id);
@@ -131,8 +133,7 @@ export class NewsRepository {
   ) {
     const subQuery = this.newsRepo
       .createQueryBuilder('subNews')
-      .select(['subNews.id id', 'MAX(timeline.date) timelineDate'])
-      .leftJoin('subNews.timeline', 'timeline')
+      .select(['subNews.id id'])
       .groupBy('subNews.id')
       .where('1 = 1');
 
@@ -144,7 +145,7 @@ export class NewsRepository {
     }
     subQuery
       .orderBy('state', 'DESC')
-      .addOrderBy('timelineDate', 'DESC')
+      .addOrderBy('subNews.date', 'DESC')
       .addOrderBy('subNews.id', 'DESC')
       .limit(limit)
       .offset(page);
@@ -165,7 +166,7 @@ export class NewsRepository {
         'news.newsImage newsImage',
         'news.state state',
         'news.isPublished isPublished',
-        'paged_news.timelineDate timelineDate',
+        'news.date date',
         'keywords.id keywordId',
         'keywords.keyword keyword',
       ])
