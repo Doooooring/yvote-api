@@ -40,13 +40,13 @@ export class NewsRepository {
 
   async getNewsTitles(search: string) {
     return this.newsRepo.find({
-      select: ['id', 'title'],
-      where: {
-        title: Like(`%${search}%`),
-      },
-    }) as Promise<Pick<News, 'id' | 'title'>[]>;
+      select: ['id', 'title', 'subTitle'],
+      where: [
+        { title: Like(`%${search}%`) },
+        { subTitle: Like(`%${search}%`) },
+      ],
+    }) as Promise<Pick<News, 'id' | 'title' | 'subTitle'>[]>;
   }
-
   async getNewsCount() {
     return this.newsRepo.count();
   }
