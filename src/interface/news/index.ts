@@ -41,11 +41,16 @@ export interface NewsPreviews
   }>;
 }
 
-export interface NewsEdit extends Omit<News, 'votes' | 'keywords'> {
+export interface NewsEdit
+  extends Omit<News, 'votes' | 'keywords' | 'comments'> {
   keywords: Array<{
     id: number;
     keyword: string;
   }>;
+}
+
+export interface NewsEditWithCommentTypes extends NewsEdit {
+  comments: Array<NewsCommentType>;
 }
 
 export interface NewsinView extends Omit<News, 'comments' | 'keywords'> {

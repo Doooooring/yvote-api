@@ -14,7 +14,11 @@ import {
 import { AdminGuard } from 'src/auth/admin/admin.guard';
 import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 import { News } from 'src/entity/news.entity';
-import { NewsCommentType, NewsEdit } from 'src/interface/news';
+import {
+  NewsCommentType,
+  NewsEdit,
+  NewsEditWithCommentTypes,
+} from 'src/interface/news';
 import { KeywordService } from 'src/keyword/keyword.service';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
@@ -126,7 +130,7 @@ export class NewsController {
   @RespInterceptor
   async updateNewsToEditById(
     @Param('id') id: number,
-    @Body() body: { news: NewsEdit },
+    @Body() body: { news: NewsEditWithCommentTypes },
   ) {
     const { news } = body;
     const response = await this.newsService.updateNewsCascade(id, news);

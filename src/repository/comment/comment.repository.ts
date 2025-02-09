@@ -134,4 +134,16 @@ export class CommentRepository {
 
     return response;
   }
+
+  async hydrateCommentsByCommentTypes(
+    newsId: number,
+    commentTypes: Array<NewsCommentType>,
+  ) {
+    const response = await this.commentRepo
+      .createQueryBuilder('commnet')
+      .delete()
+      .where('newsId = :newsId', { newsId: newsId })
+      .andWhere('commentType NOT IN (:...commentTypes)', { commentTypes })
+      .execute();
+  }
 }

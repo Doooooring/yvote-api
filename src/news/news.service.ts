@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Comment } from 'src/entity/comment.entity';
-import { NewsCommentType, NewsEdit } from 'src/interface/news';
+import {
+  NewsCommentType,
+  NewsEdit,
+  NewsEditWithCommentTypes,
+} from 'src/interface/news';
 import { CommentRepository } from 'src/repository/comment/comment.repository';
 import { KeywordRepository } from 'src/repository/keyword/keyword.repository';
 import { NewsRepository } from 'src/repository/news/news.repository';
@@ -84,18 +88,16 @@ export class NewsService {
     return await this.newsRepo.postNews(news);
   }
 
-  async updateNewsCascade(id: number, news: NewsEdit) {
-    if (!news.id) news.id = id;
+  async updateNewsCascade(id: number, news: Partial<NewsEditWithCommentTypes>) {
+    const { comments = [], ...rest } = news;
 
-    return this.newsRepo.updateNews(id, news);
-  }
+    const newsUpdate = await this.newsRepo.updateNews(id, rest);
+    const commentsUpdate = await this.commentRepo.hydrateCommentsByCommentTypes(
+      id,
+      comments,
+    );
 
-  /**
-   * @CAUTION
-   * typeorm 'update' method bypasses relational updates
-   */
-  async updateNews(id: number, news: Partial<NewsEdit>) {
-    return await this.newsRepo.updateNews(id, news);
+    return true;
   }
 
   async deleteNewsById(id: number) {
