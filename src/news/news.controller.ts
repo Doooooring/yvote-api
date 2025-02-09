@@ -105,14 +105,19 @@ export class NewsController {
   }
 
   @UseGuards(AdminGuard)
-  @Patch('/edit/:id/comments')
+  @Patch('/edit/:id/comments/:commentType')
   @RespInterceptor
   async updateCommentsByNewsId(
     @Param('id') id: number,
+    @Param('commentType') commentType: NewsCommentType,
     @Body() body: { comments: News['comments'] },
   ) {
     const { comments } = body;
-    const response = await this.newsService.saveCommentsByNewsId(id, comments);
+    const response = await this.newsService.saveCommentsByNewsId(
+      id,
+      commentType,
+      comments,
+    );
     return true;
   }
 

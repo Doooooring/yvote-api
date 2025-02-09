@@ -43,8 +43,14 @@ export class AppModule {
     { path: '/news/edit/:id', method: RequestMethod.PATCH },
     { path: '/news/edit/:id', method: RequestMethod.DELETE },
     { path: '/news/edit/:id', method: RequestMethod.OPTIONS },
-    { path: '/news/edit/:id/comments', method: RequestMethod.PATCH },
-    { path: '/news/edit/:id/comments', method: RequestMethod.OPTIONS },
+    {
+      path: '/news/edit/:id/comments/:commentType',
+      method: RequestMethod.PATCH,
+    },
+    {
+      path: '/news/edit/:id/comments/:commentType',
+      method: RequestMethod.OPTIONS,
+    },
     { path: '/keyword/edit', method: RequestMethod.POST },
     { path: '/keyword/edit', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit/:id', method: RequestMethod.POST },

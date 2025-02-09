@@ -68,8 +68,16 @@ export class NewsService {
     return await this.commentRepo.getCommentsRecentUpdated(offset, limit);
   }
 
-  async saveCommentsByNewsId(newsId: number, comments: Comment[]) {
-    return await this.commentRepo.saveCommentsByNewsId(newsId, comments);
+  async saveCommentsByNewsId(
+    newsId: number,
+    commentType: NewsCommentType,
+    comments: Comment[],
+  ) {
+    return await this.commentRepo.saveCommentsByNewsId(
+      newsId,
+      commentType,
+      comments,
+    );
   }
 
   async postNews(news: NewsEdit) {

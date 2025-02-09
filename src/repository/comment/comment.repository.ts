@@ -81,15 +81,32 @@ export class CommentRepository {
     });
   }
 
-  async saveCommentsByNewsId(newsId: number, comments: Comment[]) {
+  async saveCommentsByNewsId(
+    newsId: number,
+    commentType: NewsCommentType,
+    comments: Comment[],
+  ) {
     const queryRunner = await this.startTransaction();
     try {
       const commentRepo = queryRunner.manager.getRepository(Comment);
+
+      const ids = [];
+
       for (const order in comments) {
         const comment = comments[order];
         comment.order = comments.length - Number(order);
         const result = await this.saveCommentByNewsId(newsId, comment);
+        ids.push(result.id);
       }
+
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from(Comment)
+        .where('commentType = :commentType', { commentType })
+        .andWhere('newsId = :newsId', { newsId: newsId })
+        .andWhere('id NOT IN (:...ids)', { ids })
+        .execute();
 
       await queryRunner.commitTransaction();
       return true;
@@ -114,5 +131,7 @@ export class CommentRepository {
       ...comment,
       news: { id: newsId },
     });
+
+    return response;
   }
 }
