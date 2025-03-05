@@ -85,11 +85,15 @@ export class NewsService {
   }
 
   async postNews(news: NewsEdit) {
+    this.setNewsTimelineOrder(news);
+
     return await this.newsRepo.postNews(news);
   }
 
   async updateNewsCascade(id: number, news: Partial<NewsEditWithCommentTypes>) {
     const { comments = [], ...rest } = news;
+
+    this.setNewsTimelineOrder(rest);
 
     const newsUpdate = await this.newsRepo.updateNews(id, rest);
     const commentsUpdate = await this.commentRepo.hydrateCommentsByCommentTypes(
@@ -102,5 +106,12 @@ export class NewsService {
 
   async deleteNewsById(id: number) {
     return await this.newsRepo.deleteNewsById(id);
+  }
+
+  setNewsTimelineOrder(news: Partial<NewsEdit>) {
+    return news.timeline.map((t, idx) => {
+      t.order = news.timeline.length - idx;
+      return t;
+    });
   }
 }

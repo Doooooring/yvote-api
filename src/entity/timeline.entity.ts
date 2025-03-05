@@ -12,6 +12,9 @@ export class Timeline {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  order: number;
+
   @Column({
     type: 'timestamp',
     nullable: true,
