@@ -96,6 +96,7 @@ export class NewsService {
     this.setNewsTimelineOrder(rest);
 
     const newsUpdate = await this.newsRepo.updateNews(id, rest);
+
     const commentsUpdate = await this.commentRepo.hydrateCommentsByCommentTypes(
       id,
       comments,
@@ -110,7 +111,7 @@ export class NewsService {
 
   setNewsTimelineOrder(news: Partial<NewsEdit>) {
     return news.timeline.map((t, idx) => {
-      t.order = news.timeline.length - idx;
+      t.order = idx;
       return t;
     });
   }

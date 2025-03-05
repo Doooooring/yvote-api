@@ -139,11 +139,17 @@ export class CommentRepository {
     newsId: number,
     commentTypes: Array<NewsCommentType>,
   ) {
-    const response = await this.commentRepo
-      .createQueryBuilder('commnet')
+    const queryBuilder = this.commentRepo
+      .createQueryBuilder('comment')
       .delete()
-      .where('newsId = :newsId', { newsId: newsId })
-      .andWhere('commentType NOT IN (:...commentTypes)', { commentTypes })
-      .execute();
+      .where('newsId = :newsId', { newsId });
+
+    if (commentTypes.length > 0) {
+      queryBuilder.andWhere('commentType NOT IN (:...commentTypes)', {
+        commentTypes,
+      });
+    }
+
+    const response = await queryBuilder.execute();
   }
 }
