@@ -19,7 +19,7 @@ import {
   NewsEdit,
   NewsEditWithCommentTypes,
 } from 'src/interface/news';
-import { KeywordService } from 'src/keyword/keyword.service';
+import { OpenAIService } from 'src/openai/openai.service';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
 
@@ -29,8 +29,8 @@ export class NewsController {
   constructor(
     @Inject(NewsService)
     private readonly newsService: NewsService,
-    @Inject(KeywordService)
-    private readonly keywordService: KeywordService,
+    @Inject(OpenAIService)
+    private readonly openAIService: OpenAIService,
   ) {}
 
   // @Get()

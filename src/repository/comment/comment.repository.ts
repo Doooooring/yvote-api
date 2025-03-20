@@ -24,6 +24,14 @@ export class CommentRepository {
     return queryRunner;
   }
 
+  async getCommentByCommentId(id: number) {
+    return await this.commentRepo.findOne({
+      where: {
+        id: id,
+      },
+    });
+  }
+
   async getCommentsRecentUpdated(offset: number, limit: number) {
     return await this.commentRepo
       .createQueryBuilder('comment')
