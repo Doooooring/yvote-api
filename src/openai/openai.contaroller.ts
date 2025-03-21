@@ -5,7 +5,7 @@ import { RespInterceptor } from 'src/tools/decorator';
 import { OpenAIService } from './openai.service';
 
 @LogRequests()
-@Controller('openAI')
+@Controller('openai')
 export class OpenAIController {
   constructor(
     @Inject(OpenAIService)
@@ -14,7 +14,7 @@ export class OpenAIController {
 
   @Post('/')
   @RespInterceptor
-  async getFreeMessage(
+  async getAIResult(
     @Body() body: { message: Array<ChatCompletionMessageParam> },
   ) {
     const { message } = body;
