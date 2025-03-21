@@ -42,6 +42,14 @@ export class AuthController {
     return true;
   }
 
+  @UseGuards(AdminGuard)
+  @Get('/admin/cookie-info')
+  @RespInterceptor
+  async getCookieInfo(@Req() req: Request) {
+    const token = req.cookies['access_token'];
+    const info = await this.adminAuthService.getCookieInfo(token);
+  }
+
   @Post('/admin/refresh')
   async checkTokenRefresh() {}
 
