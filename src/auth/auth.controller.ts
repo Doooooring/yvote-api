@@ -42,6 +42,13 @@ export class AuthController {
     return true;
   }
 
+  @UseGuards(AdminGuard)
+  @Get('/admin/cookie-info')
+  async getCookiePayload(@Req() req: Request) {
+    console.log(req.cookies);
+    return true;
+  }
+
   @Post('/admin/refresh')
   async checkTokenRefresh() {}
 
