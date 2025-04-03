@@ -48,6 +48,7 @@ export class AuthController {
   async getCookieInfo(@Req() req: Request) {
     const token = req.cookies['access_token'];
     const info = await this.adminAuthService.getCookieInfo(token);
+    return info;
   }
 
   @Post('/admin/refresh')

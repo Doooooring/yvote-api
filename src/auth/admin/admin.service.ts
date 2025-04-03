@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { AuthPayload } from 'src/interface/auth';
 import { AuthServiceInterface } from '../auth.service.interface';
 
 @Injectable()
@@ -13,7 +14,10 @@ export class AdminAuthService extends AuthServiceInterface {
   }
   async login(token: string) {
     if (token == this.configService.get('YVOTE_ADMIN_CODE')) {
-      const payload = { username: 'admin', expiredAt: new Date() };
+      const payload = {
+        username: 'admin',
+        expiredAt: new Date(),
+      } as AuthPayload;
       const jwt = await this.jwtService.signAsync(payload, {
         expiresIn: `${60 * 60 * 24}s`,
       });
@@ -22,8 +26,8 @@ export class AdminAuthService extends AuthServiceInterface {
     throw new UnauthorizedException();
   }
 
-  async getCookieInfo(token: string) {
-    const info = await this.jwtService.verifyAsync(token);
-    return info;
+  async getCookieInfo(accessToken: string) {
+    const payload = this.jwtService.decode(accessToken) as AuthPayload;
+    return payload;
   }
 }
