@@ -39,6 +39,7 @@ import { OpenAIModule } from './openai/openai.module';
 export class AppModule {
   corsAuthCheckPath = [
     { path: '/auth/admin/validate-session', method: RequestMethod.GET },
+    { path: '/auth/admin/cookie-info', method: RequestMethod.GET },
     { path: '/auth/admin/login', method: RequestMethod.POST },
     { path: '/auth/admin/login', method: RequestMethod.OPTIONS },
     { path: '/news/edit', method: RequestMethod.POST },

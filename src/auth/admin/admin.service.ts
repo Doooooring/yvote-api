@@ -14,9 +14,12 @@ export class AdminAuthService extends AuthServiceInterface {
   }
   async login(token: string) {
     if (token == this.configService.get('YVOTE_ADMIN_CODE')) {
+      const cur = new Date();
+      cur.setDate(cur.getDate() + 1);
+
       const payload = {
         username: 'admin',
-        expiredAt: new Date(),
+        expiredAt: cur,
       } as AuthPayload;
       const jwt = await this.jwtService.signAsync(payload, {
         expiresIn: `${60 * 60 * 24}s`,
