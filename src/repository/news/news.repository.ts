@@ -78,6 +78,7 @@ export class NewsRepository {
       ])
       .leftJoin('news.keywords', 'keywords')
       .addSelect(['keywords.keyword', 'keywords.id'])
+      .leftJoinAndSelect('news.summaries', 'summaries')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .orderBy('timeline.order', 'ASC')
       .where('news.id = :id', { id: id })
@@ -110,6 +111,7 @@ export class NewsRepository {
       ])
       .leftJoin('news.keywords', 'keyword')
       .leftJoinAndSelect('news.timeline', 'timeline')
+      .leftJoinAndSelect('news.summaries', 'summaries')
       .orderBy('timeline.order', 'ASC')
       .where('news.id = :id', { id: id })
       .getOne();

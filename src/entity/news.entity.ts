@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Comment } from './comment.entity';
 import { Keyword } from './keyword.entity';
+import { NewsSummary } from './newsSummary.entity';
 import { Timeline } from './timeline.entity';
 import { Vote } from './vote.entity';
 
@@ -58,6 +59,11 @@ export class News {
 
   @Column({ nullable: true })
   newsImage?: string;
+
+  @OneToMany(() => NewsSummary, (summary) => summary.news, {
+    cascade: ['insert', 'update', 'remove', 'soft-remove', 'recover'],
+  })
+  summaries: NewsSummary[];
 
   @OneToMany(() => Comment, (comment) => comment.news, {
     cascade: ['insert', 'update', 'remove', 'soft-remove', 'recover'],

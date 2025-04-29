@@ -30,6 +30,7 @@ export interface NewsPreviews
     | 'subTitle'
     | 'slug'
     | 'summary'
+    | 'summaries'
     | 'state'
     | 'isPublished'
     | 'newsImage'

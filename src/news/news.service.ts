@@ -34,12 +34,16 @@ export class NewsService {
 
   async getNewsToViewById(id: number) {
     const data = await this.newsRepo.getNewsInView(id);
+
+    data.summary = data.summaries.filter(
+      (s) => s.commentType === NewsCommentType.와이보트,
+    )[0]?.summary;
+
     return data;
   }
 
   async getNewsToEditById(id: number) {
     const data = await this.newsRepo.getNewsInEdit(id);
-
     return data;
   }
 
