@@ -1,11 +1,17 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { News } from './news.entity';
 
 @Entity({
   name: 'NewsSummary',
 })
 export class NewsSummary {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ default: '', type: 'longtext' })

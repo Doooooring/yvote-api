@@ -96,6 +96,10 @@ export class NewsService {
 
   async updateNewsCascade(id: number, news: Partial<NewsEditWithCommentTypes>) {
     const { comments = [], ...rest } = news;
+    const { summaries } = rest;
+
+    console.log('==================');
+    console.log(summaries);
 
     this.setNewsTimelineOrder(rest);
 
