@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
 import { News } from 'src/entity/news.entity';
+import { NewsSummary } from 'src/entity/newsSummary.entity';
 import { DBERROR } from 'src/interface/err';
-import { NewsEdit } from 'src/interface/news';
+import { NewsCommentType, NewsEdit, NewsState } from 'src/interface/news';
 import { mergeUniqueArrays } from 'src/tools/common';
 import {
   DataSource,
@@ -23,6 +24,8 @@ export class NewsRepository {
     private readonly newsRepo: Repository<News>,
     @InjectRepository(Comment)
     private readonly commentRepo: Repository<Comment>,
+    @InjectRepository(NewsSummary)
+    private readonly newsSummaryRepo: Repository<NewsSummary>,
     private readonly keywordRepository: KeywordRepository,
   ) {}
 
@@ -84,6 +87,8 @@ export class NewsRepository {
       .where('news.id = :id', { id: id })
       .getOne();
 
+    console.log(news);
+
     if (!news) throw Error(DBERROR.NOT_EXIST);
     const distnctComments = await this.getDistinctCommentTypeByNewsId(id);
 
@@ -127,10 +132,10 @@ export class NewsRepository {
     limit: number,
     {
       keyword,
-      isAdmin,
+      state,
     }: {
       keyword?: string;
-      isAdmin?: boolean;
+      state?: NewsState;
     },
   ) {
     const subQuery = this.newsRepo
@@ -139,7 +144,11 @@ export class NewsRepository {
       .groupBy('subNews.id')
       .where('1 = 1');
 
-    if (!isAdmin) subQuery.andWhere('isPublished = True');
+    if (state)
+      subQuery.andWhere('state  = :state', {
+        state: state,
+      });
+
     if (keyword) {
       subQuery
         .leftJoin('subNews.keywords', 'keywords')
@@ -164,7 +173,6 @@ export class NewsRepository {
         'news.id id',
         'news.title title',
         'news.subTitle subTitle',
-        'news.summary summary',
         'news.newsImage newsImage',
         'news.state state',
         'news.isPublished isPublished',
@@ -174,6 +182,8 @@ export class NewsRepository {
       ])
       .leftJoin('news.keywords', 'keywords')
       .getRawMany();
+
+    if (response.length === 0) return [];
 
     const ids = [];
     const entityMap = {};
@@ -190,6 +200,31 @@ export class NewsRepository {
         };
       }
     });
+
+    const summaries = await this.newsSummaryRepo
+      .createQueryBuilder('newsSummary')
+      .select([
+        'newsSummary.newsId newsId',
+        'newsSummary.commentType commentType',
+        'newsSummary.summary summary',
+      ])
+      .where('newsSummary.newsId IN (:...ids)', { ids })
+      .getRawMany();
+
+    summaries.forEach((row) => {
+      const { newsId, commentType } = row;
+      if (newsId in entityMap) {
+        const entity = entityMap[newsId];
+        if (!entity.comments) {
+          entity.comments = [];
+        }
+        entity.comments.push(commentType);
+        if (commentType === NewsCommentType.와이보트) {
+          entity.summary = row.summary;
+        }
+      }
+    });
+
     const result = ids.map((id) => {
       return entityMap[id];
     });
@@ -233,6 +268,71 @@ export class NewsRepository {
       throw Error(e);
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  async createNewsSummary(newsId: number, commentType: NewsCommentType) {
+    const queryRunner = await this.startTransaction();
+    const newsSummaryRepo = queryRunner.manager.getRepository(NewsSummary);
+
+    try {
+      const existingSummary = await newsSummaryRepo.findOne({
+        where: {
+          news: { id: newsId },
+          commentType: commentType,
+        },
+      });
+      if (existingSummary) {
+        throw Error(DBERROR.DUPLICATE);
+      }
+
+      const newsSummary = {
+        newsId: newsId,
+        commentType: commentType,
+      };
+
+      await newsSummaryRepo.save(newsSummary);
+      await queryRunner.commitTransaction();
+      return newsSummary;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async convertNewsCommentType(
+    newsId: number,
+    prev: NewsCommentType,
+    next: NewsCommentType,
+  ) {
+    const queryRunner = await this.startTransaction();
+    const newsSummaryRepo = queryRunner.manager.getRepository(NewsSummary);
+    const commentRepo = queryRunner.manager.getRepository(Comment);
+    try {
+      const summary = await newsSummaryRepo
+        .createQueryBuilder('newsSummary')
+        .where('newsSummary.newsId = :newsId', { newsId })
+        .andWhere('newsSummary.commentType = :prev', { prev })
+        .update({
+          commentType: next,
+        })
+        .execute();
+
+      const comment = await commentRepo
+        .createQueryBuilder('comment')
+        .where('comment.newsId = :newsId', { newsId })
+        .andWhere('comment.commentType = :prev', { prev })
+        .update({
+          commentType: next,
+        })
+        .execute();
+
+      return true;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
     }
   }
 
@@ -291,5 +391,22 @@ export class NewsRepository {
       .select('DISTINCT c.commentType', 'commentType')
       .where('c.newsId = :id', { id })
       .getRawMany();
+  }
+
+  async hydrateNewsSummariesByCommentTypes(
+    newsId: number,
+    commentTypes: NewsCommentType[],
+  ) {
+    const queryBuilder = this.newsSummaryRepo
+      .createQueryBuilder('newsSummary')
+      .delete()
+      .where('newsId = :id', { id: newsId });
+
+    if (commentTypes.length > 0) {
+      queryBuilder.andWhere('commentType NOT IN (:...commentTypes)', {
+        commentTypes,
+      });
+    }
+    return await queryBuilder.execute();
   }
 }

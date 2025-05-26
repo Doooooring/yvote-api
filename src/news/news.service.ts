@@ -4,6 +4,7 @@ import {
   NewsCommentType,
   NewsEdit,
   NewsEditWithCommentTypes,
+  NewsState,
 } from 'src/interface/news';
 import { CommentRepository } from 'src/repository/comment/comment.repository';
 import { KeywordRepository } from 'src/repository/keyword/keyword.repository';
@@ -53,9 +54,25 @@ export class NewsService {
     option: {
       keyword?: string;
       isAdmin?: boolean;
+      state?: NewsState;
     },
   ) {
-    return await this.newsRepo.getNewsPreviews(page, limit, option);
+    const { state, isAdmin, ...rest } = option;
+    let result: any;
+    if (isAdmin) {
+      result = await this.newsRepo.getNewsPreviews(page, limit, {
+        ...rest,
+      });
+    } else {
+      result = await this.newsRepo.getNewsPreviews(page, limit, {
+        ...rest,
+        state,
+      });
+    }
+
+    console.log(result);
+
+    return result;
   }
 
   async getNewsComment(
@@ -88,6 +105,25 @@ export class NewsService {
     );
   }
 
+  async postNewsComment(newsId: number, commentType: NewsCommentType) {
+    const comment = await this.newsRepo.createNewsSummary(newsId, commentType);
+    return comment;
+  }
+
+  async updateNewsComment(
+    newsId: number,
+    prev: NewsCommentType,
+    next: NewsCommentType,
+  ) {
+    const result = await this.newsRepo.convertNewsCommentType(
+      newsId,
+      prev,
+      next,
+    );
+
+    return result;
+  }
+
   async postNews(news: NewsEdit) {
     this.setNewsTimelineOrder(news);
 
@@ -95,11 +131,9 @@ export class NewsService {
   }
 
   async updateNewsCascade(id: number, news: Partial<NewsEditWithCommentTypes>) {
-    const { comments = [], ...rest } = news;
+    const { comments: commentLeg, ...rest } = news;
     const { summaries } = rest;
-
-    console.log('==================');
-    console.log(summaries);
+    const comments = summaries.map((s) => s.commentType as NewsCommentType);
 
     this.setNewsTimelineOrder(rest);
 
@@ -109,6 +143,9 @@ export class NewsService {
       id,
       comments,
     );
+
+    const summaryUpdate =
+      await this.newsRepo.hydrateNewsSummariesByCommentTypes(id, comments);
 
     return true;
   }

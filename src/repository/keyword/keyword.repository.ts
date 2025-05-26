@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Keyword } from 'src/entity/keyword.entity';
 import { KeywordEdit, keywordCategory } from 'src/interface/keyword';
+import { NewsState } from 'src/interface/news';
 import {
   DataSource,
   EntityManager,
@@ -84,7 +85,7 @@ export class KeywordRepository {
   getRecentKeywordsShort(qb: SelectQueryBuilder<Keyword>) {
     return qb
       .innerJoin('keyword.news', 'news')
-      .where('news.state = :state', { state: true })
+      .where('news.state = :state', { state: NewsState.Published })
       .distinct(true);
   }
 
@@ -203,7 +204,7 @@ export class KeywordRepository {
       .createQueryBuilder('keyword')
       .leftJoinAndSelect('keyword.news', 'news')
       .where('keyword.id = :keywordId', { keywordId })
-      .andWhere('news.state = :state', { state: true })
+      .andWhere('news.state = :state', { state: NewsState.Published })
       .getCount();
 
     return cnt > 0;

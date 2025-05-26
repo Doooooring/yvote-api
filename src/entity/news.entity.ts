@@ -1,3 +1,4 @@
+import { NewsState } from 'src/interface/news';
 import {
   Column,
   Entity,
@@ -45,8 +46,12 @@ export class News {
   })
   date?: Date;
 
-  @Column({ default: false })
-  state: boolean;
+  @Column({
+    type: 'varchar',
+    length: 2,
+    default: NewsState.NotPublished,
+  })
+  state: NewsState;
 
   @Column({ default: false })
   isPublished: boolean;

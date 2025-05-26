@@ -65,12 +65,17 @@ export class NewsController {
     @Query('offset') offset: number,
     @Query('limit') limit: number,
     @Query('keyword') keyword: string,
+    @Query('state') state?: News['state'],
     @Query('isAdmin') isAdmin: boolean = false,
   ) {
     const response = await this.newsService.getNewsPreviews(offset, limit, {
       keyword,
+      state,
       isAdmin,
     });
+
+    console.log(response);
+
     return response;
   }
 
@@ -122,6 +127,32 @@ export class NewsController {
       commentType,
       comments,
     );
+    return true;
+  }
+
+  @UseGuards(AdminGuard)
+  @Post('/edit/:id/comment_type')
+  @RespInterceptor
+  async generateNewsComment(
+    @Param('id') id: number,
+    @Body() body: { commentType: NewsCommentType },
+  ) {
+    const { commentType } = body;
+    const response = await this.newsService.postNewsComment(id, commentType);
+
+    return true;
+  }
+
+  @UseGuards(AdminGuard)
+  @Patch('/edit/:id/comment_type')
+  @RespInterceptor
+  async changeNewsComment(
+    @Param('id') id: number,
+    @Body() body: { prev: NewsCommentType; next: NewsCommentType },
+  ) {
+    const { prev, next } = body;
+    const response = await this.newsService.updateNewsComment(id, prev, next);
+
     return true;
   }
 

@@ -1,6 +1,12 @@
 import { Keyword } from 'src/entity/keyword.entity';
 import { News } from 'src/entity/news.entity';
 
+export enum NewsState {
+  Published = '0',
+  Pending = '1',
+  NotPublished = '2',
+}
+
 export enum NewsCommentType {
   전략가 = '전략가',
   지도자 = '지도자',

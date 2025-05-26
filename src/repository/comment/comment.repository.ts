@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
-import { NewsCommentType } from 'src/interface/news';
+import { NewsCommentType, NewsState } from 'src/interface/news';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 
 export interface RecentComment
@@ -46,8 +46,7 @@ export class CommentRepository {
       .leftJoin('comment.news', 'news')
       .addSelect('news.id')
       .where('comment.date IS NOT NULL')
-      .andWhere('news.isPublished  = :published', { published: true })
-      .andWhere('news.state = :state', { state: false })
+      .andWhere('news.state  != :state', { state: NewsState.NotPublished })
       .orderBy('comment.date', 'DESC')
       .offset(offset)
       .limit(limit)
@@ -158,6 +157,6 @@ export class CommentRepository {
       });
     }
 
-    const response = await queryBuilder.execute();
+    return await queryBuilder.execute();
   }
 }

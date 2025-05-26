@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from 'src/entity/comment.entity';
 import { Keyword } from 'src/entity/keyword.entity';
 import { News } from 'src/entity/news.entity';
+import { NewsSummary } from 'src/entity/newsSummary.entity';
 import { Timeline } from 'src/entity/timeline.entity';
 import { User } from 'src/entity/user.entity';
 import { Vote } from 'src/entity/vote.entity';
@@ -12,7 +13,15 @@ import { NewsRepository } from './news/news.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([News, Keyword, Comment, Timeline, User, Vote]),
+    TypeOrmModule.forFeature([
+      News,
+      NewsSummary,
+      Keyword,
+      Comment,
+      Timeline,
+      User,
+      Vote,
+    ]),
   ],
   providers: [NewsRepository, KeywordRepository, CommentRepository],
   exports: [NewsRepository, KeywordRepository, CommentRepository],
