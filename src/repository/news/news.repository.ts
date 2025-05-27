@@ -275,6 +275,9 @@ export class NewsRepository {
     const queryRunner = await this.startTransaction();
     const newsSummaryRepo = queryRunner.manager.getRepository(NewsSummary);
 
+    console.log('============');
+    console.log(newsId, commentType);
+
     try {
       const existingSummary = await newsSummaryRepo.findOne({
         where: {
@@ -282,12 +285,18 @@ export class NewsRepository {
           commentType: commentType,
         },
       });
+
+      console.log(existingSummary);
       if (existingSummary) {
+        console.log('Duplicate summary found');
         throw Error(DBERROR.DUPLICATE);
       }
 
       const newsSummary = {
-        newsId: newsId,
+        news: {
+          id: newsId,
+        },
+        summary: '',
         commentType: commentType,
       };
 
@@ -296,6 +305,7 @@ export class NewsRepository {
       return newsSummary;
     } catch (e) {
       await queryRunner.rollbackTransaction();
+      console.log(e);
       throw e;
     } finally {
       await queryRunner.release();
