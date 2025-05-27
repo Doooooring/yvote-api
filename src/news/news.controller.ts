@@ -157,6 +157,18 @@ export class NewsController {
   }
 
   @UseGuards(AdminGuard)
+  @Delete('/edit/:id/comment_type/:commentType')
+  @RespInterceptor
+  async deleteNewsComment(
+    @Param('id') id: number,
+    @Param('commentType') commentType: NewsCommentType,
+  ) {
+    const response = await this.newsService.deleteNewsComment(id, commentType);
+
+    return true;
+  }
+
+  @UseGuards(AdminGuard)
   @Patch('/edit/:id')
   @RespInterceptor
   async updateNewsToEditById(

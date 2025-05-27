@@ -68,6 +68,14 @@ export class AppModule {
       path: '/news/edit/:id/comment_type',
       method: RequestMethod.OPTIONS,
     },
+    {
+      path: '/news/edit/:id/comment_type/:commentType',
+      method: RequestMethod.DELETE,
+    },
+    {
+      path: '/news/edit/:id/comment_type/:commentType',
+      method: RequestMethod.OPTIONS,
+    },
     { path: '/keyword/edit', method: RequestMethod.POST },
     { path: '/keyword/edit', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit/:id', method: RequestMethod.POST },

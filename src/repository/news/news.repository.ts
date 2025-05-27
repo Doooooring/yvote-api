@@ -121,9 +121,9 @@ export class NewsRepository {
       .where('news.id = :id', { id: id })
       .getOne();
 
-    const distnctComments = await this.getDistinctCommentTypeByNewsId(id);
+    // const distnctComments = await this.getDistinctCommentTypeByNewsId(id);
 
-    news.comments = distnctComments.map(({ commentType }) => commentType);
+    // news.comments = distnctComments.map(({ commentType }) => commentType);
     return news;
   }
 
@@ -318,31 +318,54 @@ export class NewsRepository {
     next: NewsCommentType,
   ) {
     const queryRunner = await this.startTransaction();
-    const newsSummaryRepo = queryRunner.manager.getRepository(NewsSummary);
-    const commentRepo = queryRunner.manager.getRepository(Comment);
+
     try {
-      const summary = await newsSummaryRepo
-        .createQueryBuilder('newsSummary')
-        .where('newsSummary.newsId = :newsId', { newsId })
-        .andWhere('newsSummary.commentType = :prev', { prev })
-        .update({
-          commentType: next,
-        })
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(NewsSummary)
+        .set({ commentType: next })
+        .where('newsId = :newsId AND commentType = :prev', { newsId, prev })
         .execute();
 
-      const comment = await commentRepo
-        .createQueryBuilder('comment')
-        .where('comment.newsId = :newsId', { newsId })
-        .andWhere('comment.commentType = :prev', { prev })
-        .update({
-          commentType: next,
-        })
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(Comment)
+        .set({ commentType: next })
+        .where('newsId = :newsId AND commentType = :prev', { newsId, prev })
         .execute();
+      await queryRunner.commitTransaction();
 
       return true;
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
+    }
+  }
+
+  async deleteNewsComment(newsId: number, commentType: NewsCommentType) {
+    const queryRunner = await this.startTransaction();
+
+    try {
+      const newsSummaryRepo = queryRunner.manager.getRepository(NewsSummary);
+      const commentRepo = queryRunner.manager.getRepository(Comment);
+
+      await newsSummaryRepo.delete({
+        news: { id: newsId },
+        commentType: commentType,
+      });
+
+      await commentRepo.delete({
+        news: { id: newsId },
+        commentType: commentType,
+      });
+
+      await queryRunner.commitTransaction();
+      return true;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
     }
   }
 

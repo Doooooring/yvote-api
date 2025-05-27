@@ -124,6 +124,11 @@ export class NewsService {
     return result;
   }
 
+  async deleteNewsComment(newsId: number, commentType: NewsCommentType) {
+    const result = await this.newsRepo.deleteNewsComment(newsId, commentType);
+    return result;
+  }
+
   async postNews(news: NewsEdit) {
     this.setNewsTimelineOrder(news);
 
