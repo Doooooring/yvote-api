@@ -5,7 +5,7 @@ export class ConvertNewsStateVarchar1746589270488
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.changeColumn(
-      'news',
+      'News',
       'state',
       new TableColumn({
         name: 'state',
@@ -28,7 +28,7 @@ export class ConvertNewsStateVarchar1746589270488
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.changeColumn(
-      'news',
+      'News',
       'state',
       new TableColumn({
         name: 'state',

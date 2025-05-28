@@ -52,7 +52,7 @@ export class CreateNewsSummaryTable1682752800000 implements MigrationInterface {
         SELECT n.summary,
                '와이보트'       AS commentType,
                n.id          AS newsId
-        FROM   news n
+        FROM   News n
       `);
   }
 
