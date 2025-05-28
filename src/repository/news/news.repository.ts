@@ -185,6 +185,9 @@ export class NewsRepository {
 
     if (response.length === 0) return [];
 
+    console.log('=============');
+    console.log(response);
+
     const ids = [];
     const entityMap = {};
     response.forEach((row) => {
@@ -212,7 +215,7 @@ export class NewsRepository {
       .getRawMany();
 
     summaries.forEach((row) => {
-      const { newsId, commentType } = row;
+      const { newsId, summary, commentType } = row;
       if (newsId in entityMap) {
         const entity = entityMap[newsId];
         if (!entity.comments) {
@@ -220,14 +223,22 @@ export class NewsRepository {
         }
         entity.comments.push(commentType);
         if (commentType === NewsCommentType.와이보트) {
-          entity.summary = row.summary;
+          entity.summary = summary;
+        }
+
+        if (!entity.summary) {
+          entity.summary = summary;
         }
       }
     });
 
     const result = ids.map((id) => {
-      return entityMap[id];
+      const entity = entityMap[id];
+
+      return entity;
     });
+
+    console.log(result);
 
     return result;
   }

@@ -40,6 +40,10 @@ export class NewsService {
       (s) => s.commentType === NewsCommentType.와이보트,
     )[0]?.summary;
 
+    if (!data.summary) {
+      data.summary = data.summaries[0]?.summary ?? '';
+    }
+
     return data;
   }
 
