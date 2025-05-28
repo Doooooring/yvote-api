@@ -17,7 +17,7 @@ export class ConvertNewsStateVarchar1746589270488
     );
 
     await queryRunner.query(`
-      UPDATE NEWS
+      UPDATE News
       SET state = CASE
         WHEN isPublished = 1 THEN '0'
         WHEN isPublished = 0 THEN '2'
