@@ -48,7 +48,7 @@ export class CreateNewsSummaryTable1682752800000 implements MigrationInterface {
     );
 
     await queryRunner.query(`
-        INSERT INTO newsSummary (summary, commentType, newsId)
+        INSERT INTO NewsSummary (summary, commentType, newsId)
         SELECT n.summary,
                '와이보트'       AS commentType,
                n.id          AS newsId
