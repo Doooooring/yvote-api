@@ -45,6 +45,7 @@ export class CommentRepository {
       ])
       .leftJoin('comment.news', 'news')
       .addSelect('news.id')
+      .addSelect('news.state')
       .where('comment.date IS NOT NULL')
       .andWhere('news.state  != :state', { state: NewsState.NotPublished })
       .orderBy('comment.date', 'DESC')
