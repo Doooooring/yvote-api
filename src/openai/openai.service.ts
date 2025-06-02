@@ -14,9 +14,9 @@ export class OpenAIService {
     });
   }
 
-  async getOpenAI(messages: Array<ChatCompletionMessageParam>) {
+  async getOpenAI(messages: Array<ChatCompletionMessageParam>, model: string) {
     const completion = await this.openaiClient.chat.completions.create({
-      model: 'grok-2',
+      model: model,
       messages: messages,
     });
     return completion.choices?.[0]?.message?.content;

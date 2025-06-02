@@ -15,9 +15,13 @@ export class OpenAIController {
   @Post('/')
   @RespInterceptor
   async getAIResult(
-    @Body() body: { message: Array<ChatCompletionMessageParam> },
+    @Body()
+    body: {
+      message: Array<ChatCompletionMessageParam>;
+      model?: string;
+    },
   ) {
-    const { message } = body;
-    return await this.openAIService.getOpenAI(message);
+    const { message, model = 'grok-2' } = body;
+    return await this.openAIService.getOpenAI(message, model);
   }
 }
