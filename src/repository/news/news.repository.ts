@@ -87,8 +87,6 @@ export class NewsRepository {
       .where('news.id = :id', { id: id })
       .getOne();
 
-    console.log(news);
-
     if (!news) throw Error(DBERROR.NOT_EXIST);
     const distnctComments = await this.getDistinctCommentTypeByNewsId(id);
 
@@ -185,9 +183,6 @@ export class NewsRepository {
 
     if (response.length === 0) return [];
 
-    console.log('=============');
-    console.log(response);
-
     const ids = [];
     const entityMap = {};
     response.forEach((row) => {
@@ -212,6 +207,17 @@ export class NewsRepository {
         'newsSummary.summary summary',
       ])
       .where('newsSummary.newsId IN (:...ids)', { ids })
+      .andWhere((qb) => {
+        const sub = qb
+          .subQuery()
+          .select('1')
+          .from(Comment, 'c')
+          .where('c.newsId = newsSummary.newsId')
+          .andWhere('c.commentType = newsSummary.commentType')
+          .limit(1)
+          .getQuery();
+        return `EXISTS ${sub}`;
+      })
       .getRawMany();
 
     summaries.forEach((row) => {
@@ -237,8 +243,6 @@ export class NewsRepository {
 
       return entity;
     });
-
-    console.log(result);
 
     return result;
   }
