@@ -26,7 +26,7 @@ export class AdminGuard implements CanActivate {
 
   async checkAuthToken(req: Request) {
     const token = this.extractTokenFromHeader(req);
-    const adminToken = this.configServie.get('YVOTE_ADMIN_Token');
+    const adminToken = this.configServie.get('YVOTE_ADMIN_TOKEN');
 
     if (!token) {
       throw new Error('TokenNotExist');

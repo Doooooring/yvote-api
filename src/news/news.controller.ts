@@ -84,8 +84,13 @@ export class NewsController {
   async getRecentComments(
     @Query('offset') offset: number,
     @Query('limit') limit: number,
+    @Query('type') type?: NewsCommentType,
   ) {
-    const response = await this.newsService.getRecentComments(offset, limit);
+    const response = await this.newsService.getRecentComments(
+      offset,
+      limit,
+      type ?? null,
+    );
     return response;
   }
 

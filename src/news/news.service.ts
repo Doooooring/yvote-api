@@ -93,8 +93,18 @@ export class NewsService {
     );
   }
 
-  async getRecentComments(offset: number, limit: number) {
-    return await this.commentRepo.getCommentsRecentUpdated(offset, limit);
+  async getRecentComments(
+    offset: number,
+    limit: number,
+    type: NewsCommentType | null,
+  ) {
+    const option = {};
+    if (type) option['type'] = type;
+    return await this.commentRepo.getCommentsRecentUpdated(
+      offset,
+      limit,
+      option,
+    );
   }
 
   async saveCommentsByNewsId(

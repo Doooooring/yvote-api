@@ -32,8 +32,14 @@ export class CommentRepository {
     });
   }
 
-  async getCommentsRecentUpdated(offset: number, limit: number) {
-    return await this.commentRepo
+  async getCommentsRecentUpdated(
+    offset: number,
+    limit: number,
+    option: {
+      type?: NewsCommentType;
+    },
+  ) {
+    const query = this.commentRepo
       .createQueryBuilder('comment')
       .select([
         'comment.id',
@@ -44,10 +50,15 @@ export class CommentRepository {
         'comment.comment',
       ])
       .leftJoin('comment.news', 'news')
-      .addSelect('news.id')
-      .addSelect('news.state')
+      .addSelect(['news.id', 'news.state'])
       .where('comment.date IS NOT NULL')
-      .andWhere('news.state  != :state', { state: NewsState.NotPublished })
+      .andWhere('news.state != :state', { state: NewsState.NotPublished });
+
+    if (option.type) {
+      query.andWhere('comment.commentType = :type', { type: option.type });
+    }
+
+    return await query
       .orderBy('comment.date', 'DESC')
       .offset(offset)
       .limit(limit)
