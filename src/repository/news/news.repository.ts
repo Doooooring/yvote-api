@@ -71,6 +71,7 @@ export class NewsRepository {
         'news.id',
         'news.title',
         'news.subTitle',
+        'news.newsType',
         'news.summary',
         'news.date',
         'news.state',
@@ -103,6 +104,7 @@ export class NewsRepository {
         'news.title',
         'news.subTitle',
         'news.summary',
+        'news.newsType',
         'news.date',
         'news.state',
         'news.isPublished',
@@ -171,6 +173,7 @@ export class NewsRepository {
         'news.id id',
         'news.title title',
         'news.subTitle subTitle',
+        'news.newsType',
         'news.newsImage newsImage',
         'news.state state',
         'news.isPublished isPublished',
@@ -290,9 +293,6 @@ export class NewsRepository {
     const queryRunner = await this.startTransaction();
     const newsSummaryRepo = queryRunner.manager.getRepository(NewsSummary);
 
-    console.log('============');
-    console.log(newsId, commentType);
-
     try {
       const existingSummary = await newsSummaryRepo.findOne({
         where: {
@@ -301,7 +301,6 @@ export class NewsRepository {
         },
       });
 
-      console.log(existingSummary);
       if (existingSummary) {
         console.log('Duplicate summary found');
         throw Error(DBERROR.DUPLICATE);

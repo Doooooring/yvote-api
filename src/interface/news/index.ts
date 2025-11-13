@@ -28,6 +28,47 @@ export enum NewsCommentType {
   기타 = '기타',
 }
 
+export enum NewsType {
+  bill = 'bill',
+  constitution = 'constitution',
+  executive = 'executive',
+  cabinet = 'cabinet',
+  diplomat = 'diplomat',
+  govern = 'govern',
+  debate = 'debate',
+  election = 'election',
+  original = 'original',
+  others = 'others',
+}
+
+export const newsTypesToKor = (newsType: NewsType) => {
+  switch (newsType) {
+    case NewsType.bill:
+      return '법률';
+    case NewsType.constitution:
+      return '헌법재판소';
+    case NewsType.executive:
+      return '시행령';
+    case NewsType.cabinet:
+      return '국무회의';
+    case NewsType.diplomat:
+      return '정상외교';
+    case NewsType.govern:
+      return '행정';
+    case NewsType.debate:
+      return '논평';
+    case NewsType.election:
+      return '선거';
+    case NewsType.original:
+      return '자체제작';
+    case NewsType.others:
+      return '기타';
+    default:
+      newsType satisfies never;
+      throw new Error('Unknown news type');
+  }
+};
+
 export interface NewsPreviews
   extends Pick<
     News,
@@ -35,6 +76,7 @@ export interface NewsPreviews
     | 'order'
     | 'title'
     | 'subTitle'
+    | 'newsType'
     | 'slug'
     | 'summary'
     | 'summaries'

@@ -1,4 +1,4 @@
-import { NewsState } from 'src/interface/news';
+import { NewsState, NewsType } from 'src/interface/news';
 import {
   Column,
   Entity,
@@ -33,6 +33,9 @@ export class News {
 
   @Column({ default: '' })
   subTitle: string;
+
+  @Column({ default: NewsType.others })
+  newsType: NewsType;
 
   @Column({ default: '' })
   slug: string;
