@@ -173,7 +173,7 @@ export class NewsRepository {
         'news.id id',
         'news.title title',
         'news.subTitle subTitle',
-        'news.newsType',
+        'news.newsType newsType',
         'news.newsImage newsImage',
         'news.state state',
         'news.isPublished isPublished',

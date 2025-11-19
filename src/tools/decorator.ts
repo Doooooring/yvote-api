@@ -19,6 +19,10 @@ export function RespInterceptor(
   const originalMethod = descriptor.value;
 
   descriptor.value = async function (...args: any[]) {
+    const req: Request | undefined = args.find(
+      (arg) => arg && arg.headers && arg.method && arg.url,
+    );
+
     try {
       const result = await originalMethod.apply(this, args);
       return {
