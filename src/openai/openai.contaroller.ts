@@ -21,7 +21,7 @@ export class OpenAIController {
       model?: string;
     },
   ) {
-    const { message, model = 'grok-2' } = body;
+    const { message, model = 'grok-3-mini' } = body;
     return await this.openAIService.getOpenAI(message, model);
   }
 }
