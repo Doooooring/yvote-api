@@ -79,6 +79,8 @@ export class NewsRepository {
         'news.opinionRight',
         'news.isPublished',
         'news.newsImage',
+        'news.agendaList',
+        'news.speechContent',
       ])
       .leftJoin('news.keywords', 'keywords')
       .addSelect(['keywords.keyword', 'keywords.id'])
@@ -111,6 +113,8 @@ export class NewsRepository {
         'news.opinionLeft',
         'news.opinionRight',
         'news.newsImage',
+        'news.agendaList',
+        'news.speechContent',
         'keyword.id',
         'keyword.keyword',
       ])
@@ -178,6 +182,8 @@ export class NewsRepository {
         'news.state state',
         'news.isPublished isPublished',
         'news.date date',
+        'news.agendaList agendaList',
+        'news.speechContent speechContent',
         'keywords.id keywordId',
         'keywords.keyword keyword',
       ])
@@ -268,6 +274,8 @@ export class NewsRepository {
       const newsRepository = queryRunner.manager.getRepository(News);
       const result = await newsRepository.save({
         ...news,
+        agendaList: news.agendaList ?? '',
+        speechContent: news.speechContent ?? '',
         order: 0,
       });
 
@@ -393,7 +401,11 @@ export class NewsRepository {
       const prevKeywords = prevNews.keywords.map(({ id }) => id);
       const curKeywords = news.keywords.map(({ id }) => id) ?? [];
 
-      await newsRepository.save(news);
+      await newsRepository.save({
+        ...news,
+        agendaList: news.agendaList ?? '',
+        speechContent: news.speechContent ?? '',
+      });
 
       const keywordsToUpdate = mergeUniqueArrays(prevKeywords, curKeywords);
       await this.updateKeywordsState(keywordsToUpdate, queryRunner.manager);
