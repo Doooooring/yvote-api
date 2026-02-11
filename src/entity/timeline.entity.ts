@@ -24,6 +24,9 @@ export class Timeline {
   @Column({ default: '' })
   title: string;
 
+  @Column({ default: '기타' })
+  commentType: string;
+
   @ManyToOne(() => News, (news) => news.timeline, {
     onDelete: 'CASCADE',
     orphanedRowAction: 'delete',

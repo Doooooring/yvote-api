@@ -78,7 +78,7 @@ export class NewsRepository {
         'news.opinionLeft',
         'news.opinionRight',
         'news.isPublished',
-        'news.newsImage',
+        // 'news.newsImage', // OMITTED
         'news.agendaList',
         'news.speechContent',
       ])
@@ -112,7 +112,7 @@ export class NewsRepository {
         'news.isPublished',
         'news.opinionLeft',
         'news.opinionRight',
-        'news.newsImage',
+        // 'news.newsImage', // OMITTED
         'news.agendaList',
         'news.speechContent',
         'keyword.id',
@@ -178,7 +178,7 @@ export class NewsRepository {
         'news.title title',
         'news.subTitle subTitle',
         'news.newsType newsType',
-        'news.newsImage newsImage',
+        // 'news.newsImage newsImage', // OMITTED
         'news.state state',
         'news.isPublished isPublished',
         'news.date date',

@@ -65,7 +65,6 @@ export class News {
   @Column({ default: '' })
   opinionRight: string;
 
-
   @Column({ type: 'longtext', nullable: true })
   agendaList?: string;
 
