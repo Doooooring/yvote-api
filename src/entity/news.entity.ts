@@ -44,10 +44,11 @@ export class News {
   summary: string;
 
   @Column({
-    type: 'timestamp',
+    type: 'varchar',
+    length: 10,
     nullable: true,
   })
-  date?: Date;
+  date?: string;
 
   @Column({
     type: 'varchar',
