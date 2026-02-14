@@ -137,9 +137,13 @@ export class NewsRepository {
     {
       keyword,
       state,
+      startDate,
+      endDate,
     }: {
       keyword?: string;
       state?: NewsState;
+      startDate?: string;
+      endDate?: string;
     },
   ) {
     const subQuery = this.newsRepo
@@ -148,15 +152,24 @@ export class NewsRepository {
       .groupBy('subNews.id')
       .where('1 = 1');
 
-    if (state)
-      subQuery.andWhere('state  = :state', {
+    if (state) {
+      subQuery.andWhere('state = :state', {
         state: state,
       });
+    }
 
     if (keyword) {
       subQuery
         .leftJoin('subNews.keywords', 'keywords')
         .andWhere('keywords.keyword = :keyword', { keyword });
+    }
+    
+    if (startDate) {
+      subQuery.andWhere('subNews.date >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      subQuery.andWhere('subNews.date <= :endDate', { endDate });
     }
     subQuery
       .orderBy('state', 'DESC')
