@@ -78,7 +78,9 @@ export class NewsRepository {
         'news.opinionLeft',
         'news.opinionRight',
         'news.isPublished',
-        'news.newsImage',
+        // 'news.newsImage', // OMITTED
+        'news.agendaList',
+        'news.speechContent',
       ])
       .leftJoin('news.keywords', 'keywords')
       .addSelect(['keywords.keyword', 'keywords.id'])
@@ -110,7 +112,9 @@ export class NewsRepository {
         'news.isPublished',
         'news.opinionLeft',
         'news.opinionRight',
-        'news.newsImage',
+        // 'news.newsImage', // OMITTED
+        'news.agendaList',
+        'news.speechContent',
         'keyword.id',
         'keyword.keyword',
       ])
@@ -133,9 +137,13 @@ export class NewsRepository {
     {
       keyword,
       state,
+      startDate,
+      endDate,
     }: {
       keyword?: string;
       state?: NewsState;
+      startDate?: string;
+      endDate?: string;
     },
   ) {
     const subQuery = this.newsRepo
@@ -144,15 +152,24 @@ export class NewsRepository {
       .groupBy('subNews.id')
       .where('1 = 1');
 
-    if (state)
-      subQuery.andWhere('state  = :state', {
+    if (state) {
+      subQuery.andWhere('state = :state', {
         state: state,
       });
+    }
 
     if (keyword) {
       subQuery
         .leftJoin('subNews.keywords', 'keywords')
         .andWhere('keywords.keyword = :keyword', { keyword });
+    }
+    
+    if (startDate) {
+      subQuery.andWhere('subNews.date >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      subQuery.andWhere('subNews.date <= :endDate', { endDate });
     }
     subQuery
       .orderBy('state', 'DESC')
@@ -174,10 +191,12 @@ export class NewsRepository {
         'news.title title',
         'news.subTitle subTitle',
         'news.newsType newsType',
-        'news.newsImage newsImage',
+        // 'news.newsImage newsImage', // OMITTED
         'news.state state',
         'news.isPublished isPublished',
         'news.date date',
+        'news.agendaList agendaList',
+        'news.speechContent speechContent',
         'keywords.id keywordId',
         'keywords.keyword keyword',
       ])
@@ -268,6 +287,8 @@ export class NewsRepository {
       const newsRepository = queryRunner.manager.getRepository(News);
       const result = await newsRepository.save({
         ...news,
+        agendaList: news.agendaList ?? '',
+        speechContent: news.speechContent ?? '',
         order: 0,
       });
 
@@ -393,7 +414,11 @@ export class NewsRepository {
       const prevKeywords = prevNews.keywords.map(({ id }) => id);
       const curKeywords = news.keywords.map(({ id }) => id) ?? [];
 
-      await newsRepository.save(news);
+      await newsRepository.save({
+        ...news,
+        agendaList: news.agendaList ?? '',
+        speechContent: news.speechContent ?? '',
+      });
 
       const keywordsToUpdate = mergeUniqueArrays(prevKeywords, curKeywords);
       await this.updateKeywordsState(keywordsToUpdate, queryRunner.manager);
