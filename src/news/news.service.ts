@@ -168,7 +168,8 @@ export class NewsService {
   }
 
   setNewsTimelineOrder(news: Partial<NewsEdit>) {
-    return news.timeline.map((t, idx) => {
+    if (!news.timeline) return;
+    news.timeline.map((t, idx) => {
       t.order = idx;
       return t;
     });
