@@ -44,10 +44,11 @@ export class News {
   summary: string;
 
   @Column({
-    type: 'timestamp',
+    type: 'varchar',
+    length: 10,
     nullable: true,
   })
-  date?: Date;
+  date?: string;
 
   @Column({
     type: 'varchar',
@@ -64,6 +65,12 @@ export class News {
 
   @Column({ default: '' })
   opinionRight: string;
+
+  @Column({ type: 'longtext', nullable: true })
+  agendaList?: string;
+
+  @Column({ type: 'longtext', nullable: true })
+  speechContent?: string;
 
   @Column({ nullable: true })
   newsImage?: string;

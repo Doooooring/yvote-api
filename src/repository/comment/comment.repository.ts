@@ -111,11 +111,13 @@ export class CommentRepository {
 
       const ids = [];
 
-      for (const order in comments) {
+      for (let order = 0; order < comments.length; order++) {
         const comment = comments[order];
-        comment.order = comments.length - Number(order);
+        comment.order = comments.length - order;
         const result = await this.saveCommentByNewsId(newsId, comment);
-        ids.push(result.id);
+        if (result && result.id !== undefined) {
+          ids.push(result.id);
+        }
       }
 
       await queryRunner.manager
@@ -146,8 +148,11 @@ export class CommentRepository {
       ? manager.getRepository(Comment)
       : this.commentRepo;
 
+
+    // Ensure date is a string in 'YYYY-MM-DD' format if present
     const response = await commentRepo.save({
       ...comment,
+      date: comment.date ? new Date(comment.date).toISOString().slice(0, 10) : undefined,
       news: { id: newsId },
     });
 

@@ -57,22 +57,16 @@ export class NewsService {
     limit: number,
     option: {
       keyword?: string;
-      isAdmin?: boolean;
       state?: NewsState;
+      startDate?: string;
+      endDate?: string;
     },
   ) {
-    const { state, isAdmin, ...rest } = option;
-    let result: any;
-    if (isAdmin) {
-      result = await this.newsRepo.getNewsPreviews(page, limit, {
-        ...rest,
-      });
-    } else {
-      result = await this.newsRepo.getNewsPreviews(page, limit, {
-        ...rest,
-        state,
-      });
-    }
+    const { state, ...rest } = option;
+    const result = await this.newsRepo.getNewsPreviews(page, limit, {
+      ...rest,
+      state,
+    });
 
     console.log(result);
 
@@ -174,7 +168,8 @@ export class NewsService {
   }
 
   setNewsTimelineOrder(news: Partial<NewsEdit>) {
-    return news.timeline.map((t, idx) => {
+    if (!news.timeline) return;
+    news.timeline.map((t, idx) => {
       t.order = idx;
       return t;
     });

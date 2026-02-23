@@ -33,10 +33,11 @@ export class Comment {
   comment: string;
 
   @Column({
-    type: 'timestamp',
+    type: 'varchar',
+    length: 10,
     nullable: true,
   })
-  date?: Date;
+  date?: string;
 
   @UpdateDateColumn()
   updatedAt?: Date;
