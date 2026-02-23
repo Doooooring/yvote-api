@@ -37,7 +37,7 @@ export enum NewsType {
   govern = 'govern',
   debate = 'debate',
   election = 'election',
-  original = 'original',
+  weekly = 'weekly',
   others = 'others',
 }
 
@@ -59,8 +59,8 @@ export const newsTypesToKor = (newsType: NewsType) => {
       return '논평';
     case NewsType.election:
       return '선거';
-    case NewsType.original:
-      return '자체제작';
+    case NewsType.weekly:
+      return '일주일';
     case NewsType.others:
       return '기타';
     default:

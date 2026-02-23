@@ -290,6 +290,7 @@ export class NewsRepository {
         agendaList: news.agendaList ?? '',
         speechContent: news.speechContent ?? '',
         order: 0,
+        isPublished: news.state === NewsState.Published,
       });
 
       if (news.state) {
@@ -418,6 +419,9 @@ export class NewsRepository {
         ...news,
         agendaList: news.agendaList ?? '',
         speechContent: news.speechContent ?? '',
+        ...(news.state !== undefined && {
+          isPublished: news.state === NewsState.Published,
+        }),
       });
 
       const keywordsToUpdate = mergeUniqueArrays(prevKeywords, curKeywords);
