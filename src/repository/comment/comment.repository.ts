@@ -152,7 +152,7 @@ export class CommentRepository {
     // Ensure date is a string in 'YYYY-MM-DD' format if present
     const response = await commentRepo.save({
       ...comment,
-      date: comment.date ? new Date(comment.date).toISOString().slice(0, 10) : undefined,
+      date: comment.date || undefined,
       news: { id: newsId },
     });
 

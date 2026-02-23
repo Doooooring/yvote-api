@@ -27,6 +27,9 @@ export const TypeormConfig = (configService: ConfigService) => {
     entities: [News, NewsSummary, Keyword, Comment, Timeline, User, Vote],
     autoLoadEntities: true,
     synchronize: false,
+    extra: {
+      dateStrings: true,
+    },
   };
 
   return option;
