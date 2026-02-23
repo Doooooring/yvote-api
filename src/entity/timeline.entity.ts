@@ -16,10 +16,11 @@ export class Timeline {
   order: number;
 
   @Column({
-    type: 'timestamp',
+    type: 'varchar',
+    length: 10,
     nullable: true,
   })
-  date?: Date;
+  date?: string;
 
   @Column({ default: '' })
   title: string;
