@@ -11,6 +11,6 @@ async function bootstrap() {
   app.useGlobalFilters(new ErrorLoggingFilter());
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
-  await app.listen(3000);
+  await app.listen(3002);
 }
 bootstrap();

@@ -72,6 +72,27 @@ export class News {
   @Column({ type: 'longtext', nullable: true })
   speechContent?: string;
 
+  @Column({ type: 'longtext', nullable: true })
+  proDebate?: string;
+
+  @Column({ type: 'longtext', nullable: true })
+  conDebate?: string;
+
+  @Column({ type: 'longtext', nullable: true })
+  etcDebate?: string;
+
+  @Column({ type: 'longtext', nullable: true })
+  billSummary?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  billVoteResult?: string;
+
+  @Column({ type: 'int', nullable: true })
+  billVoteTotal?: number;
+
+  @Column({ type: 'simple-json', nullable: true })
+  billVoteByParty?: { party: string; for: number; against: number; abstain: number; absent: number }[];
+
   @Column({ nullable: true })
   newsImage?: string;
 

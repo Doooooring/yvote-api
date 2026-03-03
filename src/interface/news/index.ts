@@ -21,7 +21,7 @@ export enum NewsCommentType {
   자유주의자 = '자유주의자',
   더불어민주당 = '더불어민주당',
   국민의힘 = '국민의힘',
-  대통령실 = '대통령실',
+  청와대 = '청와대',
   행정부 = '행정부',
   헌법재판소 = '헌법재판소',
   와이보트 = '와이보트',
@@ -38,6 +38,7 @@ export enum NewsType {
   debate = 'debate',
   election = 'election',
   weekly = 'weekly',
+  teukprosecution = 'teukprosecution',
   others = 'others',
 }
 
@@ -61,6 +62,8 @@ export const newsTypesToKor = (newsType: NewsType) => {
       return '선거';
     case NewsType.weekly:
       return '일주일';
+    case NewsType.teukprosecution:
+      return '특검';
     case NewsType.others:
       return '기타';
     default:

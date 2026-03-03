@@ -81,6 +81,13 @@ export class NewsRepository {
         // 'news.newsImage', // OMITTED
         'news.agendaList',
         'news.speechContent',
+        'news.proDebate',
+        'news.conDebate',
+        'news.etcDebate',
+        'news.billSummary',
+        'news.billVoteResult',
+        'news.billVoteTotal',
+        'news.billVoteByParty',
       ])
       .leftJoin('news.keywords', 'keywords')
       .addSelect(['keywords.keyword', 'keywords.id'])
@@ -115,6 +122,13 @@ export class NewsRepository {
         // 'news.newsImage', // OMITTED
         'news.agendaList',
         'news.speechContent',
+        'news.proDebate',
+        'news.conDebate',
+        'news.etcDebate',
+        'news.billSummary',
+        'news.billVoteResult',
+        'news.billVoteTotal',
+        'news.billVoteByParty',
         'keyword.id',
         'keyword.keyword',
       ])
@@ -289,6 +303,13 @@ export class NewsRepository {
         ...news,
         agendaList: news.agendaList ?? '',
         speechContent: news.speechContent ?? '',
+        proDebate: news.proDebate ?? '',
+        conDebate: news.conDebate ?? '',
+        etcDebate: news.etcDebate ?? '',
+        billSummary: news.billSummary ?? '',
+        billVoteResult: news.billVoteResult ?? null,
+        billVoteTotal: news.billVoteTotal ?? null,
+        billVoteByParty: news.billVoteByParty ?? null,
         order: 0,
         isPublished: news.state === NewsState.Published,
       });
@@ -419,6 +440,13 @@ export class NewsRepository {
         ...news,
         agendaList: news.agendaList ?? '',
         speechContent: news.speechContent ?? '',
+        proDebate: news.proDebate ?? '',
+        conDebate: news.conDebate ?? '',
+        etcDebate: news.etcDebate ?? '',
+        billSummary: news.billSummary ?? '',
+        billVoteResult: news.billVoteResult ?? null,
+        billVoteTotal: news.billVoteTotal ?? null,
+        billVoteByParty: news.billVoteByParty ?? null,
         ...(news.state !== undefined && {
           isPublished: news.state === NewsState.Published,
         }),
