@@ -79,10 +79,13 @@ export class News {
   conDebate?: string;
 
   @Column({ type: 'longtext', nullable: true })
-  etcDebate?: string;
+  billAmendment?: string;
 
   @Column({ type: 'longtext', nullable: true })
   billSummary?: string;
+
+  @Column({ type: 'longtext', nullable: true })
+  billDetail?: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   billVoteResult?: string;
