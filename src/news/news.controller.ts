@@ -68,12 +68,14 @@ export class NewsController {
     @Query('state') state?: News['state'],
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
+    @Query('newsType') newsType?: string,
   ) {
     const response = await this.newsService.getNewsPreviews(offset, limit, {
       keyword,
       state,
       startDate,
       endDate,
+      newsType,
     });
 
     console.log(response);

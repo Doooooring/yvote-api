@@ -155,11 +155,13 @@ export class NewsRepository {
       state,
       startDate,
       endDate,
+      newsType,
     }: {
       keyword?: string;
       state?: NewsState;
       startDate?: string;
       endDate?: string;
+      newsType?: string;
     },
   ) {
     const subQuery = this.newsRepo
@@ -179,13 +181,17 @@ export class NewsRepository {
         .leftJoin('subNews.keywords', 'keywords')
         .andWhere('keywords.keyword = :keyword', { keyword });
     }
-    
+
     if (startDate) {
       subQuery.andWhere('subNews.date >= :startDate', { startDate });
     }
 
     if (endDate) {
       subQuery.andWhere('subNews.date <= :endDate', { endDate });
+    }
+
+    if (newsType) {
+      subQuery.andWhere('subNews.newsType = :newsType', { newsType });
     }
     subQuery
       .orderBy('state', 'DESC')
@@ -211,8 +217,6 @@ export class NewsRepository {
         'news.state state',
         'news.isPublished isPublished',
         'news.date date',
-        'news.agendaList agendaList',
-        'news.speechContent speechContent',
         'keywords.id keywordId',
         'keywords.keyword keyword',
       ])
@@ -242,7 +246,6 @@ export class NewsRepository {
       .select([
         'newsSummary.newsId newsId',
         'newsSummary.commentType commentType',
-        'newsSummary.summary summary',
       ])
       .where('newsSummary.newsId IN (:...ids)', { ids })
       .andWhere((qb) => {
@@ -259,20 +262,13 @@ export class NewsRepository {
       .getRawMany();
 
     summaries.forEach((row) => {
-      const { newsId, summary, commentType } = row;
+      const { newsId, commentType } = row;
       if (newsId in entityMap) {
         const entity = entityMap[newsId];
         if (!entity.comments) {
           entity.comments = [];
         }
         entity.comments.push(commentType);
-        if (commentType === NewsCommentType.와이보트) {
-          entity.summary = summary;
-        }
-
-        if (!entity.summary) {
-          entity.summary = summary;
-        }
       }
     });
 

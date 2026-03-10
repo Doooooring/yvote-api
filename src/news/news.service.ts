@@ -60,6 +60,7 @@ export class NewsService {
       state?: NewsState;
       startDate?: string;
       endDate?: string;
+      newsType?: string;
     },
   ) {
     const { state, ...rest } = option;

@@ -31,7 +31,7 @@ export class News {
   @Column({ default: '' })
   title: string;
 
-  @Column({ default: '' })
+  @Column({ type: 'text', default: '' })
   subTitle: string;
 
   @Column({ default: NewsType.others })
