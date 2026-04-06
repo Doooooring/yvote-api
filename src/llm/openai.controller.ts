@@ -5,7 +5,7 @@ import { RespInterceptor } from 'src/tools/decorator';
 import { OpenAIService } from './openai.service';
 
 @LogRequests()
-@Controller('openai')
+@Controller('llm')
 export class OpenAIController {
   constructor(
     @Inject(OpenAIService)
