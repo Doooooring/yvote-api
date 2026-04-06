@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { OpenAIService } from 'src/openai/openai.service';
+import { OpenAIService } from 'src/llm/openai.service';
 import { CommentRepository } from 'src/repository/comment/comment.repository';
 
 @Injectable()

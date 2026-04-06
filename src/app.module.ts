@@ -11,8 +11,8 @@ import { AuthCorsMiddleware } from './middleware/auth_cors.middleware';
 import { CommonCorsMiddleware } from './middleware/common_cors.middleware';
 import { MigrationModule } from './migration/migration.module';
 import { NewsModule } from './news/news.module';
-import { CommentModule } from './comment/comment.moudle';
-import { OpenAIModule } from './openai/openai.module';
+import { CommentModule } from './comment/comment.module';
+import { OpenAIModule } from './llm/openai.module';
 
 @Module({
   imports: [

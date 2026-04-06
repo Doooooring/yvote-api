@@ -5,17 +5,25 @@ import { ChatCompletionMessageParam } from 'openai/resources';
 
 @Injectable()
 export class OpenAIService {
-  openaiClient: OpenAI;
+  private xaiClient: OpenAI;
+  private openaiClient: OpenAI | null = null;
 
   constructor(private configService: ConfigService) {
-    this.openaiClient = new OpenAI({
-      apiKey: this.configService.get('OPENAI_KEY'),
+    this.xaiClient = new OpenAI({
+      apiKey: this.configService.get('XAI_KEY'),
       baseURL: 'https://api.x.ai/v1',
     });
+    const openaiKey = this.configService.get('OPENAI_KEY');
+    if (openaiKey) {
+      this.openaiClient = new OpenAI({ apiKey: openaiKey });
+    }
   }
 
   async getOpenAI(messages: Array<ChatCompletionMessageParam>, model: string) {
-    const completion = await this.openaiClient.chat.completions.create({
+    const client = model.startsWith('gpt') && this.openaiClient
+      ? this.openaiClient
+      : this.xaiClient;
+    const completion = await client.chat.completions.create({
       model: model,
       messages: messages,
     });

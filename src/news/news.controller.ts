@@ -19,7 +19,7 @@ import {
   NewsEdit,
   NewsEditWithCommentTypes,
 } from 'src/interface/news';
-import { OpenAIService } from 'src/openai/openai.service';
+import { OpenAIService } from 'src/llm/openai.service';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
 

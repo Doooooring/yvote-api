@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Param } from '@nestjs/common';
 import { LogRequests } from 'src/decorators/requestLoggin.decorator';
-import { OpenAIService } from 'src/openai/openai.service';
+import { OpenAIService } from 'src/llm/openai.service';
 import { RespInterceptor } from 'src/tools/decorator';
 import { CommentService } from './comment.service';
 
