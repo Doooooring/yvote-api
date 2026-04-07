@@ -12,7 +12,7 @@ import { CommonCorsMiddleware } from './middleware/common_cors.middleware';
 import { MigrationModule } from './migration/migration.module';
 import { NewsModule } from './news/news.module';
 import { CommentModule } from './comment/comment.module';
-import { OpenAIModule } from './llm/openai.module';
+import { LlmModule } from './llm/llm.module';
 
 @Module({
   imports: [
@@ -29,7 +29,7 @@ import { OpenAIModule } from './llm/openai.module';
     NewsModule,
     KeywordModule,
     CommentModule,
-    OpenAIModule,
+    LlmModule,
     MigrationModule,
     AuthModule,
   ],

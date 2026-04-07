@@ -57,6 +57,7 @@ export class NewsService {
     limit: number,
     option: {
       keyword?: string;
+      title?: string;
       state?: NewsState;
       startDate?: string;
       endDate?: string;

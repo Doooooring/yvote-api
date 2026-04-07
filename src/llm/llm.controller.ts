@@ -2,14 +2,14 @@ import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 import { RespInterceptor } from 'src/tools/decorator';
-import { OpenAIService } from './openai.service';
+import { LlmService } from './llm.service';
 
 @LogRequests()
 @Controller('llm')
-export class OpenAIController {
+export class LlmController {
   constructor(
-    @Inject(OpenAIService)
-    private readonly openAIService: OpenAIService,
+    @Inject(LlmService)
+    private readonly llmService: LlmService,
   ) {}
 
   @Post('/')
@@ -21,7 +21,7 @@ export class OpenAIController {
       model?: string;
     },
   ) {
-    const { message, model = 'grok-3-mini' } = body;
-    return await this.openAIService.getOpenAI(message, model);
+    const { message, model = 'grok-4-1-fast-reasoning' } = body;
+    return await this.llmService.getOpenAI(message, model);
   }
 }

@@ -11,7 +11,6 @@ import {
   EntityManager,
   FindOptionsWhere,
   In,
-  Like,
   Repository,
 } from 'typeorm';
 import { KeywordRepository } from '../keyword/keyword.repository';
@@ -42,13 +41,13 @@ export class NewsRepository {
   }
 
   async getNewsTitles(search: string) {
-    return this.newsRepo.find({
-      select: ['id', 'title', 'subTitle'],
-      where: [
-        { title: Like(`%${search}%`) },
-        { subTitle: Like(`%${search}%`) },
-      ],
-    }) as Promise<Pick<News, 'id' | 'title' | 'subTitle'>[]>;
+    return this.newsRepo
+      .createQueryBuilder('news')
+      .select(['news.id', 'news.title', 'news.subTitle'])
+      .where('MATCH(news.title) AGAINST(:search IN BOOLEAN MODE)', {
+        search,
+      })
+      .getMany() as Promise<Pick<News, 'id' | 'title' | 'subTitle'>[]>;
   }
   async getNewsCount() {
     return this.newsRepo.count();
@@ -152,12 +151,14 @@ export class NewsRepository {
     limit: number,
     {
       keyword,
+      title,
       state,
       startDate,
       endDate,
       newsType,
     }: {
       keyword?: string;
+      title?: string;
       state?: NewsState;
       startDate?: string;
       endDate?: string;
@@ -180,6 +181,10 @@ export class NewsRepository {
       subQuery
         .leftJoin('subNews.keywords', 'keywords')
         .andWhere('keywords.keyword = :keyword', { keyword });
+    }
+
+    if (title) {
+      subQuery.andWhere('subNews.title LIKE :title', { title: `%${title}%` });
     }
 
     if (startDate) {

@@ -1,7 +1,7 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 import { RespInterceptor } from 'src/tools/decorator';
-import { OpenAIService } from './openai.service';
+import { LlmService } from './llm.service';
 
 const SYSTEM_PROMPT = `당신은 정치 뉴스앱 yVote의 도우미입니다.
 한국 정치에 대한 사용자의 질문에 간결하고 객관적으로 답변합니다.
@@ -16,8 +16,8 @@ const SYSTEM_PROMPT = `당신은 정치 뉴스앱 yVote의 도우미입니다.
 @Controller('chat')
 export class ChatController {
   constructor(
-    @Inject(OpenAIService)
-    private readonly openAIService: OpenAIService,
+    @Inject(LlmService)
+    private readonly llmService: LlmService,
   ) {}
 
   @Post('/')
@@ -31,7 +31,7 @@ export class ChatController {
     },
   ) {
     const { messages, model = 'grok', context } = body;
-    const modelId = model === 'gpt' ? 'gpt-4o-mini' : 'grok-3-mini';
+    const modelId = model === 'gpt' ? 'gpt-4o-mini' : 'grok-4-1-fast-reasoning';
 
     const systemContent = context
       ? `${SYSTEM_PROMPT}\n\n${context}`
@@ -45,7 +45,7 @@ export class ChatController {
       })),
     ];
 
-    const reply = await this.openAIService.getOpenAI(formatted, modelId);
+    const reply = await this.llmService.getOpenAI(formatted, modelId);
     return reply;
   }
 }

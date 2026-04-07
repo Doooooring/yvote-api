@@ -4,7 +4,7 @@ import OpenAI from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources';
 
 @Injectable()
-export class OpenAIService {
+export class LlmService {
   private xaiClient: OpenAI;
   private openaiClient: OpenAI | null = null;
 

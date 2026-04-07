@@ -19,7 +19,6 @@ import {
   NewsEdit,
   NewsEditWithCommentTypes,
 } from 'src/interface/news';
-import { OpenAIService } from 'src/llm/openai.service';
 import { RespInterceptor } from 'src/tools/decorator';
 import { NewsService } from './news.service';
 
@@ -29,8 +28,6 @@ export class NewsController {
   constructor(
     @Inject(NewsService)
     private readonly newsService: NewsService,
-    @Inject(OpenAIService)
-    private readonly openAIService: OpenAIService,
   ) {}
 
   // @Get()
@@ -69,9 +66,11 @@ export class NewsController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('newsType') newsType?: string,
+    @Query('title') title?: string,
   ) {
     const response = await this.newsService.getNewsPreviews(offset, limit, {
       keyword,
+      title,
       state,
       startDate,
       endDate,

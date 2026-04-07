@@ -2,6 +2,7 @@ import { NewsState, NewsType } from 'src/interface/news';
 import {
   Column,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   OneToMany,
@@ -28,6 +29,7 @@ export class News {
   @Column()
   order: number;
 
+  @Index('ft_news_title', { fulltext: true })
   @Column({ default: '' })
   title: string;
 
