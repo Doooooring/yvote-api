@@ -82,6 +82,12 @@ export class NewsController {
     return response;
   }
 
+  @Get('/comment/:commentId/body')
+  @RespInterceptor
+  async getCommentBody(@Param('commentId') commentId: number) {
+    return await this.newsService.getCommentBody(commentId);
+  }
+
   @Get('/comment-updated')
   @RespInterceptor
   async getRecentComments(

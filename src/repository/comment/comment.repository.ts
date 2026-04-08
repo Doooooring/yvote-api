@@ -5,7 +5,7 @@ import { NewsCommentType, NewsState } from 'src/interface/news';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 
 export interface RecentComment
-  extends Pick<Comment, 'id' | 'commentType' | 'title' | 'comment' | 'date'> {
+  extends Pick<Comment, 'id' | 'commentType' | 'title' | 'date'> {
   newsId: number;
 }
 
@@ -32,6 +32,14 @@ export class CommentRepository {
     });
   }
 
+  async getCommentBodyById(id: number) {
+    return await this.commentRepo
+      .createQueryBuilder('comment')
+      .select(['comment.id', 'comment.comment'])
+      .where('comment.id = :id', { id })
+      .getOne();
+  }
+
   async getCommentsRecentUpdated(
     offset: number,
     limit: number,
@@ -47,7 +55,6 @@ export class CommentRepository {
         'comment.title',
         'comment.date',
         'comment.url',
-        'comment.comment',
       ])
       .leftJoin('comment.news', 'news')
       .addSelect(['news.id', 'news.state'])

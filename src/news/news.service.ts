@@ -89,6 +89,10 @@ export class NewsService {
     );
   }
 
+  async getCommentBody(commentId: number) {
+    return await this.commentRepo.getCommentBodyById(commentId);
+  }
+
   async getRecentComments(
     offset: number,
     limit: number,
