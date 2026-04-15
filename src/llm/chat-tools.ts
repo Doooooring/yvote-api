@@ -10,6 +10,7 @@ export const CHAT_TOOLS: ChatCompletionTool[] = [
         type: 'object',
         properties: {
           query: { type: 'string', description: '검색할 제목 키워드' },
+          semanticQuery: { type: 'string', description: '결과 필터링용 의미 검색 쿼리. 결과가 많을 때 이 문장과 의미적으로 가장 가까운 항목만 남김. 사용자 질문의 핵심 의도를 담은 구체적인 문장으로 작성.' },
         },
         required: ['query'],
       },
@@ -39,6 +40,7 @@ export const CHAT_TOOLS: ChatCompletionTool[] = [
         properties: {
           newsId: { type: 'number', description: '뉴스 ID' },
           commentType: { type: 'string', description: '코멘트 타입 (예: 청와대, 행정부, 국민의힘, 더불어민주당)' },
+          semanticQuery: { type: 'string', description: '결과 필터링용 의미 검색 쿼리. 코멘트가 많을 때 이 문장과 가장 관련 높은 코멘트만 남김.' },
         },
         required: ['newsId', 'commentType'],
       },
@@ -54,6 +56,7 @@ export const CHAT_TOOLS: ChatCompletionTool[] = [
         properties: {
           limit: { type: 'number', description: '가져올 개수 (기본 10)' },
           newsType: { type: 'string', description: '뉴스 타입 필터 (예: weekly, cabinet, bill 등). 생략하면 전체.' },
+          semanticQuery: { type: 'string', description: '결과 필터링용 의미 검색 쿼리.' },
         },
       },
     },
@@ -68,6 +71,7 @@ export const CHAT_TOOLS: ChatCompletionTool[] = [
         properties: {
           limit: { type: 'number', description: '가져올 개수 (기본 20)' },
           commentType: { type: 'string', description: '코멘트 타입 필터. 생략하면 전체.' },
+          semanticQuery: { type: 'string', description: '결과 필터링용 의미 검색 쿼리.' },
         },
       },
     },
@@ -96,6 +100,7 @@ export const CHAT_TOOLS: ChatCompletionTool[] = [
         properties: {
           query: { type: 'string', description: '법령명 또는 키워드' },
           date: { type: 'string', description: '개정일 (YYYYMMDD). 생략하면 전체 개정 이력 반환' },
+          semanticQuery: { type: 'string', description: '결과 필터링용 의미 검색 쿼리. 개정 조문이 많을 때 관련 조문만 남김.' },
         },
         required: ['query'],
       },
@@ -115,6 +120,7 @@ export const CHAT_TOOLS: ChatCompletionTool[] = [
           rrClsCd: { type: 'string', description: '제개정 종류 (300201=제정, 300202=일부개정, 300203=전부개정, 300204=폐지)' },
           sort: { type: 'string', description: '정렬 (ddes=공포일 내림차순, efdes=시행일 내림차순)' },
           limit: { type: 'number', description: '결과 수 (기본 20, 최대 100)' },
+          semanticQuery: { type: 'string', description: '결과 필터링용 의미 검색 쿼리.' },
         },
       },
     },

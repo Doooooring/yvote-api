@@ -32,7 +32,13 @@ DB 구조:
 • 뉴스/코멘트 찾기: search_news(keyword)로 검색. 키워드는 짧고 핵심적으로. 결과 없으면 키워드를 줄여서 재시도.
 • 뉴스를 찾은 뒤: get_news로 메타데이터만 보고 끝내지 마세요. 사용자가 내용을 물으면 반드시 get_news_comments로 코멘트(공식 자료)도 조회하세요. 뉴스의 실질적 내용은 코멘트에 있습니다.
 • 법령 질문 → get_law_amendment(query)로 이력 먼저 확인 → 날짜 확인 → get_law_amendment(query, date)로 상세 조회
-• "없다"고 단정하기 전에 다양한 방식으로 충분히 검색하세요.`;
+• "없다"고 단정하기 전에 다양한 방식으로 충분히 검색하세요.
+
+의미 검색 필터링(semanticQuery):
+• 도구 결과가 클 때, semanticQuery 문장과 의미적으로 가장 가까운 항목 20개만 남기는 필터가 자동 적용됩니다.
+• semanticQuery를 직접 지정하면 그 문장 기준으로 필터링합니다. 생략하면 검색 키워드+사용자 질문이 자동 사용됩니다.
+• 사용자가 특정 주제를 물을 때, semanticQuery에 해당 주제를 구체적으로 서술하세요. 예: 사용자가 "최근 교육 관련 법 개정 뭐 있어?"라고 물으면 semanticQuery를 "초중등교육 고등교육 학교 교원 학생 교육과정 관련 법률 개정"처럼 의도를 풀어서 작성.
+• 전체 목록이 필요하면 semanticQuery를 생략하세요.`;
 
 const MAX_TOOL_ROUNDS = 5;
 
@@ -61,7 +67,7 @@ export class ChatController {
     const { messages, model = 'grok', context } = body;
     const modelId = model === 'claude' ? 'claude-haiku-4-5-20251001'
       : model === 'gpt' ? 'gpt-4o-mini'
-      : 'grok-4-1-fast-non-reasoning';
+      : 'grok-4-1-fast-reasoning';
 
     const systemContent = context
       ? `${SYSTEM_PROMPT}\n\n현재 화면 정보:\n${context}`
@@ -101,9 +107,9 @@ export class ChatController {
             toolCall.function.name,
             toolArgs,
           );
-          // Use tool arguments as filter query (more specific than raw user input)
-          const filterTerms = [toolArgs.query, toolArgs.lawName, toolArgs.keyword, userQuery]
-            .filter(Boolean).join(' ');
+          const filterTerms = toolArgs.semanticQuery
+            || [toolArgs.query, toolArgs.lawName, toolArgs.keyword, userQuery]
+              .filter(Boolean).join(' ');
           const filtered = await this.semanticFilter(result, filterTerms);
           formatted.push({
             role: 'tool',
