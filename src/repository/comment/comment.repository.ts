@@ -29,6 +29,7 @@ export class CommentRepository {
       where: {
         id: id,
       },
+      relations: ['news'],
     });
   }
 
@@ -45,6 +46,9 @@ export class CommentRepository {
     limit: number,
     option: {
       type?: NewsCommentType;
+      startDate?: string;
+      endDate?: string;
+      order?: 'ASC' | 'DESC';
     },
   ) {
     const query = this.commentRepo
@@ -57,16 +61,22 @@ export class CommentRepository {
         'comment.url',
       ])
       .leftJoin('comment.news', 'news')
-      .addSelect(['news.id', 'news.state'])
+      .addSelect(['news.id', 'news.title', 'news.state'])
       .where('comment.date IS NOT NULL')
       .andWhere('news.state != :state', { state: NewsState.NotPublished });
 
     if (option.type) {
       query.andWhere('comment.commentType = :type', { type: option.type });
     }
+    if (option.startDate) {
+      query.andWhere('comment.date >= :startDate', { startDate: option.startDate });
+    }
+    if (option.endDate) {
+      query.andWhere('comment.date <= :endDate', { endDate: option.endDate });
+    }
 
     return await query
-      .orderBy('comment.date', 'DESC')
+      .orderBy('comment.date', option.order || 'DESC')
       .offset(offset)
       .limit(limit)
       .getMany();
@@ -95,6 +105,16 @@ export class CommentRepository {
       .limit(limit)
       .orderBy('comment.order', 'DESC')
       .getMany();
+  }
+
+  async getCommentCountsByNewsId(id: number) {
+    return await this.commentRepo
+      .createQueryBuilder('comment')
+      .select('comment.commentType', 'commentType')
+      .addSelect('COUNT(*)', 'count')
+      .where('comment.newsId = :id', { id })
+      .groupBy('comment.commentType')
+      .getRawMany<{ commentType: NewsCommentType; count: string }>();
   }
 
   async getCommentAllByNewsIdAndCommentType(id: number) {

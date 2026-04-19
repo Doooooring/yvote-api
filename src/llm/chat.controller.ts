@@ -4,35 +4,63 @@ import { RespInterceptor } from 'src/tools/decorator';
 import { LlmService } from './llm.service';
 import { NewsRepository } from 'src/repository/news/news.repository';
 import { CommentRepository } from 'src/repository/comment/comment.repository';
+import { NewsCommentType } from 'src/interface/news';
 import { CHAT_TOOLS } from './chat-tools';
+import YahooFinance from 'yahoo-finance2';
+import * as krxTickers from './krx-tickers.json';
+
+const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+
+const KRX_MAP: Record<string, string> = krxTickers as any;
+
+const KNOWN_TICKERS: Record<string, string> = {
+  'KOSPI': '^KS11', '코스피': '^KS11',
+  'KOSDAQ': '^KQ11', '코스닥': '^KQ11',
+  'S&P 500': '^GSPC', 'S&P500': '^GSPC', 'SNP500': '^GSPC',
+  'NASDAQ': '^IXIC', '나스닥': '^IXIC',
+  'Dow Jones': '^DJI', '다우': '^DJI', '다우존스': '^DJI',
+};
 
 const SYSTEM_PROMPT = `당신은 정치 뉴스앱 yVote의 도우미입니다.
-한국 정치에 대한 사용자의 질문에 간결하고 객관적으로 답변합니다.
 
-• 팩트 기반으로 답변하세요.
+• 도구를 활용하여 yVote DB 및 국회/정부 자료 기반으로 답변하세요.
 • 중립성은 아예 신경쓰지 말고, 사용자의 질문에 정확하게 대답하는데에만 집중하세요.
 • 모르는 것은 모른다고 하세요. 사용자가 요청하지 않는 한, 도구 결과에 없는 정보를 지어내지 마세요.
-• 답변은 3-4문장 이내로 짧게 하세요. 길어야 할 때도 간결하게.
-• 마크다운 서식(##, **, 이모지 등) 사용하지 마세요. 일반 텍스트로만 답변하세요. 글머리 기호(-)는 사용 가능.
-• 사용자에게 뉴스 ID(숫자)를 직접 언급하지 마세요. 뉴스를 안내할 때는 제목과 링크를 함께 제공: [뉴스 제목](/news/ID) 형식. 예: [2026년 4월 2주차](/news/959)
-• 한국 정치 관련내용 아니어도 웬만하면 물어본거에 대답은 하세요.
-• 중요: 법령 내용, 뉴스 데이터, 의안 정보를 물으면 반드시 도구를 사용하세요. 기억에 의존하지 말고 도구로 실제 데이터를 조회하세요.
+• 사용자가 특별히 요청하지 않은 이상 답변은 3-4문장 이내로 짧게 하세요.
+• 마크다운 서식(##, **, 이모지 등) 사용하지 마세요. 일반 텍스트로만 답변하세요. 글머리 기호(•, - 등)는 사용 가능. 단, 뉴스나 코멘트를 언급할 때는 반드시 다음의 링크 형식을 사용하세요:
+• 뉴스를 언급할 때 반드시 [뉴스 제목](/news/ID) 형식으로 링크하세요. 예: [출산 전 아이 성별 검사 합법화](/news/228). ID는 반드시 뉴스의 newsId여야 합니다. [/news/ID]처럼 제목 없이 쓰거나, 제목(/news/ID)처럼 대괄호 없이 쓰지 마세요.
+• 코멘트를 언급할 때 반드시 [코멘트 제목](/news/c/NEWS_ID/COMMENT_TYPE/COMMENT_ID) 형식으로 링크하세요. 예: [공공기관 업무보고 브리핑](/news/c/1146/청와대/5432). NEWS_ID는 해당 코멘트가 속한 뉴스의 ID, COMMENT_TYPE은 commentType, COMMENT_ID는 코멘트의 id입니다. 뉴스 링크와 마찬가지로 대괄호를 반드시 사용하세요.
+• 뉴스 ID, 코멘트 ID 등 내부 식별자를 답변에 노출하지 마세요. 링크 안에만 사용하세요.
+• 한국 정치 관련내용 아니어도 웬만하면 물어본거에 답하고, 정치 얘기만 해달라는 듯이 첨언하지 마세요.
+• "현재 화면 정보"에 "사용자의 최근 행동"이 포함될 수 있습니다. 여기에는 사용자가 앱에서 클릭하거나 이동한 내용이 표시됩니다. 사용자가 "이거 뭐야", "요약해줘" 등 맥락 의존적 질문을 하면 최근 행동에 나온 뉴스 ID나 코멘트 ID를 활용하여 도구로 조회하세요. 사용자에게 "뭘 눌렀는지 알려주세요"라고 되묻지 마세요.
 
 DB 구조:
-• News: id, title, subTitle, date, newsType, state(0=발행,1=대기,2=미발행), summary, keywords, timeline, agendaList, speechContent
-• newsType 종류: weekly(주간뉴스, 제목 예: "2026년 4월 2주차"), cabinet(국무회의, 예: "제15회 임시국무회의"), bill(법률, 예: "반도체산업 경쟁력 강화 및 지원 특별법"), constitution(헌재), executive(시행령), diplomat(정상외교), govern(행정), debate(논평), election(선거), budget(예산), specialcounsel(특검), northkorea(북한), investigation(국조), others(기타)
-• Comment(코멘트): 각 뉴스에 대한 청와대/행정부/정당 등의 공식 입장·브리핑·논평 자료. commentType별로 분류: 청와대, 행정부, 국민의힘, 더불어민주당, 입법부, 사법부, 기타, 와이보트 등
-• 뉴스 제목에 대통령 이름은 포함되지 않음. 특정 시기의 뉴스를 찾으려면 날짜로 필터링
-• search_news는 제목 키워드 검색. get_recent_news는 newsType 필터 가능
-• 중요: 정책, 외교, 법률 등 국가 방향에 영향을 주는 주제만 독립 뉴스로 존재. 스캔들, 논란, 사건사고, 정당 공방 등은 종종 뉴스 선정 기준에 부합하지 않을 경우 해당 주의 weekly 뉴스 안에 코멘트로 포함됨. 따라서 특정 논란이나 사건을 찾을 때 독립 뉴스가 없으면 해당 시기의 weekly 뉴스 코멘트(특히 국민의힘, 더불어민주당)를 검색해야 함.
+• 이 서비스에서 뉴스라 함은, 특정 주제에 관한 Comment(자료)들과 그에 대한 메타데이터(제목, 날짜, 뉴스타입 등)를 모두 포함하는 개념입니다. 뉴스 하나가 여러 개의 commentType, 그 아래 원문 자료(공식 브리핑 및 정당 논평)들을 가질 수 있습니다. 별도의 뉴스로 존재하는 경우는 서비스의 뉴스 선정 기준에 부합하는 주제입니다. 그에 해당하지 않는 자료들은 해당 시기의 weekly 뉴스 안에 코멘트로 포함되어 있을 수 있습니다. 각 newstype별 뉴스는 다음의 기준으로 선정됩니다:
+- 본회의 최종 표결 및 공포 과정에서 정부/여당과 야당의 입장이 달랐던 경우는 bill(법률) 뉴스로 존재.
+- 대중에게 공개된 모든 국무회의 자료는 cabinet(국무회의) 뉴스(예: "제15회 임시국무회의")로 존재.
+- 해외 정상 또는 정상급 인사와의 외교 관련 뉴스는 diplomat(정상외교) 뉴스로 존재.
+- 반대 의견이 명확히 존재한 시행령 관련 뉴스는 executive(시행령) 뉴스로 존재.
+- 매달 헌법재판소가 선정한 주요 결정은 constitution(헌재) 뉴스로 존재.
+- 대통령 또는 정부의 공식 기조가 선명하게 드러나고 후속 조치들이 비중 있게 다뤄지는 주제는 govern(행정) 뉴스로 존재. 정부 부처별 업무보고 또한 이 형태로 존재.
+- 선거 관련 뉴스는 election(선거) 뉴스로 존재. 예산안 및 추경 예산안은 budget(예산) 뉴스로 존재. 특검 관련 뉴스는 specialcounsel(특검) 뉴스로 존재. 북한 관련 뉴스는 northkorea(북한) 뉴스로 존재. 국정조사 관련 뉴스는 investigation(국조) 뉴스로 존재.
+- 기타 분류하기 어렵지만 여야의 공방이 높은 강도로 지속된 주제는 debate(논평) 뉴스로 존재.
+- 이외 모든 자료는 전부 weekly(주간) 뉴스(제목 예: "2026년 4월 2주차") 안에 포함. weekly 뉴스는 매주 월-일요일 단위로 발행. 특정 주제에 관련된 뉴스나 자료가 부실한 것 같다면 해당 시기의 weekly 뉴스 코멘트를 검색해야 함.
+• News의 메타데이터: id, title, subTitle, date, newsType, state(0=발행,1=대기,2=미발행), timeline, agendaList, speechContent, summary or summaries(코멘트별 요약), commentTypes(해당 뉴스에 어떤 코멘트 타입이 있는지)
+• Comment(코멘트): 각 뉴스에 대한 청와대/행정부/정당 등의 공식 입장·브리핑·논평 자료. commentType별로 분류되어있음.
+• commentType : 입법부(개정안 관련 내용 등 국회 공식 자료), 청와대(대통령 및 대통령실 공식 자료), 행정부(국무총리 및 부처별 공식 자료), 헌법재판소(판결문), 국민의힘, 더불어민주당, 기타(군소 정당 등)
+• 제21대 국회 임기 : 2020년 5월 30일 ~ 2024년 5월 29일
+• 윤석열 대통령 임기 : 2022년 5월 10일 ~ 2025년 4월 4일 (탄핵)
+• 제22대 국회 임기 : 2024년 5월 30일 ~ 2028년 5월 29일
+• 이재명 대통령 임기 : 2025년 6월 4일 ~ (임기 중)
 
 도구 사용 전략:
-• 한 번에 1-2개만 호출하세요. 결과를 보고 다음 단계를 결정하세요.
+• 한 번에 1~2개만 호출하세요. 결과를 보고 다음 단계를 결정하세요.
 • 날짜, ID, 의안번호 등 파라미터를 추측하거나 기억에서 꺼내지 마세요. 모르면 파라미터 없이 먼저 호출해서 알아내세요.
-• 뉴스/코멘트 찾기: search_news(keyword)로 검색. 키워드는 짧고 핵심적으로. 결과 없으면 키워드를 줄여서 재시도.
-• 뉴스를 찾은 뒤: get_news로 메타데이터만 보고 끝내지 마세요. 사용자가 내용을 물으면 반드시 get_news_comments로 코멘트(공식 자료)도 조회하세요. 뉴스의 실질적 내용은 코멘트에 있습니다.
+• 뉴스/코멘트 찾기: 넓은 주제면 search_news(semanticQuery)로 의미 검색. 구체적 제목을 알면 search_news(query+semanticQuery). 키워드 검색 결과 없으면 semanticQuery만으로 재시도.
+• 뉴스를 찾은 뒤: get_news로 메타데이터만 보고 끝내지 마세요. 사용자가 내용을 물으면 반드시 get_news_section_comments로 코멘트(공식 자료)도 조회하세요. 뉴스의 실질적 내용은 코멘트에 있습니다.
+• 화면 정보에 "코멘트{ID}"가 보이면 사용자가 해당 코멘트를 보고 있는 것입니다. get_comment_body(commentId)로 본문과 같은 섹션의 다른 코멘트 제목을 한 번에 가져옵니다.
+• list_comment_titles로 코멘트 ID를 찾은 뒤 본문이 필요하면 get_comment_body(commentId)를 호출하세요.
 • 법령 질문 → get_law_amendment(query)로 이력 먼저 확인 → 날짜 확인 → get_law_amendment(query, date)로 상세 조회
-• "없다"고 단정하기 전에 다양한 방식으로 충분히 검색하세요.
 
 의미 검색 필터링(semanticQuery):
 • 도구 결과가 클 때, semanticQuery 문장과 의미적으로 가장 가까운 항목 20개만 남기는 필터가 자동 적용됩니다.
@@ -64,9 +92,9 @@ export class ChatController {
       context?: string;
     },
   ) {
-    const { messages, model = 'grok', context } = body;
+    const { messages, model = 'gpt', context } = body;
     const modelId = model === 'claude' ? 'claude-haiku-4-5-20251001'
-      : model === 'gpt' ? 'gpt-4o-mini'
+      : model === 'gpt' ? 'gpt-5-nano'
       : 'grok-4-1-fast-reasoning';
 
     const systemContent = context
@@ -247,19 +275,14 @@ export class ChatController {
   private async executeTool(name: string, args: any): Promise<any> {
     switch (name) {
       case 'search_news': {
-        const result = await this.newsRepository.getNewsTitles(args.query);
-        // Filter out unpublished (state=2)
-        const filtered: any[] = [];
-        for (const n of (result || [])) {
-          try {
-            const full = await this.newsRepository.getNewsInView(n.id);
-            if (full && String(full.state) !== '2') {
-              filtered.push({ id: n.id, title: n.title });
-            }
-          } catch { /* skip */ }
-          if (filtered.length >= 20) break;
-        }
-        return filtered;
+        const result = args.query
+          ? await this.newsRepository.getNewsTitles(args.query)
+          : await this.newsRepository.getAllNewsTitles();
+        return (result || []).map((n) => ({
+          id: n.id,
+          title: n.title,
+          subTitle: n.subTitle || '',
+        }));
       }
 
       case 'get_news': {
@@ -271,6 +294,14 @@ export class ChatController {
         }
         if (!news) return { error: 'news not found', newsId: args.newsId };
         if (String(news.state) === '2') return { error: 'news not found', newsId: args.newsId };
+
+        const countRows = await this.commentRepository.getCommentCountsByNewsId(args.newsId);
+        const commentCounts = countRows.map((r) => ({
+          commentType: r.commentType,
+          count: Number(r.count),
+        }));
+        const commentTypes = commentCounts.map((c) => c.commentType);
+
         const result: any = {
           id: news.id,
           title: news.title,
@@ -278,45 +309,35 @@ export class ChatController {
           date: news.date,
           newsType: news.newsType,
           state: news.state,
+          isPublished: news.isPublished,
           summary: news.summary,
-          keywords: news.keywords,
-          timeline: news.timeline,
           agendaList: news.agendaList,
           speechContent: news.speechContent,
+          proDebate: news.proDebate,
+          conDebate: news.conDebate,
+          billAmendment: news.billAmendment,
+          billSummary: news.billSummary,
+          billDetail: news.billDetail,
+          billVoteResult: news.billVoteResult,
+          billVoteTotal: news.billVoteTotal,
+          billVoteByParty: news.billVoteByParty,
+          keywords: news.keywords,
+          timeline: news.timeline,
           summaries: news.summaries?.map((s: any) => ({
             commentType: s.commentType,
             summary: s.summary,
           })),
-          commentTypes: news.summaries?.map((s: any) => s.commentType) || [],
+          commentTypes,
+          commentCounts,
         };
-
-        // If pending/unpublished, auto-fetch comments (no processed summaries available)
-        if (String(news.state) !== '0') {
-          const types = news.summaries?.map((s: any) => s.commentType) || [];
-          const allComments: any[] = [];
-          for (const ct of types) {
-            const comments = await this.commentRepository.getCommentByNewsIdAndCommentType(
-              args.newsId, ct, 0, 30,
-            );
-            if (comments) {
-              allComments.push(...comments.map((c: any) => ({
-                commentType: ct,
-                title: c.title,
-                comment: c.comment || '',
-                date: c.date,
-              })));
-            }
-          }
-          result.comments = allComments;
-        }
 
         return result;
       }
 
-      case 'get_news_comments': {
-        // Block unpublished news
+      case 'get_news_section_comments': {
+        let newsCheck;
         try {
-          const newsCheck = await this.newsRepository.getNewsInView(args.newsId);
+          newsCheck = await this.newsRepository.getNewsInView(args.newsId);
           if (!newsCheck || String(newsCheck.state) === '2') return { error: 'news not found' };
         } catch { return { error: 'news not found' }; }
 
@@ -327,16 +348,40 @@ export class ChatController {
           30,
         );
         if (!commentList || commentList.length === 0) {
-          const news = await this.newsRepository.getNewsInView(args.newsId);
-          const available = news?.summaries?.map((s: any) => s.commentType) || [];
+          const available = (newsCheck?.comments as unknown as string[]) || [];
           return { error: 'no comments found', available };
         }
-        return commentList.map((c: any) => ({
-          id: c.id,
-          title: c.title,
-          comment: c.comment || '',
-          date: c.date,
-        }));
+        return {
+          newsId: args.newsId,
+          newsTitle: newsCheck.title,
+          comments: commentList.map((c: any) => ({
+            id: c.id,
+            title: c.title,
+            comment: c.comment || '',
+            date: c.date,
+          })),
+        };
+      }
+
+      case 'get_comment_body': {
+        const single = await this.commentRepository.getCommentByCommentId(args.commentId);
+        if (!single) return { error: 'comment not found', commentId: args.commentId };
+        const newsId = (single as any).news?.id;
+        if (!newsId) return { error: 'comment has no news linkage', commentId: args.commentId };
+        let newsCheck;
+        try {
+          newsCheck = await this.newsRepository.getNewsInView(newsId);
+          if (!newsCheck || String(newsCheck.state) === '2') return { error: 'news not found' };
+        } catch { return { error: 'news not found' }; }
+        const siblings = await this.commentRepository.getCommentByNewsIdAndCommentType(
+          newsId, single.commentType as NewsCommentType, 0, 30,
+        );
+        return {
+          comment: { id: single.id, title: single.title, comment: single.comment || '', date: single.date, commentType: single.commentType, newsId, newsTitle: newsCheck.title },
+          otherComments: (siblings || [])
+            .filter((c: any) => c.id !== single.id)
+            .map((c: any) => ({ id: c.id, title: c.title, date: c.date })),
+        };
       }
 
       case 'get_recent_news': {
@@ -356,16 +401,21 @@ export class ChatController {
         }));
       }
 
-      case 'get_recent_comments': {
-        const limit = args.limit || 20;
+      case 'list_comment_titles': {
+        const limit = args.limit || 100;
         const option: any = {};
         if (args.commentType) option.type = args.commentType;
+        if (args.startDate) option.startDate = args.startDate;
+        if (args.endDate) option.endDate = args.endDate;
+        option.order = args.startDate && !args.endDate ? 'ASC' : 'DESC';
         const comments = await this.commentRepository.getCommentsRecentUpdated(0, limit, option);
         return (comments || []).slice(0, limit).map((c: any) => ({
           id: c.id,
           title: c.title,
           commentType: c.commentType,
           date: c.date,
+          newsId: c.news?.id,
+          newsTitle: c.news?.title,
         }));
       }
 
@@ -640,6 +690,155 @@ export class ChatController {
           return Object.values(byParty);
         } catch (e) {
           return { error: `bill votes failed: ${e}` };
+        }
+      }
+
+      case 'get_stock_price': {
+        try {
+          const query = (args.query || '').trim();
+          const period = args.period || '5d';
+          let symbol = KNOWN_TICKERS[query] || KRX_MAP[query];
+
+          if (!symbol) {
+            try {
+              const search = await yf.search(query);
+              symbol = (search.quotes?.[0] as any)?.symbol;
+            } catch { /* search failed, try as raw symbol */ }
+          }
+          if (!symbol) symbol = query;
+
+          const quote = await yf.quote(symbol);
+
+          const periodDays: Record<string, number> = { '1d': 2, '5d': 7, '1mo': 35, '3mo': 100, '6mo': 200, '1y': 370 };
+          const days = periodDays[period] || 7;
+          const now = new Date();
+          const from = new Date(now);
+          from.setDate(from.getDate() - days);
+
+          let prices: any[] = [];
+          try {
+            const hist = await yf.chart(symbol, { period1: from, period2: now });
+            prices = (hist.quotes || [])
+              .filter((q: any) => q.close != null)
+              .map((q: any) => ({
+                date: new Date(q.date).toISOString().slice(0, 10),
+                open: q.open != null ? Math.round(q.open * 100) / 100 : null,
+                high: q.high != null ? Math.round(q.high * 100) / 100 : null,
+                low: q.low != null ? Math.round(q.low * 100) / 100 : null,
+                close: Math.round(q.close * 100) / 100,
+                volume: q.volume || 0,
+              }));
+          } catch { /* history fetch failed, quote is enough */ }
+
+          return {
+            name: quote.shortName || quote.longName || query,
+            symbol,
+            currency: quote.currency || 'USD',
+            price: quote.regularMarketPrice,
+            change: Math.round((quote.regularMarketChange || 0) * 100) / 100,
+            changePct: Math.round((quote.regularMarketChangePercent || 0) * 100) / 100,
+            previousClose: quote.regularMarketPreviousClose,
+            history: prices.slice(-20),
+          };
+        } catch (e) {
+          return { error: `stock price lookup failed: ${e}` };
+        }
+      }
+
+      case 'get_market_summary': {
+        try {
+          const symbols = ['^KS11', '^KQ11', '^GSPC', '^IXIC'];
+          const names = ['KOSPI', 'KOSDAQ', 'S&P 500', 'NASDAQ'];
+          const quotes = await Promise.all(symbols.map(s => yf.quote(s)));
+          return quotes.map((q, i) => ({
+            name: names[i],
+            symbol: symbols[i],
+            price: q.regularMarketPrice,
+            change: Math.round((q.regularMarketChange || 0) * 100) / 100,
+            changePct: Math.round((q.regularMarketChangePercent || 0) * 100) / 100,
+            previousClose: q.regularMarketPreviousClose,
+          }));
+        } catch (e) {
+          return { error: `market summary failed: ${e}` };
+        }
+      }
+
+      case 'get_economic_data': {
+        try {
+          const ecosKey = process.env.BOK_ECOS_API_KEY || '';
+          const indicator = (args.indicator || '').trim();
+
+          const ECOS_INDICATORS: Record<string, { code: string; item: string; cycle: string }> = {
+            'GDP': { code: '200Y104', item: '1400', cycle: 'Q' },
+            'CPI': { code: '901Y009', item: '0', cycle: 'M' },
+            '물가': { code: '901Y009', item: '0', cycle: 'M' },
+            '소비자물가': { code: '901Y009', item: '0', cycle: 'M' },
+            '기준금리': { code: '722Y001', item: '0101000', cycle: 'M' },
+            '환율': { code: '731Y001', item: '0000001', cycle: 'D' },
+            '환율(USD)': { code: '731Y001', item: '0000001', cycle: 'D' },
+            '달러': { code: '731Y001', item: '0000001', cycle: 'D' },
+            '환율(JPY)': { code: '731Y001', item: '0000002', cycle: 'D' },
+            '엔화': { code: '731Y001', item: '0000002', cycle: 'D' },
+            '환율(EUR)': { code: '731Y001', item: '0000003', cycle: 'D' },
+            '유로': { code: '731Y001', item: '0000003', cycle: 'D' },
+            '환율(CNY)': { code: '731Y001', item: '0000053', cycle: 'D' },
+            '위안': { code: '731Y001', item: '0000053', cycle: 'D' },
+            '국고채3년': { code: '817Y002', item: '010200000', cycle: 'D' },
+            '국고채10년': { code: '817Y002', item: '010210000', cycle: 'D' },
+            '회사채': { code: '817Y002', item: '010300000', cycle: 'D' },
+            'CD금리': { code: '817Y002', item: '010502000', cycle: 'D' },
+            '콜금리': { code: '817Y002', item: '010101000', cycle: 'D' },
+            'M2': { code: '101Y018', item: '0', cycle: 'M' },
+            '통화량': { code: '101Y018', item: '0', cycle: 'M' },
+            '생산자물가': { code: '404Y014', item: '0', cycle: 'M' },
+          };
+
+          const known = ECOS_INDICATORS[indicator];
+          const statCode = known?.code || indicator;
+          const itemCode = args.itemCode || known?.item || '0';
+          const cycle = args.cycle || known?.cycle || 'Q';
+
+          const now = new Date();
+          let startDate = args.startDate;
+          let endDate = args.endDate;
+          if (!endDate) {
+            if (cycle === 'A') endDate = String(now.getFullYear());
+            else if (cycle === 'Q') endDate = `${now.getFullYear()}Q${Math.ceil((now.getMonth() + 1) / 3)}`;
+            else if (cycle === 'M') endDate = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
+            else endDate = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+          }
+          if (!startDate) {
+            if (cycle === 'A') startDate = String(now.getFullYear() - 10);
+            else if (cycle === 'Q') startDate = `${now.getFullYear() - 3}Q1`;
+            else if (cycle === 'M') startDate = `${now.getFullYear() - 2}01`;
+            else {
+              const d = new Date(now);
+              d.setDate(d.getDate() - 30);
+              startDate = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+            }
+          }
+
+          const url = `https://ecos.bok.or.kr/api/StatisticSearch/${ecosKey}/json/kr/1/100/${statCode}/${cycle}/${startDate}/${endDate}/${itemCode}`;
+          const resp = await fetch(url);
+          const data = await resp.json();
+
+          if (data?.RESULT?.CODE) {
+            return { error: data.RESULT.MESSAGE, code: data.RESULT.CODE };
+          }
+
+          const rows = data?.StatisticSearch?.row || [];
+          return {
+            indicator: rows[0]?.STAT_NAME || indicator,
+            itemName: rows[0]?.ITEM_NAME1 || '',
+            unit: rows[0]?.UNIT_NAME || '',
+            count: rows.length,
+            data: rows.map((r: any) => ({
+              time: r.TIME,
+              value: r.DATA_VALUE,
+            })),
+          };
+        } catch (e) {
+          return { error: `ECOS lookup failed: ${e}` };
         }
       }
 

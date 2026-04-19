@@ -49,6 +49,14 @@ export class NewsRepository {
       })
       .getMany() as Promise<Pick<News, 'id' | 'title' | 'subTitle'>[]>;
   }
+
+  async getAllNewsTitles() {
+    return this.newsRepo
+      .createQueryBuilder('news')
+      .select(['news.id', 'news.title', 'news.subTitle'])
+      .orderBy('news.id', 'DESC')
+      .getMany() as Promise<Pick<News, 'id' | 'title' | 'subTitle'>[]>;
+  }
   async getNewsCount() {
     return this.newsRepo.count();
   }
