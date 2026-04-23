@@ -84,6 +84,33 @@ export const newsTypesToKor = (newsType: NewsType) => {
   }
 };
 
+export interface BillVoteByParty {
+  party: string;
+  for: number;
+  against: number;
+  abstain: number;
+  absent: number;
+}
+
+export interface NewsRationale {
+  axis?: string;
+  instrument?: string;
+  inclusion?: string;
+  exclusion?: string;
+  conversion?: string;
+  scope?: string;
+}
+
+export interface BillItem {
+  billNo: string;
+  billName: string;
+  detail?: string;
+  proposalReason?: string;
+  voteResult?: string;
+  voteTotal?: number;
+  voteByParty?: BillVoteByParty[];
+}
+
 export interface NewsPreviews
   extends Pick<
     News,

@@ -1,4 +1,4 @@
-import { NewsState, NewsType } from 'src/interface/news';
+import { BillItem, NewsRationale, NewsState, NewsType } from 'src/interface/news';
 import {
   Column,
   Entity,
@@ -97,6 +97,12 @@ export class News {
 
   @Column({ type: 'simple-json', nullable: true })
   billVoteByParty?: { party: string; for: number; against: number; abstain: number; absent: number }[];
+
+  @Column({ type: 'simple-json', nullable: true })
+  bills?: BillItem[];
+
+  @Column({ type: 'simple-json', nullable: true })
+  rationale?: NewsRationale;
 
   @Column({ nullable: true })
   newsImage?: string;

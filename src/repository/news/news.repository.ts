@@ -96,6 +96,8 @@ export class NewsRepository {
         'news.billVoteResult',
         'news.billVoteTotal',
         'news.billVoteByParty',
+        'news.bills',
+        'news.rationale',
       ])
       .leftJoin('news.keywords', 'keywords')
       .addSelect(['keywords.keyword', 'keywords.id'])
@@ -138,6 +140,8 @@ export class NewsRepository {
         'news.billVoteResult',
         'news.billVoteTotal',
         'news.billVoteByParty',
+        'news.bills',
+        'news.rationale',
         'keyword.id',
         'keyword.keyword',
       ])
@@ -322,6 +326,7 @@ export class NewsRepository {
         billVoteResult: news.billVoteResult ?? null,
         billVoteTotal: news.billVoteTotal ?? null,
         billVoteByParty: news.billVoteByParty ?? null,
+        bills: news.bills ?? null,
         order: 0,
         isPublished: news.state === NewsState.Published,
       });
@@ -460,6 +465,7 @@ export class NewsRepository {
         billVoteResult: news.billVoteResult ?? null,
         billVoteTotal: news.billVoteTotal ?? null,
         billVoteByParty: news.billVoteByParty ?? null,
+        bills: news.bills ?? null,
         ...(news.state !== undefined && {
           isPublished: news.state === NewsState.Published,
         }),
