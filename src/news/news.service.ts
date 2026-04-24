@@ -180,4 +180,12 @@ export class NewsService {
       return t;
     });
   }
+
+  async updateNewsTracked(
+    id: number,
+    tracked: boolean,
+    trackedNote?: string | null,
+  ) {
+    return await this.newsRepo.updateTracked(id, tracked, trackedNote);
+  }
 }

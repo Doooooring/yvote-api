@@ -532,4 +532,13 @@ export class NewsRepository {
     }
     return await queryBuilder.execute();
   }
+
+  async updateTracked(id: number, tracked: boolean, trackedNote?: string | null) {
+    const update: Partial<News> = { tracked };
+    if (trackedNote !== undefined) {
+      update.trackedNote = trackedNote ?? null;
+    }
+    await this.newsRepo.update({ id }, update);
+    return true;
+  }
 }

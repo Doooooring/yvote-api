@@ -183,6 +183,17 @@ export class NewsController {
   }
 
   @UseGuards(AdminGuard)
+  @Patch('/edit/:id/tracked')
+  @RespInterceptor
+  async updateNewsTracked(
+    @Param('id') id: number,
+    @Body() body: { tracked: boolean; trackedNote?: string | null },
+  ) {
+    const { tracked, trackedNote } = body;
+    return await this.newsService.updateNewsTracked(id, tracked, trackedNote);
+  }
+
+  @UseGuards(AdminGuard)
   @Patch('/edit/:id')
   @RespInterceptor
   async updateNewsToEditById(
