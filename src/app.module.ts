@@ -13,6 +13,7 @@ import { MigrationModule } from './migration/migration.module';
 import { NewsModule } from './news/news.module';
 import { CommentModule } from './comment/comment.module';
 import { LlmModule } from './llm/llm.module';
+import { ProposedActionModule } from './proposed-action/proposed-action.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { LlmModule } from './llm/llm.module';
     LlmModule,
     MigrationModule,
     AuthModule,
+    ProposedActionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -78,6 +80,19 @@ export class AppModule {
     },
     { path: '/news/edit/:id/tracked', method: RequestMethod.PATCH },
     { path: '/news/edit/:id/tracked', method: RequestMethod.OPTIONS },
+    { path: '/proposed-action', method: RequestMethod.POST },
+    { path: '/proposed-action', method: RequestMethod.OPTIONS },
+    { path: '/proposed-action', method: RequestMethod.GET },
+    { path: '/proposed-action/:id', method: RequestMethod.GET },
+    { path: '/proposed-action/:id', method: RequestMethod.PATCH },
+    { path: '/proposed-action/:id', method: RequestMethod.OPTIONS },
+    { path: '/proposed-action/:id', method: RequestMethod.DELETE },
+    { path: '/proposed-action/:id/approve', method: RequestMethod.PATCH },
+    { path: '/proposed-action/:id/approve', method: RequestMethod.OPTIONS },
+    { path: '/proposed-action/:id/reject', method: RequestMethod.PATCH },
+    { path: '/proposed-action/:id/reject', method: RequestMethod.OPTIONS },
+    { path: '/proposed-action/:id/applied', method: RequestMethod.PATCH },
+    { path: '/proposed-action/:id/applied', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit', method: RequestMethod.POST },
     { path: '/keyword/edit', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit/:id', method: RequestMethod.POST },
