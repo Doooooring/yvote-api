@@ -10,7 +10,10 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "moduleResolution": "node",
+    "paths": {
+      "src/*": ["src/*"]
+    },
+    "moduleResolution": "node10",
     "incremental": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
