@@ -98,6 +98,8 @@ export class NewsRepository {
         'news.billVoteByParty',
         'news.bills',
         'news.rationale',
+        'news.tracked',
+        'news.trackedNote',
       ])
       .leftJoin('news.keywords', 'keywords')
       .addSelect(['keywords.keyword', 'keywords.id'])
@@ -142,6 +144,8 @@ export class NewsRepository {
         'news.billVoteByParty',
         'news.bills',
         'news.rationale',
+        'news.tracked',
+        'news.trackedNote',
         'keyword.id',
         'keyword.keyword',
       ])
