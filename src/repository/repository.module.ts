@@ -4,6 +4,7 @@ import { Comment } from 'src/entity/comment.entity';
 import { Keyword } from 'src/entity/keyword.entity';
 import { News } from 'src/entity/news.entity';
 import { NewsSummary } from 'src/entity/newsSummary.entity';
+import { ProposedAction } from 'src/entity/proposed-action.entity';
 import { Timeline } from 'src/entity/timeline.entity';
 import { User } from 'src/entity/user.entity';
 import { Vote } from 'src/entity/vote.entity';
@@ -21,6 +22,7 @@ import { NewsRepository } from './news/news.repository';
       Timeline,
       User,
       Vote,
+      ProposedAction,
     ]),
   ],
   providers: [NewsRepository, KeywordRepository, CommentRepository],
