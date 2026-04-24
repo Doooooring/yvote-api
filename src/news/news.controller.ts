@@ -67,7 +67,10 @@ export class NewsController {
     @Query('endDate') endDate?: string,
     @Query('newsType') newsType?: string,
     @Query('title') title?: string,
+    @Query('tracked') tracked?: string,
   ) {
+    const trackedBool =
+      tracked === undefined ? undefined : tracked === 'true' || tracked === '1';
     const response = await this.newsService.getNewsPreviews(offset, limit, {
       keyword,
       title,
@@ -75,6 +78,7 @@ export class NewsController {
       startDate,
       endDate,
       newsType,
+      tracked: trackedBool,
     });
 
     console.log(response);

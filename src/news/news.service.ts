@@ -62,6 +62,7 @@ export class NewsService {
       startDate?: string;
       endDate?: string;
       newsType?: string;
+      tracked?: boolean;
     },
   ) {
     const { state, ...rest } = option;

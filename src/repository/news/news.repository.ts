@@ -172,6 +172,7 @@ export class NewsRepository {
       startDate,
       endDate,
       newsType,
+      tracked,
     }: {
       keyword?: string;
       title?: string;
@@ -179,6 +180,7 @@ export class NewsRepository {
       startDate?: string;
       endDate?: string;
       newsType?: string;
+      tracked?: boolean;
     },
   ) {
     const subQuery = this.newsRepo
@@ -214,6 +216,11 @@ export class NewsRepository {
     if (newsType) {
       subQuery.andWhere('subNews.newsType = :newsType', { newsType });
     }
+
+    if (tracked !== undefined) {
+      subQuery.andWhere('subNews.tracked = :tracked', { tracked });
+    }
+
     subQuery
       .orderBy('state', 'DESC')
       .addOrderBy('subNews.date', 'DESC')
@@ -238,6 +245,8 @@ export class NewsRepository {
         'news.state state',
         'news.isPublished isPublished',
         'news.date date',
+        'news.tracked tracked',
+        'news.trackedNote trackedNote',
         'keywords.id keywordId',
         'keywords.keyword keyword',
       ])
