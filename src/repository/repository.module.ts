@@ -11,6 +11,7 @@ import { Vote } from 'src/entity/vote.entity';
 import { CommentRepository } from './comment/comment.repository';
 import { KeywordRepository } from './keyword/keyword.repository';
 import { NewsRepository } from './news/news.repository';
+import { ProposedActionRepository } from './proposed-action/proposed-action.repository';
 
 @Module({
   imports: [
@@ -25,7 +26,17 @@ import { NewsRepository } from './news/news.repository';
       ProposedAction,
     ]),
   ],
-  providers: [NewsRepository, KeywordRepository, CommentRepository],
-  exports: [NewsRepository, KeywordRepository, CommentRepository],
+  providers: [
+    NewsRepository,
+    KeywordRepository,
+    CommentRepository,
+    ProposedActionRepository,
+  ],
+  exports: [
+    NewsRepository,
+    KeywordRepository,
+    CommentRepository,
+    ProposedActionRepository,
+  ],
 })
 export class RepositoryModule {}
