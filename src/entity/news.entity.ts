@@ -104,6 +104,12 @@ export class News {
   @Column({ type: 'simple-json', nullable: true })
   rationale?: NewsRationale;
 
+  @Column({ default: false })
+  tracked: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  trackedNote?: string;
+
   @Column({ nullable: true })
   newsImage?: string;
 
