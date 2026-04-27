@@ -14,6 +14,7 @@ import { NewsModule } from './news/news.module';
 import { CommentModule } from './comment/comment.module';
 import { LlmModule } from './llm/llm.module';
 import { ProposedActionModule } from './proposed-action/proposed-action.module';
+import { IncidentModule } from './incident/incident.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ProposedActionModule } from './proposed-action/proposed-action.module';
     MigrationModule,
     AuthModule,
     ProposedActionModule,
+    IncidentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -93,6 +95,17 @@ export class AppModule {
     { path: '/proposed-action/:id/reject', method: RequestMethod.OPTIONS },
     { path: '/proposed-action/:id/applied', method: RequestMethod.PATCH },
     { path: '/proposed-action/:id/applied', method: RequestMethod.OPTIONS },
+    { path: '/incident', method: RequestMethod.POST },
+    { path: '/incident', method: RequestMethod.OPTIONS },
+    { path: '/incident', method: RequestMethod.GET },
+    { path: '/incident/:id', method: RequestMethod.GET },
+    { path: '/incident/:id', method: RequestMethod.PATCH },
+    { path: '/incident/:id', method: RequestMethod.OPTIONS },
+    { path: '/incident/:id', method: RequestMethod.DELETE },
+    { path: '/incident/:id/dismiss', method: RequestMethod.PATCH },
+    { path: '/incident/:id/dismiss', method: RequestMethod.OPTIONS },
+    { path: '/incident/:id/resolve', method: RequestMethod.PATCH },
+    { path: '/incident/:id/resolve', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit', method: RequestMethod.POST },
     { path: '/keyword/edit', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit/:id', method: RequestMethod.POST },
