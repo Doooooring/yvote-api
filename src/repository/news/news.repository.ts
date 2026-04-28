@@ -426,6 +426,8 @@ export class NewsRepository {
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
+    } finally {
+      await queryRunner.release();
     }
   }
 
