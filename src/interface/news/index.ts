@@ -21,7 +21,21 @@ export enum NewsCommentType {
   자유주의자 = '자유주의자',
   더불어민주당 = '더불어민주당',
   국민의힘 = '국민의힘',
+  // Historical lineage names — emitted by yvote_automation backfill scrapes
+  // when news_date precedes the lineage's current-name cutoff. See
+  // company.ceo.shared.party_history for cutoff dates.
+  한나라당 = '한나라당',
+  새누리당 = '새누리당',
+  자유한국당 = '자유한국당',
+  미래통합당 = '미래통합당',
+  통합민주당 = '통합민주당',
+  민주당 = '민주당',
+  민주통합당 = '민주통합당',
+  새정치민주연합 = '새정치민주연합',
   청와대 = '청와대',
+  // 윤석열 정부 시기에만 사용된 명칭 (2022-05-10 ~ 2025-12-29).
+  // 그 외 모든 기간은 청와대로 통일.
+  대통령실 = '대통령실',
   행정부 = '행정부',
   헌법재판소 = '헌법재판소',
   와이보트 = '와이보트',

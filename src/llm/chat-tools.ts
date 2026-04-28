@@ -38,7 +38,7 @@ export const CHAT_TOOLS: ChatCompletionTool[] = [
         type: 'object',
         properties: {
           newsId: { type: 'number', description: '뉴스 ID' },
-          commentType: { type: 'string', description: '코멘트 타입 (예: 청와대, 행정부, 국민의힘, 더불어민주당)' },
+          commentType: { type: 'string', description: '코멘트 타입 (예: 청와대, 행정부, 국민의힘, 더불어민주당, 또는 시대별 과거 정당명: 한나라당, 새누리당, 자유한국당, 미래통합당, 통합민주당, 민주당, 민주통합당, 새정치민주연합)' },
           semanticQuery: { type: 'string', description: '결과 필터링용 의미 검색 쿼리.' },
         },
         required: ['newsId', 'commentType'],
