@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AdminGuard } from 'src/auth/admin/admin.guard';
+import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { ProposedActionController } from './proposed-action.controller';
 import { ProposedActionService } from './proposed-action.service';
 
@@ -24,15 +24,36 @@ describe('ProposedActionController', () => {
           },
         },
       ],
-    })
-      .overrideGuard(AdminGuard)
-      .useValue({ canActivate: () => true })
-      .compile();
+    }).compile();
 
     controller = module.get<ProposedActionController>(ProposedActionController);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  const methodGuards = (methodName: keyof ProposedActionController) =>
+    Reflect.getMetadata(
+      GUARDS_METADATA,
+      Object.getOwnPropertyDescriptor(
+        ProposedActionController.prototype,
+        methodName,
+      )?.value,
+    ) || [];
+
+  it('does not apply the old AdminGuard to /adminjae2 proposed-action endpoints', () => {
+    for (const methodName of [
+      'create',
+      'list',
+      'getById',
+      'approve',
+      'reject',
+      'markApplied',
+      'update',
+      'delete',
+    ] as const) {
+      expect(methodGuards(methodName)).toEqual([]);
+    }
   });
 });

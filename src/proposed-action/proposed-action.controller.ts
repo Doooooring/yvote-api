@@ -8,9 +8,7 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { AdminGuard } from 'src/auth/admin/admin.guard';
 import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 import { RespInterceptor } from 'src/tools/decorator';
 import {
@@ -28,14 +26,12 @@ export class ProposedActionController {
     private readonly svc: ProposedActionService,
   ) {}
 
-  @UseGuards(AdminGuard)
   @Post()
   @RespInterceptor
   async create(@Body() body: ProposedActionCreate) {
     return await this.svc.create(body);
   }
 
-  @UseGuards(AdminGuard)
   @Get()
   @RespInterceptor
   async list(
@@ -52,35 +48,30 @@ export class ProposedActionController {
     });
   }
 
-  @UseGuards(AdminGuard)
   @Get(':id')
   @RespInterceptor
   async getById(@Param('id') id: number) {
     return await this.svc.getById(Number(id));
   }
 
-  @UseGuards(AdminGuard)
   @Patch(':id/approve')
   @RespInterceptor
   async approve(@Param('id') id: number) {
     return await this.svc.approve(Number(id));
   }
 
-  @UseGuards(AdminGuard)
   @Patch(':id/reject')
   @RespInterceptor
   async reject(@Param('id') id: number) {
     return await this.svc.reject(Number(id));
   }
 
-  @UseGuards(AdminGuard)
   @Patch(':id/applied')
   @RespInterceptor
   async markApplied(@Param('id') id: number) {
     return await this.svc.markApplied(Number(id));
   }
 
-  @UseGuards(AdminGuard)
   @Patch(':id')
   @RespInterceptor
   async update(
@@ -90,7 +81,6 @@ export class ProposedActionController {
     return await this.svc.update(Number(id), body);
   }
 
-  @UseGuards(AdminGuard)
   @Delete(':id')
   @RespInterceptor
   async delete(@Param('id') id: number) {
