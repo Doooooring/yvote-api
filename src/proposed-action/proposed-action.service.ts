@@ -27,7 +27,7 @@ const ALLOWED_ACTION_TYPES = new Set<string>([
 ]);
 
 const ALLOWED_STATUSES = new Set<string>([
-  ProposedActionStatus.Pending,
+  ProposedActionStatus.Waiting,
   ProposedActionStatus.Approved,
   ProposedActionStatus.Rejected,
   ProposedActionStatus.Applied,
@@ -35,13 +35,28 @@ const ALLOWED_STATUSES = new Set<string>([
 ]);
 
 /**
+ * Parse an ISO-8601 timestamp string supplied via query string.
+ * Returns undefined when the input is undefined; throws BadRequest
+ * when present but unparseable so callers see a clear 400 instead of
+ * silently being ignored.
+ */
+function parseFilterDate(raw: string | undefined, field: string): Date | undefined {
+  if (raw === undefined) return undefined;
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  const d = new Date(trimmed);
+  if (Number.isNaN(d.getTime())) {
+    throw new BadRequestException(
+      `proposed-action: ${field} must be an ISO-8601 timestamp (got '${raw}')`,
+    );
+  }
+  return d;
+}
+
+/**
  * Per-actionType payload-shape sanity check. The API enforces only the
  * top-level required fields — full schema validation lives in the
  * conductor's apply.py because that's where the action is consumed.
- *
- * The point of this validator is to fail fast for typos
- * (e.g. `commentTyep`, `newId`) at PA-creation time so they don't sit
- * in the queue until apply blows up.
  */
 function validatePayloadShape(
   actionType: string,
@@ -82,19 +97,10 @@ function validatePayloadShape(
         return `${actionType} requires top-level \`newsId\``;
       return null;
     case ProposedActionType.FillNews:
-      // FillNews is "(re)generate the type-specific content fields for
-      // an existing row". Always needs newsId. Optional payload field
-      // `generatedContent` lets a worker pre-bake the field map so the
-      // apply path can use the fast-path (no pipeline run); without it,
-      // apply runs the full type-specific pipeline. We don't enforce
-      // payload shape here — the conductor's apply.py owns that schema.
       if (newsId === undefined || newsId === null)
         return 'fill_news requires top-level `newsId`';
       return null;
     case ProposedActionType.EditComment:
-      // EditComment requires top-level newsId + payload identifying
-      // which comment to edit; the conductor's apply.py owns the rest
-      // of the schema (commentType / matcher / new fields).
       if (newsId === undefined || newsId === null)
         return 'edit_comment requires top-level `newsId`';
       return null;
@@ -136,12 +142,48 @@ export class ProposedActionService {
   }
 
   async list(options: {
-    status?: ProposedActionStatus;
+    /** One or more statuses (`status IN (...)` if length > 1). */
+    statuses?: string[];
     newsId?: number;
+    /** Exact match on actionType (e.g. "publish"). */
+    actionType?: string;
+    /** Substring match on note (LIKE %note%). */
+    note?: string;
+    /** ISO timestamp string; matches createdAt >= this value. */
+    createdAfter?: string;
+    /** ISO timestamp string; matches createdAt <= this value. */
+    createdBefore?: string;
     offset?: number;
     limit?: number;
   }) {
-    return await this.repo.list(options);
+    if (options.statuses && options.statuses.length > 0) {
+      for (const s of options.statuses) {
+        if (!ALLOWED_STATUSES.has(s)) {
+          throw new BadRequestException(
+            `proposed-action: unknown status '${s}'. ` +
+              `Allowed: ${[...ALLOWED_STATUSES].join(', ')}`,
+          );
+        }
+      }
+    }
+    if (options.actionType !== undefined && !ALLOWED_ACTION_TYPES.has(options.actionType)) {
+      throw new BadRequestException(
+        `proposed-action: unknown actionType '${options.actionType}'. ` +
+          `Allowed: ${[...ALLOWED_ACTION_TYPES].join(', ')}`,
+      );
+    }
+    const createdAfterDate = parseFilterDate(options.createdAfter, 'createdAfter');
+    const createdBeforeDate = parseFilterDate(options.createdBefore, 'createdBefore');
+    return await this.repo.list({
+      statuses: options.statuses,
+      newsId: options.newsId,
+      actionType: options.actionType,
+      note: options.note,
+      createdAfter: createdAfterDate,
+      createdBefore: createdBeforeDate,
+      offset: options.offset,
+      limit: options.limit,
+    });
   }
 
   async update(id: number, patch: ProposedActionUpdate) {

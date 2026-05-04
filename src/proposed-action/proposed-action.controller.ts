@@ -13,7 +13,6 @@ import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 import { RespInterceptor } from 'src/tools/decorator';
 import {
   ProposedActionCreate,
-  ProposedActionStatus,
   ProposedActionUpdate,
 } from 'src/interface/proposed-action';
 import { ProposedActionService } from './proposed-action.service';
@@ -35,14 +34,30 @@ export class ProposedActionController {
   @Get()
   @RespInterceptor
   async list(
-    @Query('status') status?: ProposedActionStatus,
+    @Query('status') status?: string,
     @Query('newsId') newsId?: number,
+    @Query('actionType') actionType?: string,
+    @Query('note') note?: string,
+    @Query('createdAfter') createdAfter?: string,
+    @Query('createdBefore') createdBefore?: string,
     @Query('offset') offset?: number,
     @Query('limit') limit?: number,
   ) {
+    // status accepts either a single value (e.g. "waiting") or a
+    // comma-separated list (e.g. "waiting,approved,applied") for an
+    // indexed `status IN (...)` query. Empty strings ignored.
+    const parsedStatuses =
+      status === undefined || status === ''
+        ? undefined
+        : status.split(',').map((s) => s.trim()).filter(Boolean);
+
     return await this.svc.list({
-      status,
+      statuses: parsedStatuses,
       newsId: newsId !== undefined ? Number(newsId) : undefined,
+      actionType: actionType || undefined,
+      note: note || undefined,
+      createdAfter: createdAfter || undefined,
+      createdBefore: createdBefore || undefined,
       offset: offset !== undefined ? Number(offset) : undefined,
       limit: limit !== undefined ? Number(limit) : undefined,
     });

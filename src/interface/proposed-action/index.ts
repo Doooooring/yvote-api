@@ -24,7 +24,11 @@ export enum ProposedActionType {
 // fill end-to-end. EditComment is the existing per-comment edit action.
 
 export enum ProposedActionStatus {
-  Pending = 'pending',
+  // Renamed 2026-05-04: 'pending' → 'waiting' to disambiguate from
+  // News.state 'pending' (= draft). Migration
+  // RenameProposedActionPendingToWaiting1777822084423 rewrites existing
+  // rows. The conductor's apply.py + adminjae2 UI move in lockstep.
+  Waiting = 'waiting',
   Approved = 'approved',
   Rejected = 'rejected',
   Applied = 'applied',

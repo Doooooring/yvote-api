@@ -31,8 +31,13 @@ export class ProposedActionRepository {
   }
 
   async list(options: {
-    status?: ProposedActionStatus;
+    /** One or more statuses. Single → `status = :s`, multiple → `status IN (...)`. */
+    statuses?: string[];
     newsId?: number;
+    actionType?: string;
+    note?: string;
+    createdAfter?: Date;
+    createdBefore?: Date;
     offset?: number;
     limit?: number;
   }) {
@@ -40,11 +45,33 @@ export class ProposedActionRepository {
       .createQueryBuilder('pa')
       .orderBy('pa.createdAt', 'DESC');
 
-    if (options.status) {
-      qb.andWhere('pa.status = :status', { status: options.status });
+    if (options.statuses && options.statuses.length > 0) {
+      if (options.statuses.length === 1) {
+        qb.andWhere('pa.status = :status', { status: options.statuses[0] });
+      } else {
+        qb.andWhere('pa.status IN (:...statuses)', { statuses: options.statuses });
+      }
     }
     if (options.newsId !== undefined) {
       qb.andWhere('pa.newsId = :newsId', { newsId: options.newsId });
+    }
+    if (options.actionType !== undefined) {
+      qb.andWhere('pa.actionType = :actionType', { actionType: options.actionType });
+    }
+    if (options.note !== undefined && options.note !== '') {
+      // LIKE substring match. note is plain text, no special-char
+      // escaping needed beyond TypeORM's parameter binding.
+      qb.andWhere('pa.note LIKE :note', { note: `%${options.note}%` });
+    }
+    if (options.createdAfter !== undefined) {
+      qb.andWhere('pa.createdAt >= :createdAfter', {
+        createdAfter: options.createdAfter,
+      });
+    }
+    if (options.createdBefore !== undefined) {
+      qb.andWhere('pa.createdAt <= :createdBefore', {
+        createdBefore: options.createdBefore,
+      });
     }
     if (options.offset !== undefined) qb.skip(options.offset);
     if (options.limit !== undefined) qb.take(options.limit);

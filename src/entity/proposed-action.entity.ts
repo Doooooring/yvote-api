@@ -33,7 +33,7 @@ export class ProposedAction {
   @Column({ type: 'simple-json' })
   payload: ProposedActionPayload;
 
-  @Column({ type: 'varchar', length: 16, default: ProposedActionStatus.Pending })
+  @Column({ type: 'varchar', length: 16, default: ProposedActionStatus.Waiting })
   status: ProposedActionStatus;
 
   @Column({ type: 'timestamp', nullable: true })
