@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ProposedAction } from 'src/entity/proposed-action.entity';
 import {
   ProposedActionCreate,
@@ -11,19 +11,32 @@ import {
 @Injectable()
 export class ProposedActionRepository {
   constructor(
+    private readonly dataSource: DataSource,
     @InjectRepository(ProposedAction)
     private readonly repo: Repository<ProposedAction>,
   ) {}
 
-  async create(data: ProposedActionCreate) {
-    const entity = this.repo.create({
+  private toEntityInput(data: ProposedActionCreate) {
+    return {
       actionType: data.actionType,
       payload: data.payload,
       source: data.source,
       newsId: data.newsId ?? null,
       note: data.note ?? null,
-    });
+    };
+  }
+
+  async create(data: ProposedActionCreate) {
+    const entity = this.repo.create(this.toEntityInput(data));
     return await this.repo.save(entity);
+  }
+
+  async createBatch(actions: ProposedActionCreate[]) {
+    return await this.dataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(ProposedAction);
+      const entities = actions.map((data) => repo.create(this.toEntityInput(data)));
+      return await repo.save(entities);
+    });
   }
 
   async findById(id: number) {

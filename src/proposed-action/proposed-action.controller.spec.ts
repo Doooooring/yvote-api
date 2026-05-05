@@ -5,14 +5,19 @@ import { ProposedActionService } from './proposed-action.service';
 
 describe('ProposedActionController', () => {
   let controller: ProposedActionController;
+  let service: { createBatch: jest.Mock };
 
   beforeEach(async () => {
+    service = {
+      createBatch: jest.fn(async (body) => body.actions),
+    };
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProposedActionController],
       providers: [
         {
           provide: ProposedActionService,
           useValue: {
+            ...service,
             create: jest.fn(),
             list: jest.fn(),
             getById: jest.fn(),
@@ -45,6 +50,7 @@ describe('ProposedActionController', () => {
   it('does not apply the old AdminGuard to /adminjae2 proposed-action endpoints', () => {
     for (const methodName of [
       'create',
+      'createBatch',
       'list',
       'getById',
       'approve',
@@ -55,5 +61,22 @@ describe('ProposedActionController', () => {
     ] as const) {
       expect(methodGuards(methodName)).toEqual([]);
     }
+  });
+
+  it('forwards batch create body to the service', async () => {
+    const body = {
+      actions: [
+        {
+          actionType: 'create_news',
+          payload: { title: 'Daily bill', newsType: 'plenary' },
+          source: 'claude_triage',
+        },
+      ],
+    };
+
+    await controller.createBatch(body as never);
+
+    expect(service.createBatch).toHaveBeenCalledTimes(1);
+    expect(service.createBatch).toHaveBeenCalledWith(body);
   });
 });

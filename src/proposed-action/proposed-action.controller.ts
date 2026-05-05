@@ -12,6 +12,7 @@ import {
 import { LogRequests } from 'src/decorators/requestLoggin.decorator';
 import { RespInterceptor } from 'src/tools/decorator';
 import {
+  ProposedActionBatchCreate,
   ProposedActionCreate,
   ProposedActionUpdate,
 } from 'src/interface/proposed-action';
@@ -29,6 +30,12 @@ export class ProposedActionController {
   @RespInterceptor
   async create(@Body() body: ProposedActionCreate) {
     return await this.svc.create(body);
+  }
+
+  @Post('batch')
+  @RespInterceptor
+  async createBatch(@Body() body: ProposedActionBatchCreate) {
+    return await this.svc.createBatch(body);
   }
 
   @Get()

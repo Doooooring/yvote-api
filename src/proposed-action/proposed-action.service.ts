@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ProposedActionRepository } from 'src/repository/proposed-action/proposed-action.repository';
 import {
+  ProposedActionBatchCreate,
   ProposedActionCreate,
   ProposedActionStatus,
   ProposedActionType,
@@ -71,14 +72,35 @@ function validatePayloadShape(
       if (!p.newsType || typeof p.newsType !== 'string')
         return 'create_news payload missing string `newsType`';
       return null;
-    case ProposedActionType.RouteComment:
-      if (!p.commentType || typeof p.commentType !== 'string')
-        return 'route_comment payload missing string `commentType`';
-      if (!p.commentPayload || typeof p.commentPayload !== 'object')
-        return 'route_comment payload missing object `commentPayload`';
+    case ProposedActionType.RouteComment: {
+      // Two accepted shapes:
+      //   - Single:  { commentType: <string>, commentPayload: <object>, ... }
+      //   - Batch:   { commentPayloads: [<object>, ...], ... }   (per-entry
+      //     commentType lives inside each entry; conductor's apply.py
+      //     groups by per-entry commentType at apply time).
+      // The batch form is what the dailyscrape AI topical step emits when
+      // multiple items match the same target news; previously rejected by
+      // this validator, which silently lost comments on the conductor side.
+      const hasBatch =
+        Array.isArray(p.commentPayloads) && p.commentPayloads.length > 0;
+      if (hasBatch) {
+        for (const cp of p.commentPayloads as unknown[]) {
+          if (!cp || typeof cp !== 'object')
+            return 'route_comment commentPayloads entries must be objects';
+          const ct = (cp as Record<string, unknown>).commentType;
+          if (!ct || typeof ct !== 'string')
+            return 'route_comment batch entry missing string `commentType`';
+        }
+      } else {
+        if (!p.commentType || typeof p.commentType !== 'string')
+          return 'route_comment payload missing string `commentType`';
+        if (!p.commentPayload || typeof p.commentPayload !== 'object')
+          return 'route_comment payload missing object `commentPayload`';
+      }
       if (p.targetNewsId === undefined && (newsId === undefined || newsId === null))
         return 'route_comment requires `targetNewsId` (in payload) or `newsId` (top-level)';
       return null;
+    }
     case ProposedActionType.PromoteType:
       if (newsId === undefined || newsId === null)
         return 'promote_type requires top-level `newsId`';
@@ -116,7 +138,7 @@ export class ProposedActionService {
     private readonly repo: ProposedActionRepository,
   ) {}
 
-  async create(data: ProposedActionCreate) {
+  private validateCreateData(data: ProposedActionCreate) {
     if (!data || !data.actionType) {
       throw new BadRequestException('proposed-action: `actionType` is required');
     }
@@ -134,7 +156,72 @@ export class ProposedActionService {
     if (shapeError) {
       throw new BadRequestException(`proposed-action: ${shapeError}`);
     }
+  }
+
+  private assertStatusTransition(
+    row: { id?: number; status?: string; appliedAt?: unknown },
+    targetStatus: ProposedActionStatus,
+  ) {
+    const current = row.status;
+    if (!current || !ALLOWED_STATUSES.has(current)) {
+      throw new BadRequestException(
+        `proposed-action: row ${row.id ?? '?'} has unknown status '${current}'`,
+      );
+    }
+
+    if (current === targetStatus) return;
+
+    if (row.appliedAt || current === ProposedActionStatus.Applied) {
+      throw new BadRequestException(
+        `proposed-action: already applied action ${row.id ?? '?'} cannot move to ${targetStatus}`,
+      );
+    }
+
+    const allowed =
+      (current === ProposedActionStatus.Waiting &&
+        [
+          ProposedActionStatus.Approved,
+          ProposedActionStatus.Rejected,
+          ProposedActionStatus.Obsolete,
+        ].includes(targetStatus)) ||
+      (current === ProposedActionStatus.Approved &&
+        [
+          ProposedActionStatus.Applied,
+          ProposedActionStatus.Obsolete,
+        ].includes(targetStatus)) ||
+      (current === ProposedActionStatus.Rejected &&
+        targetStatus === ProposedActionStatus.Obsolete);
+
+    if (!allowed) {
+      throw new BadRequestException(
+        `proposed-action: cannot change status from ${current} to ${targetStatus}`,
+      );
+    }
+  }
+
+  private async updateStatus(id: number, status: ProposedActionStatus) {
+    const row = await this.repo.findById(id);
+    if (!row) return row;
+    this.assertStatusTransition(row, status);
+    if (row.status === status) return row;
+    return await this.repo.update(id, { status });
+  }
+
+  async create(data: ProposedActionCreate) {
+    this.validateCreateData(data);
     return await this.repo.create(data);
+  }
+
+  async createBatch(data: ProposedActionBatchCreate) {
+    if (!data || !Array.isArray(data.actions) || data.actions.length === 0) {
+      throw new BadRequestException(
+        'proposed-action: `actions` must be a non-empty array',
+      );
+    }
+    for (const action of data.actions) {
+      this.validateCreateData(action);
+    }
+    return await this.repo.createBatch(data.actions);
   }
 
   async getById(id: number) {
@@ -193,19 +280,24 @@ export class ProposedActionService {
           `Allowed: ${[...ALLOWED_STATUSES].join(', ')}`,
       );
     }
+    if (patch && patch.status !== undefined) {
+      const row = await this.repo.findById(id);
+      if (!row) return row;
+      this.assertStatusTransition(row, patch.status as ProposedActionStatus);
+    }
     return await this.repo.update(id, patch);
   }
 
   async approve(id: number) {
-    return await this.repo.update(id, { status: ProposedActionStatus.Approved });
+    return await this.updateStatus(id, ProposedActionStatus.Approved);
   }
 
   async reject(id: number) {
-    return await this.repo.update(id, { status: ProposedActionStatus.Rejected });
+    return await this.updateStatus(id, ProposedActionStatus.Rejected);
   }
 
   async markApplied(id: number) {
-    return await this.repo.update(id, { status: ProposedActionStatus.Applied });
+    return await this.updateStatus(id, ProposedActionStatus.Applied);
   }
 
   async delete(id: number) {

@@ -54,6 +54,10 @@ export interface ProposedActionCreate {
   note?: string | null;
 }
 
+export interface ProposedActionBatchCreate {
+  actions: ProposedActionCreate[];
+}
+
 export interface ProposedActionUpdate {
   status?: ProposedActionStatus;
   appliedAt?: Date | string | null;
