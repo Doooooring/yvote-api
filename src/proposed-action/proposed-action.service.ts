@@ -19,6 +19,7 @@ import {
 const ALLOWED_ACTION_TYPES = new Set<string>([
   ProposedActionType.CreateNews,
   ProposedActionType.RouteComment,
+  ProposedActionType.SplitComment,
   ProposedActionType.PromoteType,
   ProposedActionType.Publish,
   ProposedActionType.Track,
@@ -99,6 +100,44 @@ function validatePayloadShape(
       }
       if (p.targetNewsId === undefined && (newsId === undefined || newsId === null))
         return 'route_comment requires `targetNewsId` (in payload) or `newsId` (top-level)';
+      return null;
+    }
+    case ProposedActionType.SplitComment: {
+      if (p.sourceNewsId === undefined)
+        return 'split_comment payload missing `sourceNewsId`';
+      if (!p.sourceCommentType || typeof p.sourceCommentType !== 'string')
+        return 'split_comment payload missing string `sourceCommentType`';
+      if (p.sourceCommentId === undefined && !p.sourceCommentTitle)
+        return 'split_comment requires `sourceCommentId` or `sourceCommentTitle`';
+      if (!Array.isArray(p.destinations) || p.destinations.length === 0)
+        return 'split_comment destinations must be a non-empty array';
+      for (const destination of p.destinations as unknown[]) {
+        if (!destination || typeof destination !== 'object')
+          return 'split_comment destination entries must be objects';
+        const d = destination as Record<string, unknown>;
+        if (d.targetNewsId === undefined)
+          return 'split_comment destination missing `targetNewsId`';
+        if (!Array.isArray(d.commentPayloads) || d.commentPayloads.length === 0)
+          return 'split_comment destination commentPayloads must be a non-empty array';
+        for (const cp of d.commentPayloads as unknown[]) {
+          if (!cp || typeof cp !== 'object')
+            return 'split_comment commentPayloads entries must be objects';
+          const ct = (cp as Record<string, unknown>).commentType;
+          if (!ct || typeof ct !== 'string')
+            return 'split_comment commentPayloads entry missing string `commentType`';
+        }
+      }
+      if (p.sourceRemainders !== undefined) {
+        if (!Array.isArray(p.sourceRemainders))
+          return 'split_comment sourceRemainders must be an array';
+        for (const cp of p.sourceRemainders as unknown[]) {
+          if (!cp || typeof cp !== 'object')
+            return 'split_comment sourceRemainders entries must be objects';
+          const ct = (cp as Record<string, unknown>).commentType;
+          if (!ct || typeof ct !== 'string')
+            return 'split_comment sourceRemainders entry missing string `commentType`';
+        }
+      }
       return null;
     }
     case ProposedActionType.PromoteType:

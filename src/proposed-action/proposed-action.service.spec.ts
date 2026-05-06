@@ -126,6 +126,37 @@ describe('ProposedActionService', () => {
     });
   });
 
+  describe('create — split_comment', () => {
+    it('accepts source replacement plus destination payloads', async () => {
+      await service.create({
+        actionType: ProposedActionType.SplitComment,
+        newsId: targetNewsId,
+        source: ProposedActionSource.ClaudeTriage,
+        payload: {
+          sourceNewsId: 1247,
+          sourceCommentType: '한나라당',
+          sourceCommentId: 45290,
+          sourceRemainders: [
+            { commentType: '한나라당', title: '나머지', comment: '본문' },
+          ],
+          destinations: [{
+            targetNewsId,
+            commentPayloads: [
+              { commentType: '한나라당', title: '분리', comment: '본문' },
+            ],
+          }],
+        },
+      });
+
+      expect(repo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionType: ProposedActionType.SplitComment,
+          newsId: targetNewsId,
+        }),
+      );
+    });
+  });
+
   describe('createBatch', () => {
     const validCreateNews = {
       actionType: ProposedActionType.CreateNews,

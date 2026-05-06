@@ -1,6 +1,7 @@
 export enum ProposedActionType {
   CreateNews = 'create_news',
   RouteComment = 'route_comment',
+  SplitComment = 'split_comment',
   PromoteType = 'promote_type',
   Publish = 'publish',
   Track = 'track',
