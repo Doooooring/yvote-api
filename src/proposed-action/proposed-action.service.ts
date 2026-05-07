@@ -55,6 +55,51 @@ function parseFilterDate(raw: string | undefined, field: string): Date | undefin
   return d;
 }
 
+function validateCommentPayloadEntries(
+  entries: unknown[],
+  label: string,
+): string | null {
+  for (const cp of entries) {
+    if (!cp || typeof cp !== 'object')
+      return `${label} entries must be objects`;
+    const ct = (cp as Record<string, unknown>).commentType;
+    if (!ct || typeof ct !== 'string')
+      return `${label} entry missing string \`commentType\``;
+  }
+  return null;
+}
+
+function validateOptionalCommentPayloadArray(
+  raw: unknown,
+  label: string,
+): string | null {
+  if (raw === undefined) return null;
+  if (!Array.isArray(raw)) return `${label} must be an array`;
+  return validateCommentPayloadEntries(raw, label);
+}
+
+function validateSplitSourceReplacement(
+  replacement: Record<string, unknown>,
+  label: string,
+): string | null {
+  if (replacement.sourceNewsId === undefined)
+    return `${label} missing \`sourceNewsId\``;
+  if (
+    !replacement.sourceCommentType ||
+    typeof replacement.sourceCommentType !== 'string'
+  )
+    return `${label} missing string \`sourceCommentType\``;
+  if (
+    replacement.sourceCommentId === undefined &&
+    !replacement.sourceCommentTitle
+  )
+    return `${label} requires \`sourceCommentId\` or \`sourceCommentTitle\``;
+  return validateOptionalCommentPayloadArray(
+    replacement.sourceRemainders,
+    `${label} sourceRemainders`,
+  );
+}
+
 /**
  * Per-actionType payload-shape sanity check. The API enforces only the
  * top-level required fields — full schema validation lives in the
@@ -103,12 +148,29 @@ function validatePayloadShape(
       return null;
     }
     case ProposedActionType.SplitComment: {
-      if (p.sourceNewsId === undefined)
-        return 'split_comment payload missing `sourceNewsId`';
-      if (!p.sourceCommentType || typeof p.sourceCommentType !== 'string')
-        return 'split_comment payload missing string `sourceCommentType`';
-      if (p.sourceCommentId === undefined && !p.sourceCommentTitle)
-        return 'split_comment requires `sourceCommentId` or `sourceCommentTitle`';
+      const sourceReplacements = p.sourceReplacements;
+      const hasBatchedSources =
+        Array.isArray(sourceReplacements) && sourceReplacements.length > 0;
+      if (sourceReplacements !== undefined && !hasBatchedSources)
+        return 'split_comment sourceReplacements must be a non-empty array';
+      if (hasBatchedSources) {
+        for (const replacement of sourceReplacements as unknown[]) {
+          if (!replacement || typeof replacement !== 'object')
+            return 'split_comment sourceReplacements entries must be objects';
+          const err = validateSplitSourceReplacement(
+            replacement as Record<string, unknown>,
+            'split_comment sourceReplacement',
+          );
+          if (err) return err;
+        }
+      } else {
+        if (p.sourceNewsId === undefined)
+          return 'split_comment payload missing `sourceNewsId`';
+        if (!p.sourceCommentType || typeof p.sourceCommentType !== 'string')
+          return 'split_comment payload missing string `sourceCommentType`';
+        if (p.sourceCommentId === undefined && !p.sourceCommentTitle)
+          return 'split_comment requires `sourceCommentId` or `sourceCommentTitle`';
+      }
       if (!Array.isArray(p.destinations) || p.destinations.length === 0)
         return 'split_comment destinations must be a non-empty array';
       for (const destination of p.destinations as unknown[]) {
@@ -119,25 +181,17 @@ function validatePayloadShape(
           return 'split_comment destination missing `targetNewsId`';
         if (!Array.isArray(d.commentPayloads) || d.commentPayloads.length === 0)
           return 'split_comment destination commentPayloads must be a non-empty array';
-        for (const cp of d.commentPayloads as unknown[]) {
-          if (!cp || typeof cp !== 'object')
-            return 'split_comment commentPayloads entries must be objects';
-          const ct = (cp as Record<string, unknown>).commentType;
-          if (!ct || typeof ct !== 'string')
-            return 'split_comment commentPayloads entry missing string `commentType`';
-        }
+        const err = validateCommentPayloadEntries(
+          d.commentPayloads as unknown[],
+          'split_comment commentPayloads',
+        );
+        if (err) return err;
       }
-      if (p.sourceRemainders !== undefined) {
-        if (!Array.isArray(p.sourceRemainders))
-          return 'split_comment sourceRemainders must be an array';
-        for (const cp of p.sourceRemainders as unknown[]) {
-          if (!cp || typeof cp !== 'object')
-            return 'split_comment sourceRemainders entries must be objects';
-          const ct = (cp as Record<string, unknown>).commentType;
-          if (!ct || typeof ct !== 'string')
-            return 'split_comment sourceRemainders entry missing string `commentType`';
-        }
-      }
+      const remainderErr = validateOptionalCommentPayloadArray(
+        p.sourceRemainders,
+        'split_comment sourceRemainders',
+      );
+      if (remainderErr) return remainderErr;
       return null;
     }
     case ProposedActionType.PromoteType:

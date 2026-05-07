@@ -155,6 +155,77 @@ describe('ProposedActionService', () => {
         }),
       );
     });
+
+    it('accepts batched source replacements without top-level sourceNewsId', async () => {
+      await service.create({
+        actionType: ProposedActionType.SplitComment,
+        newsId: targetNewsId,
+        source: ProposedActionSource.ClaudeTriage,
+        payload: {
+          sourceReplacements: [
+            {
+              sourceNewsId: 1247,
+              sourceCommentType: '한나라당',
+              sourceCommentId: 45290,
+              sourceRemainders: [
+                { commentType: '한나라당', title: '나머지 1', comment: '본문' },
+              ],
+            },
+            {
+              sourceNewsId: 1242,
+              sourceCommentType: '민주당',
+              sourceCommentId: 45291,
+              sourceRemainders: [
+                { commentType: '민주당', title: '나머지 2', comment: '본문' },
+              ],
+            },
+          ],
+          destinations: [{
+            targetNewsId,
+            commentPayloads: [
+              { commentType: '한나라당', title: '분리 1', comment: '본문' },
+              { commentType: '민주당', title: '분리 2', comment: '본문' },
+            ],
+          }],
+        },
+      });
+
+      expect(repo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionType: ProposedActionType.SplitComment,
+          newsId: targetNewsId,
+        }),
+      );
+    });
+
+    it('rejects batched source replacements missing sourceNewsId', async () => {
+      await expect(
+        service.create({
+          actionType: ProposedActionType.SplitComment,
+          newsId: targetNewsId,
+          source: ProposedActionSource.ClaudeTriage,
+          payload: {
+            sourceReplacements: [
+              {
+                sourceCommentType: '한나라당',
+                sourceCommentId: 45290,
+                sourceRemainders: [
+                  { commentType: '한나라당', title: '나머지', comment: '본문' },
+                ],
+              },
+            ],
+            destinations: [{
+              targetNewsId,
+              commentPayloads: [
+                { commentType: '한나라당', title: '분리', comment: '본문' },
+              ],
+            }],
+          },
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(repo.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('createBatch', () => {
@@ -218,6 +289,46 @@ describe('ProposedActionService', () => {
         validCreateNews,
         expect.objectContaining({
           actionType: ProposedActionType.RouteComment,
+          newsId: targetNewsId,
+        }),
+      ]);
+    });
+
+    it('accepts a batched split_comment action', async () => {
+      const splitAction = {
+        actionType: ProposedActionType.SplitComment,
+        newsId: targetNewsId,
+        source: ProposedActionSource.ClaudeTriage,
+        payload: {
+          sourceReplacements: [
+            {
+              sourceNewsId: 1247,
+              sourceCommentType: '한나라당',
+              sourceCommentId: 45290,
+              sourceRemainders: [
+                { commentType: '한나라당', title: '나머지', comment: '본문' },
+              ],
+            },
+          ],
+          destinations: [{
+            targetNewsId,
+            commentPayloads: [
+              { commentType: '한나라당', title: '분리', comment: '본문' },
+            ],
+          }],
+        },
+      };
+
+      await service.createBatch({
+        actions: [validCreateNews, splitAction],
+      });
+
+      expect(repo.create).not.toHaveBeenCalled();
+      expect(repo.createBatch).toHaveBeenCalledTimes(1);
+      expect(repo.createBatch).toHaveBeenCalledWith([
+        validCreateNews,
+        expect.objectContaining({
+          actionType: ProposedActionType.SplitComment,
           newsId: targetNewsId,
         }),
       ]);
