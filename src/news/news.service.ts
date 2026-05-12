@@ -57,10 +57,12 @@ export class NewsService {
     limit: number,
     option: {
       keyword?: string;
+      title?: string;
       state?: NewsState;
       startDate?: string;
       endDate?: string;
       newsType?: string;
+      tracked?: boolean;
     },
   ) {
     const { state, ...rest } = option;
@@ -86,6 +88,10 @@ export class NewsService {
       offset,
       limit,
     );
+  }
+
+  async getCommentBody(commentId: number) {
+    return await this.commentRepo.getCommentBodyById(commentId);
   }
 
   async getRecentComments(
@@ -174,5 +180,13 @@ export class NewsService {
       t.order = idx;
       return t;
     });
+  }
+
+  async updateNewsTracked(
+    id: number,
+    tracked: boolean,
+    trackedNote?: string | null,
+  ) {
+    return await this.newsRepo.updateTracked(id, tracked, trackedNote);
   }
 }

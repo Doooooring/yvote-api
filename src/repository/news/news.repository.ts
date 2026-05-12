@@ -11,7 +11,6 @@ import {
   EntityManager,
   FindOptionsWhere,
   In,
-  Like,
   Repository,
 } from 'typeorm';
 import { KeywordRepository } from '../keyword/keyword.repository';
@@ -42,13 +41,21 @@ export class NewsRepository {
   }
 
   async getNewsTitles(search: string) {
-    return this.newsRepo.find({
-      select: ['id', 'title', 'subTitle'],
-      where: [
-        { title: Like(`%${search}%`) },
-        { subTitle: Like(`%${search}%`) },
-      ],
-    }) as Promise<Pick<News, 'id' | 'title' | 'subTitle'>[]>;
+    return this.newsRepo
+      .createQueryBuilder('news')
+      .select(['news.id', 'news.title', 'news.subTitle'])
+      .where('MATCH(news.title) AGAINST(:search IN BOOLEAN MODE)', {
+        search,
+      })
+      .getMany() as Promise<Pick<News, 'id' | 'title' | 'subTitle'>[]>;
+  }
+
+  async getAllNewsTitles() {
+    return this.newsRepo
+      .createQueryBuilder('news')
+      .select(['news.id', 'news.title', 'news.subTitle'])
+      .orderBy('news.id', 'DESC')
+      .getMany() as Promise<Pick<News, 'id' | 'title' | 'subTitle'>[]>;
   }
   async getNewsCount() {
     return this.newsRepo.count();
@@ -89,6 +96,10 @@ export class NewsRepository {
         'news.billVoteResult',
         'news.billVoteTotal',
         'news.billVoteByParty',
+        'news.bills',
+        'news.rationale',
+        'news.tracked',
+        'news.trackedNote',
       ])
       .leftJoin('news.keywords', 'keywords')
       .addSelect(['keywords.keyword', 'keywords.id'])
@@ -131,6 +142,10 @@ export class NewsRepository {
         'news.billVoteResult',
         'news.billVoteTotal',
         'news.billVoteByParty',
+        'news.bills',
+        'news.rationale',
+        'news.tracked',
+        'news.trackedNote',
         'keyword.id',
         'keyword.keyword',
       ])
@@ -152,16 +167,20 @@ export class NewsRepository {
     limit: number,
     {
       keyword,
+      title,
       state,
       startDate,
       endDate,
       newsType,
+      tracked,
     }: {
       keyword?: string;
+      title?: string;
       state?: NewsState;
       startDate?: string;
       endDate?: string;
       newsType?: string;
+      tracked?: boolean;
     },
   ) {
     const subQuery = this.newsRepo
@@ -182,6 +201,10 @@ export class NewsRepository {
         .andWhere('keywords.keyword = :keyword', { keyword });
     }
 
+    if (title) {
+      subQuery.andWhere('subNews.title LIKE :title', { title: `%${title}%` });
+    }
+
     if (startDate) {
       subQuery.andWhere('subNews.date >= :startDate', { startDate });
     }
@@ -193,6 +216,11 @@ export class NewsRepository {
     if (newsType) {
       subQuery.andWhere('subNews.newsType = :newsType', { newsType });
     }
+
+    if (tracked !== undefined) {
+      subQuery.andWhere('subNews.tracked = :tracked', { tracked });
+    }
+
     subQuery
       .orderBy('state', 'DESC')
       .addOrderBy('subNews.date', 'DESC')
@@ -217,6 +245,8 @@ export class NewsRepository {
         'news.state state',
         'news.isPublished isPublished',
         'news.date date',
+        'news.tracked tracked',
+        'news.trackedNote trackedNote',
         'keywords.id keywordId',
         'keywords.keyword keyword',
       ])
@@ -309,6 +339,7 @@ export class NewsRepository {
         billVoteResult: news.billVoteResult ?? null,
         billVoteTotal: news.billVoteTotal ?? null,
         billVoteByParty: news.billVoteByParty ?? null,
+        bills: news.bills ?? null,
         order: 0,
         isPublished: news.state === NewsState.Published,
       });
@@ -395,6 +426,8 @@ export class NewsRepository {
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -447,6 +480,7 @@ export class NewsRepository {
         billVoteResult: news.billVoteResult ?? null,
         billVoteTotal: news.billVoteTotal ?? null,
         billVoteByParty: news.billVoteByParty ?? null,
+        bills: news.bills ?? null,
         ...(news.state !== undefined && {
           isPublished: news.state === NewsState.Published,
         }),
@@ -512,5 +546,14 @@ export class NewsRepository {
       });
     }
     return await queryBuilder.execute();
+  }
+
+  async updateTracked(id: number, tracked: boolean, trackedNote?: string | null) {
+    const update: Partial<News> = { tracked };
+    if (trackedNote !== undefined) {
+      update.trackedNote = trackedNote ?? null;
+    }
+    await this.newsRepo.update({ id }, update);
+    return true;
   }
 }

@@ -1,7 +1,8 @@
-import { NewsState, NewsType } from 'src/interface/news';
+import { BillItem, NewsRationale, NewsState, NewsType } from 'src/interface/news';
 import {
   Column,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   OneToMany,
@@ -28,6 +29,7 @@ export class News {
   @Column()
   order: number;
 
+  @Index('ft_news_title', { fulltext: true })
   @Column({ default: '' })
   title: string;
 
@@ -95,6 +97,18 @@ export class News {
 
   @Column({ type: 'simple-json', nullable: true })
   billVoteByParty?: { party: string; for: number; against: number; abstain: number; absent: number }[];
+
+  @Column({ type: 'simple-json', nullable: true })
+  bills?: BillItem[];
+
+  @Column({ type: 'simple-json', nullable: true })
+  rationale?: NewsRationale;
+
+  @Column({ default: false })
+  tracked: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  trackedNote?: string;
 
   @Column({ nullable: true })
   newsImage?: string;

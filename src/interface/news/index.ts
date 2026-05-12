@@ -21,7 +21,21 @@ export enum NewsCommentType {
   자유주의자 = '자유주의자',
   더불어민주당 = '더불어민주당',
   국민의힘 = '국민의힘',
+  // Historical lineage names — emitted by yvote_automation backfill scrapes
+  // when news_date precedes the lineage's current-name cutoff. See
+  // company.ceo.shared.party_history for cutoff dates.
+  한나라당 = '한나라당',
+  새누리당 = '새누리당',
+  자유한국당 = '자유한국당',
+  미래통합당 = '미래통합당',
+  통합민주당 = '통합민주당',
+  민주당 = '민주당',
+  민주통합당 = '민주통합당',
+  새정치민주연합 = '새정치민주연합',
   청와대 = '청와대',
+  // 윤석열 정부 시기에만 사용된 명칭 (2022-05-10 ~ 2025-12-29).
+  // 그 외 모든 기간은 청와대로 통일.
+  대통령실 = '대통령실',
   행정부 = '행정부',
   헌법재판소 = '헌법재판소',
   와이보트 = '와이보트',
@@ -38,7 +52,12 @@ export enum NewsType {
   debate = 'debate',
   election = 'election',
   weekly = 'weekly',
-  teukprosecution = 'teukprosecution',
+  specialcounsel = 'specialcounsel',
+  northkorea = 'northkorea',
+  investigation = 'investigation',
+  budget = 'budget',
+  economics = 'economics',
+  plenary = 'plenary',
   others = 'others',
 }
 
@@ -62,8 +81,18 @@ export const newsTypesToKor = (newsType: NewsType) => {
       return '선거';
     case NewsType.weekly:
       return '일주일';
-    case NewsType.teukprosecution:
+    case NewsType.specialcounsel:
       return '특검';
+    case NewsType.northkorea:
+      return '북한';
+    case NewsType.investigation:
+      return '국정조사';
+    case NewsType.budget:
+      return '예산';
+    case NewsType.economics:
+      return '경제';
+    case NewsType.plenary:
+      return '본회의';
     case NewsType.others:
       return '기타';
     default:
@@ -71,6 +100,33 @@ export const newsTypesToKor = (newsType: NewsType) => {
       throw new Error('Unknown news type');
   }
 };
+
+export interface BillVoteByParty {
+  party: string;
+  for: number;
+  against: number;
+  abstain: number;
+  absent: number;
+}
+
+export interface NewsRationale {
+  axis?: string;
+  instrument?: string;
+  inclusion?: string;
+  exclusion?: string;
+  conversion?: string;
+  scope?: string;
+}
+
+export interface BillItem {
+  billNo: string;
+  billName: string;
+  detail?: string;
+  proposalReason?: string;
+  voteResult?: string;
+  voteTotal?: number;
+  voteByParty?: BillVoteByParty[];
+}
 
 export interface NewsPreviews
   extends Pick<

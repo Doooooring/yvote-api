@@ -26,6 +26,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.88.0",
     "@aws-sdk/client-s3": "^3.654.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^4.0.3",
@@ -41,7 +42,8 @@
     "openai": "^4.87.4",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "yahoo-finance2": "^3.14.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -75,6 +77,9 @@
       "ts"
     ],
     "rootDir": "src",
+    "modulePaths": [
+      "<rootDir>/.."
+    ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"

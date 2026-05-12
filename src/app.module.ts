@@ -11,8 +11,10 @@ import { AuthCorsMiddleware } from './middleware/auth_cors.middleware';
 import { CommonCorsMiddleware } from './middleware/common_cors.middleware';
 import { MigrationModule } from './migration/migration.module';
 import { NewsModule } from './news/news.module';
-import { CommentModule } from './comment/comment.moudle';
-import { OpenAIModule } from './openai/openai.module';
+import { CommentModule } from './comment/comment.module';
+import { LlmModule } from './llm/llm.module';
+import { ProposedActionModule } from './proposed-action/proposed-action.module';
+import { IncidentModule } from './incident/incident.module';
 
 @Module({
   imports: [
@@ -29,9 +31,11 @@ import { OpenAIModule } from './openai/openai.module';
     NewsModule,
     KeywordModule,
     CommentModule,
-    OpenAIModule,
+    LlmModule,
     MigrationModule,
     AuthModule,
+    ProposedActionModule,
+    IncidentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -76,6 +80,8 @@ export class AppModule {
       path: '/news/edit/:id/comment_type/:commentType',
       method: RequestMethod.OPTIONS,
     },
+    { path: '/news/edit/:id/tracked', method: RequestMethod.PATCH },
+    { path: '/news/edit/:id/tracked', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit', method: RequestMethod.POST },
     { path: '/keyword/edit', method: RequestMethod.OPTIONS },
     { path: '/keyword/edit/:id', method: RequestMethod.POST },
