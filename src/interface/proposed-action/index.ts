@@ -4,6 +4,7 @@ export enum ProposedActionType {
   SplitComment = 'split_comment',
   PromoteType = 'promote_type',
   Publish = 'publish',
+  Unpublish = 'unpublish',
   Track = 'track',
   Untrack = 'untrack',
   EditComment = 'edit_comment',

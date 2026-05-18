@@ -98,9 +98,20 @@ export class NewsService {
     offset: number,
     limit: number,
     type: NewsCommentType | null,
+    startDate?: string,
+    endDate?: string,
+    order?: 'ASC' | 'DESC',
   ) {
-    const option = {};
-    if (type) option['type'] = type;
+    const option: {
+      type?: NewsCommentType;
+      startDate?: string;
+      endDate?: string;
+      order?: 'ASC' | 'DESC';
+    } = {};
+    if (type) option.type = type;
+    if (startDate) option.startDate = startDate;
+    if (endDate) option.endDate = endDate;
+    if (order) option.order = order;
     return await this.commentRepo.getCommentsRecentUpdated(
       offset,
       limit,

@@ -98,11 +98,17 @@ export class NewsController {
     @Query('offset') offset: number,
     @Query('limit') limit: number,
     @Query('type') type?: NewsCommentType,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('order') order?: 'ASC' | 'DESC',
   ) {
     const response = await this.newsService.getRecentComments(
       offset,
       limit,
       type ?? null,
+      startDate,
+      endDate,
+      order,
     );
     return response;
   }
