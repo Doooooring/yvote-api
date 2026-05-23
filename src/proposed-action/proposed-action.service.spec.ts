@@ -53,40 +53,34 @@ describe('ProposedActionService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('create — fill_news (added 2026-04-28, single-tier rule)', () => {
-    it('rejects fill_news without top-level newsId', async () => {
+  describe('create — retired fill_news', () => {
+    it('rejects fill_news before repository create', async () => {
       await expect(
         service.create({
-          actionType: ProposedActionType.FillNews,
+          actionType: 'fill_news' as ProposedActionType,
           payload: {},
           source: ProposedActionSource.User,
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
+      expect(repo.create).not.toHaveBeenCalled();
     });
+  });
 
-    it('accepts fill_news with newsId (payload optional)', async () => {
+  describe('create — owner state actions', () => {
+    it('accepts unpublish with top-level newsId', async () => {
       await service.create({
-        actionType: ProposedActionType.FillNews,
+        actionType: ProposedActionType.Unpublish,
         newsId: existingNewsId,
-        payload: {},
+        payload: { newsId: existingNewsId },
         source: ProposedActionSource.User,
       });
+
       expect(repo.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          actionType: ProposedActionType.FillNews,
+          actionType: ProposedActionType.Unpublish,
           newsId: existingNewsId,
         }),
       );
-    });
-
-    it('accepts fill_news with generatedContent fast-path payload', async () => {
-      await service.create({
-        actionType: ProposedActionType.FillNews,
-        newsId: existingNewsId,
-        payload: { generatedContent: { subTitle: 'x' } },
-        source: ProposedActionSource.ClaudeFinished,
-      });
-      expect(repo.create).toHaveBeenCalled();
     });
   });
 
@@ -99,6 +93,24 @@ describe('ProposedActionService', () => {
           source: ProposedActionSource.User,
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
+
+  describe('create — edit_news', () => {
+    it('accepts edit_news with top-level newsId and fields payload', async () => {
+      await service.create({
+        actionType: ProposedActionType.EditNews,
+        newsId: existingNewsId,
+        payload: { fields: { date: '2010-02-23' } },
+        source: ProposedActionSource.User,
+      });
+
+      expect(repo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionType: ProposedActionType.EditNews,
+          newsId: existingNewsId,
+        }),
+      );
     });
   });
 

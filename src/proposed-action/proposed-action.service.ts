@@ -22,10 +22,11 @@ const ALLOWED_ACTION_TYPES = new Set<string>([
   ProposedActionType.SplitComment,
   ProposedActionType.PromoteType,
   ProposedActionType.Publish,
+  ProposedActionType.Unpublish,
   ProposedActionType.Track,
   ProposedActionType.Untrack,
+  ProposedActionType.EditNews,
   ProposedActionType.EditComment,
-  ProposedActionType.FillNews,
 ]);
 
 const ALLOWED_STATUSES = new Set<string>([
@@ -203,6 +204,7 @@ function validatePayloadShape(
         return 'promote_type payload missing string `toType`';
       return null;
     case ProposedActionType.Publish:
+    case ProposedActionType.Unpublish:
       if (newsId === undefined || newsId === null)
         return `${actionType} requires top-level \`newsId\``;
       return null;
@@ -211,9 +213,13 @@ function validatePayloadShape(
       if (newsId === undefined || newsId === null)
         return `${actionType} requires top-level \`newsId\``;
       return null;
-    case ProposedActionType.FillNews:
+    case ProposedActionType.EditNews:
       if (newsId === undefined || newsId === null)
-        return 'fill_news requires top-level `newsId`';
+        return 'edit_news requires top-level `newsId`';
+      if (p.fields !== undefined) {
+        if (!p.fields || typeof p.fields !== 'object' || Array.isArray(p.fields))
+          return 'edit_news `fields` must be an object';
+      }
       return null;
     case ProposedActionType.EditComment:
       if (newsId === undefined || newsId === null)
