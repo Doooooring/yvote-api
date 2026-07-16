@@ -1,4 +1,4 @@
-import { BillItem, NewsRationale, NewsState, NewsType } from 'src/interface/news';
+import { NewsState, NewsType } from 'src/interface/news';
 import {
   Column,
   Entity,
@@ -22,14 +22,12 @@ export interface TimelineFactor {
 @Entity({
   name: 'News',
 })
+// 제목 + 부제 통합 전문검색 인덱스
+@Index('ft_news_title', ['title', 'subTitle'], { fulltext: true })
 export class News {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  order: number;
-
-  @Index('ft_news_title', { fulltext: true })
   @Column({ default: '' })
   title: string;
 
@@ -59,9 +57,6 @@ export class News {
   })
   state: NewsState;
 
-  @Column({ default: false })
-  isPublished: boolean;
-
   @Column({ default: '' })
   opinionLeft: string;
 
@@ -69,46 +64,14 @@ export class News {
   opinionRight: string;
 
   @Column({ type: 'longtext', nullable: true })
-  agendaList?: string;
-
-  @Column({ type: 'longtext', nullable: true })
-  speechContent?: string;
-
-  @Column({ type: 'longtext', nullable: true })
   proDebate?: string;
 
   @Column({ type: 'longtext', nullable: true })
   conDebate?: string;
 
-  @Column({ type: 'longtext', nullable: true })
-  billAmendment?: string;
-
-  @Column({ type: 'longtext', nullable: true })
-  billSummary?: string;
-
-  @Column({ type: 'longtext', nullable: true })
-  billDetail?: string;
-
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  billVoteResult?: string;
-
-  @Column({ type: 'int', nullable: true })
-  billVoteTotal?: number;
-
-  @Column({ type: 'simple-json', nullable: true })
-  billVoteByParty?: { party: string; for: number; against: number; abstain: number; absent: number }[];
-
-  @Column({ type: 'simple-json', nullable: true })
-  bills?: BillItem[];
-
-  @Column({ type: 'simple-json', nullable: true })
-  rationale?: NewsRationale;
-
-  @Column({ default: false })
-  tracked: boolean;
-
-  @Column({ type: 'text', nullable: true })
-  trackedNote?: string;
+  // 타입별로 있을 수도/없을 수도 한 필드들을 담는 자유 JSON (스키마 나중에 정의)
+  @Column({ type: 'json', nullable: true })
+  detail?: Record<string, unknown>;
 
   @Column({ nullable: true })
   newsImage?: string;

@@ -62,7 +62,6 @@ export class NewsService {
       startDate?: string;
       endDate?: string;
       newsType?: string;
-      tracked?: boolean;
     },
   ) {
     const { state, ...rest } = option;
@@ -191,13 +190,5 @@ export class NewsService {
       t.order = idx;
       return t;
     });
-  }
-
-  async updateNewsTracked(
-    id: number,
-    tracked: boolean,
-    trackedNote?: string | null,
-  ) {
-    return await this.newsRepo.updateTracked(id, tracked, trackedNote);
   }
 }

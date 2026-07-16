@@ -15,6 +15,22 @@ import {
 } from 'typeorm';
 import { KeywordRepository } from '../keyword/keyword.repository';
 
+// 뉴스 상세/편집에서 공통으로 뽑는 컬럼 (newsImage는 의도적으로 제외).
+const NEWS_DETAIL_COLUMNS = [
+  'news.id',
+  'news.title',
+  'news.subTitle',
+  'news.newsType',
+  'news.summary',
+  'news.date',
+  'news.state',
+  'news.opinionLeft',
+  'news.opinionRight',
+  'news.proDebate',
+  'news.conDebate',
+  'news.detail',
+];
+
 @Injectable()
 export class NewsRepository {
   constructor(
@@ -44,9 +60,10 @@ export class NewsRepository {
     return this.newsRepo
       .createQueryBuilder('news')
       .select(['news.id', 'news.title', 'news.subTitle'])
-      .where('MATCH(news.title) AGAINST(:search IN BOOLEAN MODE)', {
-        search,
-      })
+      .where(
+        'MATCH(news.title, news.subTitle) AGAINST(:search IN BOOLEAN MODE)',
+        { search },
+      )
       .getMany() as Promise<Pick<News, 'id' | 'title' | 'subTitle'>[]>;
   }
 
@@ -61,46 +78,10 @@ export class NewsRepository {
     return this.newsRepo.count();
   }
 
-  async getOrderMaximum() {
-    return this.newsRepo.find({
-      order: {
-        order: 'ASC',
-      },
-      select: ['id'],
-      take: 1,
-    });
-  }
-
   async getNewsInView(id: number) {
     const news = await this.newsRepo
       .createQueryBuilder('news')
-      .select([
-        'news.id',
-        'news.title',
-        'news.subTitle',
-        'news.newsType',
-        'news.summary',
-        'news.date',
-        'news.state',
-        'news.opinionLeft',
-        'news.opinionRight',
-        'news.isPublished',
-        // 'news.newsImage', // OMITTED
-        'news.agendaList',
-        'news.speechContent',
-        'news.proDebate',
-        'news.conDebate',
-        'news.billAmendment',
-        'news.billSummary',
-        'news.billDetail',
-        'news.billVoteResult',
-        'news.billVoteTotal',
-        'news.billVoteByParty',
-        'news.bills',
-        'news.rationale',
-        'news.tracked',
-        'news.trackedNote',
-      ])
+      .select(NEWS_DETAIL_COLUMNS)
       .leftJoin('news.keywords', 'keywords')
       .addSelect(['keywords.keyword', 'keywords.id'])
       .leftJoinAndSelect('news.summaries', 'summaries')
@@ -120,35 +101,7 @@ export class NewsRepository {
   async getNewsInEdit(id: number) {
     const news = await this.newsRepo
       .createQueryBuilder('news')
-      .select([
-        'news.id',
-        'news.title',
-        'news.subTitle',
-        'news.summary',
-        'news.newsType',
-        'news.date',
-        'news.state',
-        'news.isPublished',
-        'news.opinionLeft',
-        'news.opinionRight',
-        // 'news.newsImage', // OMITTED
-        'news.agendaList',
-        'news.speechContent',
-        'news.proDebate',
-        'news.conDebate',
-        'news.billAmendment',
-        'news.billSummary',
-        'news.billDetail',
-        'news.billVoteResult',
-        'news.billVoteTotal',
-        'news.billVoteByParty',
-        'news.bills',
-        'news.rationale',
-        'news.tracked',
-        'news.trackedNote',
-        'keyword.id',
-        'keyword.keyword',
-      ])
+      .select([...NEWS_DETAIL_COLUMNS, 'keyword.id', 'keyword.keyword'])
       .leftJoin('news.keywords', 'keyword')
       .leftJoinAndSelect('news.timeline', 'timeline')
       .leftJoinAndSelect('news.summaries', 'summaries')
@@ -156,9 +109,6 @@ export class NewsRepository {
       .where('news.id = :id', { id: id })
       .getOne();
 
-    // const distnctComments = await this.getDistinctCommentTypeByNewsId(id);
-
-    // news.comments = distnctComments.map(({ commentType }) => commentType);
     return news;
   }
 
@@ -172,7 +122,6 @@ export class NewsRepository {
       startDate,
       endDate,
       newsType,
-      tracked,
     }: {
       keyword?: string;
       title?: string;
@@ -180,7 +129,6 @@ export class NewsRepository {
       startDate?: string;
       endDate?: string;
       newsType?: string;
-      tracked?: boolean;
     },
   ) {
     const subQuery = this.newsRepo
@@ -217,10 +165,6 @@ export class NewsRepository {
       subQuery.andWhere('subNews.newsType = :newsType', { newsType });
     }
 
-    if (tracked !== undefined) {
-      subQuery.andWhere('subNews.tracked = :tracked', { tracked });
-    }
-
     subQuery
       .orderBy('state', 'DESC')
       .addOrderBy('subNews.date', 'DESC')
@@ -241,12 +185,8 @@ export class NewsRepository {
         'news.title title',
         'news.subTitle subTitle',
         'news.newsType newsType',
-        // 'news.newsImage newsImage', // OMITTED
         'news.state state',
-        'news.isPublished isPublished',
         'news.date date',
-        'news.tracked tracked',
-        'news.trackedNote trackedNote',
         'keywords.id keywordId',
         'keywords.keyword keyword',
       ])
@@ -329,19 +269,8 @@ export class NewsRepository {
       const newsRepository = queryRunner.manager.getRepository(News);
       const result = await newsRepository.save({
         ...news,
-        agendaList: news.agendaList ?? '',
-        speechContent: news.speechContent ?? '',
         proDebate: news.proDebate ?? '',
         conDebate: news.conDebate ?? '',
-        billAmendment: news.billAmendment ?? '',
-        billSummary: news.billSummary ?? '',
-        billDetail: news.billDetail ?? '',
-        billVoteResult: news.billVoteResult ?? null,
-        billVoteTotal: news.billVoteTotal ?? null,
-        billVoteByParty: news.billVoteByParty ?? null,
-        bills: news.bills ?? null,
-        order: 0,
-        isPublished: news.state === NewsState.Published,
       });
 
       if (news.state) {
@@ -470,20 +399,8 @@ export class NewsRepository {
 
       await newsRepository.save({
         ...news,
-        agendaList: news.agendaList ?? '',
-        speechContent: news.speechContent ?? '',
         proDebate: news.proDebate ?? '',
         conDebate: news.conDebate ?? '',
-        billAmendment: news.billAmendment ?? '',
-        billSummary: news.billSummary ?? '',
-        billDetail: news.billDetail ?? '',
-        billVoteResult: news.billVoteResult ?? null,
-        billVoteTotal: news.billVoteTotal ?? null,
-        billVoteByParty: news.billVoteByParty ?? null,
-        bills: news.bills ?? null,
-        ...(news.state !== undefined && {
-          isPublished: news.state === NewsState.Published,
-        }),
       });
 
       const keywordsToUpdate = mergeUniqueArrays(prevKeywords, curKeywords);
@@ -546,14 +463,5 @@ export class NewsRepository {
       });
     }
     return await queryBuilder.execute();
-  }
-
-  async updateTracked(id: number, tracked: boolean, trackedNote?: string | null) {
-    const update: Partial<News> = { tracked };
-    if (trackedNote !== undefined) {
-      update.trackedNote = trackedNote ?? null;
-    }
-    await this.newsRepo.update({ id }, update);
-    return true;
   }
 }

@@ -67,10 +67,7 @@ export class NewsController {
     @Query('endDate') endDate?: string,
     @Query('newsType') newsType?: string,
     @Query('title') title?: string,
-    @Query('tracked') tracked?: string,
   ) {
-    const trackedBool =
-      tracked === undefined ? undefined : tracked === 'true' || tracked === '1';
     const response = await this.newsService.getNewsPreviews(offset, limit, {
       keyword,
       title,
@@ -78,7 +75,6 @@ export class NewsController {
       startDate,
       endDate,
       newsType,
-      tracked: trackedBool,
     });
 
     console.log(response);
@@ -190,17 +186,6 @@ export class NewsController {
     const response = await this.newsService.deleteNewsComment(id, commentType);
 
     return true;
-  }
-
-  @UseGuards(AdminGuard)
-  @Patch('/edit/:id/tracked')
-  @RespInterceptor
-  async updateNewsTracked(
-    @Param('id') id: number,
-    @Body() body: { tracked: boolean; trackedNote?: string | null },
-  ) {
-    const { tracked, trackedNote } = body;
-    return await this.newsService.updateNewsTracked(id, tracked, trackedNote);
   }
 
   @UseGuards(AdminGuard)

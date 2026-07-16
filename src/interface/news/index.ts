@@ -132,7 +132,6 @@ export interface NewsPreviews
   extends Pick<
     News,
     | 'id'
-    | 'order'
     | 'title'
     | 'subTitle'
     | 'newsType'
@@ -140,7 +139,6 @@ export interface NewsPreviews
     | 'summary'
     | 'summaries'
     | 'state'
-    | 'isPublished'
     | 'newsImage'
     | 'timeline'
   > {
